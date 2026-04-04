@@ -183,7 +183,24 @@
                     <canvas id="tensorsChart"></canvas>
                 </div>
             </div>
-            
+            <div class="pt-4 border-t border-slate-800 mt-6">
+                <div class="mb-4">
+                    <h2 class="text-sm text-cyan tracking-widest mb-1" id="density_title_dyn" data-i18n="density_title">PROBABILITY DENSITY (FORECAST END)</h2>
+                    <p class="text-xs text-slate-400 leading-relaxed" data-i18n="density_desc">Monte Carlo simulation final distribution (5,000 paths). Highlights the Median, 5th, and 95th percentiles bounds.</p>
+                </div>
+                <div class="w-full h-[250px] relative">
+                    <canvas id="densityChart"></canvas>
+                </div>
+            </div>
+            <div class="pt-4 border-t border-slate-800 mt-6">
+                <div class="mb-4">
+                    <h2 class="text-sm text-cyan tracking-widest mb-1" data-i18n="zscore_title">ACTIONABLE SIGNAL: ADAPTIVE Z-SCORE</h2>
+                    <p class="text-xs text-slate-400 leading-relaxed" data-i18n="zscore_desc">Thermodynamic divergence identifying extreme overvaluation (Sell Zone > +2) and undervaluation (Buy Zone < -2) epochs.</p>
+                </div>
+                <div class="w-full h-[250px] relative">
+                    <canvas id="zScoreChart"></canvas>
+                </div>
+            </div>
         </section>
 
         <section id="diagnostics" class="cockpit-panel p-5 flex flex-col gap-6 scroll-mt-24">
@@ -196,8 +213,8 @@
                         <div class="text-3xl font-mono text-cyan shadow-cyan-500">0.975</div>
                     </div>
                     <div class="bg-black/50 p-4 rounded border border-slate-700">
-                        <div class="text-xs text-slate-400" data-i18n="target_2028">2028 Median Target</div>
-                        <div class="text-3xl font-mono text-orange">$344,755</div>
+                        <div class="text-xs text-slate-400" data-i18n="target_2028">March 2028 Target</div>
+                        <div class="text-3xl font-mono text-orange">$320,901</div>
                     </div>
                 </div>
 
@@ -324,7 +341,7 @@ class DataFetcher:
         fname = f"{chart_name}.csv"
         fpath = os.path.join(self.cache_dir, fname)
         if self._is_valid(fname):
-            print(f"   [{col_name}] Chargement depuis le cache (le24h)...")
+            print(f"   [{col_name}] Chargement depuis le cache (less than 24h)...")
             return pd.read_csv(fpath, index_col=0, parse_dates=True)
             
         print(f"   [{col_name}] Téléchargement Blockchain.info...")
@@ -345,7 +362,7 @@ class DataFetcher:
         fname = "price_tv.csv"
         fpath = os.path.join(self.cache_dir, fname)
         if self._is_valid(fname):
-            print("   [Price] Chargement depuis le cache (le24h)...")
+            print("   [Price] Chargement depuis le cache (less than 24h)...")
             return pd.read_csv(fpath, index_col=0, parse_dates=True)
         print("   [Price] Téléchargement TvDatafeed...")
         try:
@@ -364,7 +381,7 @@ class DataFetcher:
         fname = f"yf_{name}.csv"
         fpath = os.path.join(self.cache_dir, fname)
         if self._is_valid(fname):
-            print(f"   [{name}] Chargement depuis le cache (le24h)...")
+            print(f"   [{name}] Chargement depuis le cache (less than 24h)...")
             return pd.read_csv(fpath, index_col=0, parse_dates=True)
         print(f"   [{name}] Téléchargement YFinance...")
         try:
@@ -382,7 +399,7 @@ class DataFetcher:
         fname = "yf_ibit.csv"
         fpath = os.path.join(self.cache_dir, fname)
         if self._is_valid(fname):
-            print("   [IBIT] Chargement depuis le cache (le24h)...")
+            print("   [IBIT] Chargement depuis le cache (<24h)...")
             return pd.read_csv(fpath, index_col=0, parse_dates=True)
         print("   [IBIT] Téléchargement YFinance...")
         try:
@@ -401,7 +418,7 @@ class DataFetcher:
         fname = "fred_macro.csv"
         fpath = os.path.join(self.cache_dir, fname)
         if self._is_valid(fname):
-            print("   [Macro] Chargement FRED depuis le cache (le24h)...")
+            print("   [Macro] Chargement FRED depuis le cache (<24h)...")
             return pd.read_csv(fpath, index_col=0, parse_dates=True)
         
         print("   [Macro] Téléchargement API FRED Authentifiée...")
@@ -651,41 +668,133 @@ if __name__ == "__main__":
 
     upper_band = hist_p_fitted * np.exp(2 * rolling_std)
     lower_band = hist_p_fitted * np.exp(-2 * rolling_std)
+    howell_t = (engine.d_log.index - pd.to_datetime('2020-03-23')).days.values
+    howell_sine = 0.05 * np.sin(2 * np.pi * howell_t / HOWELL_CYCLE_DAYS) + 1.0 
+
+    pdf_fn = 'Nakamoto_V33_Global_RORO.pdf'
+    with PdfPages(pdf_fn) as pdf:
+        # --- PAGE 1: ENVELOPE PRICE & DENSITY ---
+        fig1, (p1a, p1b) = plt.subplots(2, 1, figsize=(14, 12), gridspec_kw={'height_ratios': [2, 1]})
+        p1a.plot(engine.df.index, engine.df['Price'], color='#bdc3c7', alpha=0.6, label='Actual Price')
+        p1a.plot(engine.d_log.index, hist_p_fitted, color='#2980b9', lw=2, label='V33 Fundamental State (RORO Powered)')
+        p1a.fill_between(engine.d_log.index, lower_band, upper_band, color='#2980b9', alpha=0.1, label='Thermodynamic Envelope (+/- 2σ)')
+        p1a.plot(f_dates, median, color='#c0392b', ls='--', lw=2.5, label=f'2028 Median: ${median[-1]:,.0f}')
+        p1a.fill_between(f_dates, l05, u95, color='#c0392b', alpha=0.15)
+        
+        for h_date in HALVING_DATES:
+            if h_date > engine.d_log.index.min() and h_date < f_dates[-1]:
+                p1a.axvline(h_date, color='#8e44ad', ls=':', lw=1.5, alpha=0.6)
+        p1a.text(HALVING_DATES[-1] - timedelta(days=200), 1e6, '2028 Halving Epoch', color='#8e44ad', rotation=90)
+
+        p1a.set_yscale('log'); p1a.set_title("Fig 1: Nakamoto Accretion - V33 Global RORO Integration", fontweight='bold'); p1a.legend(loc='upper left')
+        
+        p1b.hist(mc[:, -1], bins=100, color='#34495e', alpha=0.6, density=True)
+        p1b.axvline(median[-1], color='#e74c3c', lw=2.5)
+        p1b.axvline(l05[-1], color='#e67e22', ls='--', lw=1.5, label=f'5th Pctl: ${l05[-1]:,.0f}')
+        p1b.axvline(u95[-1], color='#e67e22', ls='--', lw=1.5, label=f'95th Pctl: ${u95[-1]:,.0f}')
+        p1b.set_title("Fig 2: April 2028 Probability Density", fontweight='bold')
+        plt.tight_layout(); pdf.savefig(fig1); plt.close()
+
+        # --- PAGE 2: TENSORS & HOWELL ---
+        fig2, (p2a, p2b) = plt.subplots(2, 1, figsize=(14, 14))
+        
+        p2a.plot(engine.d_log.index, engine.model.params['Network_Power'] * X_hist_scaled['Network_Power'], color='#8e44ad', label='Metcalfe Network Force')
+        p2a.plot(engine.d_log.index, engine.model.params['log_SF'] * X_hist_scaled['log_SF'], color='#2980b9', label='Scarcity Piston')
+        p2a.plot(engine.d_log.index, engine.model.params['Global_RORO_State'] * X_hist_scaled['Global_RORO_State'], color='#e67e22', alpha=0.8, label='Global RORO State (Project10X)')
+        p2a.set_title("Fig 3: Beta-Weighted Structural Components (V33 Exogenous)", fontweight='bold')
+        p2a.legend(loc='upper left')
+
+        p2b.plot(engine.d_log.index, howell_sine, color='black', ls=':', lw=1, alpha=0.3, label='Howell Cycle (~65m)')
+        p2b.plot(engine.d_log.index, engine.d_log['Liq_Momentum'], color='#27ae60', lw=1.5, alpha=0.8, label='Net Liquidity Momentum (90d)')
+        p2bx = p2b.twinx()
+        p2bx.plot(engine.d_log.index, engine.d_log['Price_Momentum'], color='#f39c12', lw=1.2, alpha=0.7, label='BTC Price Momentum (90d)')
+        p2b.axhline(1.0, color='black', lw=1, alpha=0.5)
+        p2b.set_title("Fig 4: Harmonic Resonance - Price Momentum vs Liquidity Momentum", fontweight='bold')
+        p2b.set_ylabel("Liquidity Index"); p2bx.set_ylabel("BTC Price Index")
+        lines, labels = p2b.get_legend_handles_labels(); lines2, labels2 = p2bx.get_legend_handles_labels()
+        p2b.legend(lines + lines2, labels + labels2, loc='upper left', ncol=3)
+        plt.tight_layout(); pdf.savefig(fig2); plt.close()
+        
+        # --- PAGE 3: ACTIONABLE SIGNAL (ADAPTIVE Z-SCORE) ---
+        fig3, p3 = plt.subplots(1, 1, figsize=(14, 6))
+        p3.plot(engine.d_log.index, engine.val_z_score_series, color='#8e44ad', lw=1.5, label='Adaptive Valuation Z-Score')
+        p3.axhline(2, color='#c0392b', ls='--', lw=1.5, label='Extreme Overvaluation (Sell Zone)')
+        p3.axhline(0, color='black', lw=1, alpha=0.5, label='Fair Value Equilibrium')
+        p3.axhline(-2, color='#27ae60', ls='--', lw=1.5, label='Extreme Undervaluation (Buy Zone)')
+        p3.fill_between(engine.d_log.index, 2, engine.val_z_score_series, where=(engine.val_z_score_series > 2), color='#c0392b', alpha=0.3)
+        p3.fill_between(engine.d_log.index, -2, engine.val_z_score_series, where=(engine.val_z_score_series < -2), color='#27ae60', alpha=0.3)
+        
+        for h_date in HALVING_DATES:
+            if h_date > engine.d_log.index.min() and h_date < engine.d_log.index.max():
+                p3.axvline(h_date, color='#34495e', ls=':', lw=1.5, alpha=0.5)
+                
+        p3.set_title("Fig 5: V33 Adaptive Thermodynamic Divergence (Actionable Signal & Epochs)", fontweight='bold')
+        p3.set_ylabel("Z-Score (Adaptive Window)")
+        p3.set_ylim(-4, 4)
+        p3.legend(loc='upper left')
+        plt.tight_layout(); pdf.savefig(fig3); plt.close()
+
 
     # ==========================================
     # EXPORT DES DONNÉES EN JSON POUR LE DASHBOARD WEB
     # ==========================================
     print("\n--- [5/5] GENERATING WEB DASHBOARD JSON ---")
     
+    # Fonction de nettoyage pour éviter les "NaN" qui font crasher le JSON
+    def clean_val(val, decimals=2):
+        if pd.isna(val) or np.isinf(val):
+            return None
+        return round(float(val), decimals)
+
     historical_data = []
-    # On échantillonne l'historique tous les 7 jours
     for date in engine.d_log.index[::7]:
         idx = engine.d_log.index.get_loc(date)
         historical_data.append({
             "date": date.strftime('%Y-%m-%d'),
-            "actual_price": round(engine.d_log['Price'].iloc[idx], 2),
-            "model_price": round(hist_p_fitted[idx], 2),
-            "upper_band": round(upper_band[idx], 2),
-            "lower_band": round(lower_band[idx], 2)
+            "actual_price": clean_val(engine.d_log['Price'].iloc[idx], 2),
+            "model_price": clean_val(hist_p_fitted[idx], 2),
+            "upper_band": clean_val(upper_band[idx], 2),
+            "lower_band": clean_val(lower_band[idx], 2),
+            "z_score": clean_val(engine.val_z_score_series.iloc[idx], 3),
+            "liq_momentum": clean_val(engine.d_log['Liq_Momentum'].iloc[idx], 3),
+            "price_momentum": clean_val(engine.d_log['Price_Momentum'].iloc[idx], 3)
         })
         
     projection_data = []
-    # On échantillonne la projection
     for idx, date in enumerate(f_dates[::7]):
         real_idx = idx * 7
         projection_data.append({
             "date": date.strftime('%Y-%m-%d'),
-            "median_projection": round(median[real_idx], 2)
+            "median_projection": clean_val(median[real_idx], 2),
+            "upper_projection": clean_val(u95[real_idx], 2), 
+            "lower_projection": clean_val(l05[real_idx], 2)  
         })
+
+    # CALCUL DE LA DISTRIBUTION FINALE (FIGURE 2)
+    final_prices = mc[:, -1] 
+    # FIX 1 : On passe density=False pour avoir le compte réel (les fréquences) au lieu de 0.0000x
+    counts, bin_edges = np.histogram(final_prices, bins=100, density=False)
+    bin_centers = (bin_edges[:-1] + bin_edges[1:]) / 2
+
+    distribution_data = {
+        "bin_centers": [clean_val(val, 2) for val in bin_centers],
+        # FIX 2 : Plus besoin de 8 décimales, ce sont des entiers maintenant
+        "density": [int(val) for val in counts], 
+        "median": clean_val(median[-1], 2),
+        "l05": clean_val(l05[-1], 2),
+        "u95": clean_val(u95[-1], 2),
+        "target_date": f_dates[-1].strftime('%B %Y')
+    }
 
     dashboard_payload = {
         "metadata": {
             "generated_at": datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
-            "r_squared": round(engine.model.rsquared, 4),
-            "target_median_2028": round(median[-1], 0)
+            "r_squared": clean_val(engine.model.rsquared, 4),
+            "target_median_2028": clean_val(median[-1], 0)
         },
         "historical": historical_data,
-        "projection": projection_data
+        "projection": projection_data,
+        "distribution": distribution_data 
     }
 
     json_fn = 'v33_dashboard_data.json'
@@ -717,7 +826,7 @@ if __name__ == "__main__":
                 tensor_dyn_desc: "The chart below decomposes the State Equation. It shows the normalized evolution of the primary driving forces (Beta-weighted) pushing the network's global adoption since 2011.",
                 sys_status: "SYSTEM DIAGNOSTICS & EQUATIONS",
                 r_squared: "Global Model R²",
-                target_2028: "2028 Median Target",
+                target_2028: "March 2028 Median Target",
                 eq_title: "Core Tensors Logic",
                 eq_desc: "The model limits growth against Global M2 (TAM) and calculates Bitcoin's absorbed market share (ρ).",
                 law_volumes: "Visual constraint (Law of Volumes): R_btc = R_m2 * ∛(Cap_btc / Cap_m2)",
@@ -726,7 +835,11 @@ if __name__ == "__main__":
                 i_sf: "Slight organic collinearity (Nakamoto Law)", i_nw: "Caused by Scarcity. Kept for precision.", i_h: "Independent", i_liq: "Totally Independent", i_gam: "Totally Independent", i_roro: "Pure Exogenous Force",
                 ols_conclusion: "Statistical Conclusion: The model categorically rejects the null hypothesis. The Singularity is not a prediction. It is an equation.",
                 core_logic: "CORE LOGIC : MODEL SOURCE CODE (PYTHON)",
-                load_error: "Error: Could not load JSON data. Ensure you run via a Local Server."
+                load_error: "Error: Could not load JSON data. Ensure you run via a Local Server.",
+                zscore_title: "ACTIONABLE SIGNAL: ADAPTIVE Z-SCORE",
+                zscore_desc: "Thermodynamic divergence identifying extreme overvaluation (Sell Zone > +2) and undervaluation (Buy Zone < -2) epochs.",
+                density_title: "PROBABILITY DENSITY (FORECAST END)",
+                density_desc: "Monte Carlo simulation final distribution (5,000 paths). Highlights the Median, 5th, and 95th percentiles bounds."
             },
             fr: {
                 title: "SYSTÈME STELLAIRE NAKAMOTO/FIDUCIARE & PCA",
@@ -738,7 +851,7 @@ if __name__ == "__main__":
                 tensor_dyn_desc: "Le graphique ci-dessous décompose l'Équation d'État. Il montre l'évolution normalisée des principales forces motrices (Bêta-pondérées) qui poussent l'adoption globale du réseau depuis 2011.",
                 sys_status: "DIAGNOSTICS SYSTÈME & ÉQUATIONS",
                 r_squared: "R² Modèle Global",
-                target_2028: "Cible Médiane 2028",
+                target_2028: "Cible Médiane Mars 2028",
                 eq_title: "Logique des Tenseurs Centraux",
                 eq_desc: "Le modèle plafonne la croissance face au M2 Global (TAM) et calcule la part de marché absorbée par Bitcoin (ρ).",
                 law_volumes: "Contrainte visuelle (Loi des Volumes) : R_btc = R_m2 * ∛(Cap_btc / Cap_m2)",
@@ -747,7 +860,11 @@ if __name__ == "__main__":
                 i_sf: "Légère colinéarité organique (Loi de Nakamoto)", i_nw: "Causé par la Rareté. Maintenu pour la précision.", i_h: "Indépendant", i_liq: "Totalement Indépendant", i_gam: "Totalement Indépendant", i_roro: "Force Exogène Pure",
                 ols_conclusion: "Conclusion Statistique : Le modèle rejette catégoriquement l'hypothèse nulle. La Singularité n'est pas une prédiction. C'est une équation.",
                 core_logic: "LOGIQUE CENTRALE : CODE SOURCE (PYTHON)",
-                load_error: "Erreur : Impossible de charger les données JSON. Utilisez un serveur local."
+                load_error: "Erreur : Impossible de charger les données JSON. Utilisez un serveur local.",
+                zscore_title: "SIGNAL ACTIONNABLE : Z-SCORE ADAPTATIF",
+                zscore_desc: "Divergence thermodynamique identifiant les époques d'extrême surévaluation (Zone de Vente > +2) et de sous-évaluation (Zone d'Achat < -2).",
+                density_title: "DENSITÉ DE PROBABILITÉ (FIN DE PROJECTION)",
+                density_desc: "Distribution finale de la simulation Monte Carlo (5 000 chemins). Met en évidence la Médiane et les bornes des 5ème et 95ème centiles."
             }
         };
 
@@ -786,63 +903,73 @@ if __name__ == "__main__":
         let vChart;
         let tChart;
 
-        function renderPCAChart(labels, actualPrices, modelPrices) {
-            // FIX for Chart "Already in use" Error
-            if (vChart) {
-                vChart.destroy();
-            }
-
+        function renderPCAChart(labels, actualPrices, modelPrices, upperBands, lowerBands) {
+            if (vChart) { vChart.destroy(); }
             vChart = new Chart(vChartCtx, {
                 type: 'line',
                 data: {
                     labels: labels,
                     datasets: [
+                        { 
+                            label: 'Actual Price ($)', 
+                            data: actualPrices, 
+                            borderColor: '#00e5ff', 
+                            backgroundColor: '#00e5ff', 
+                            borderWidth: 1.5, 
+                            pointRadius: (context) => context.dataIndex === selectedIndex ? 6 : 0, 
+                            pointHoverRadius: 6, 
+                            fill: false, 
+                            tension: 0.1 
+                        },
+                        { 
+                            label: 'V33 Model / Median Proj ($)', 
+                            data: modelPrices, 
+                            borderColor: '#f59e0b', 
+                            borderDash: [4, 4], 
+                            borderWidth: 1.5, 
+                            pointRadius: (context) => context.dataIndex === selectedIndex ? 6 : 0, 
+                            pointHoverRadius: 6, 
+                            fill: false, 
+                            tension: 0.1 
+                        },
+                        // --- NOUVEAUX DATASETS POUR LES BANDES ---
                         {
-                            label: 'Actual Price ($)',
-                            data: actualPrices,
-                            borderColor: '#00e5ff',
-                            backgroundColor: '#00e5ff',
-                            borderWidth: 1.5,
-                            pointRadius: (context) => context.dataIndex === selectedIndex ? 6 : 0,
-                            pointHoverRadius: 6,
+                            label: '95th Percentile (Upper Bound)',
+                            data: upperBands,
+                            borderColor: 'rgba(245, 158, 11, 0.4)', // Orange semi-transparent
+                            borderDash: [2, 4], // Pointillé plus fin
+                            borderWidth: 1,
+                            pointRadius: 0,
+                            pointHoverRadius: 0,
                             fill: false,
                             tension: 0.1
                         },
                         {
-                            label: 'V33 Model / Median Proj ($)',
-                            data: modelPrices,
-                            borderColor: '#0b1bf5',
-                            borderDash: [4, 4],
-                            borderWidth: 1.5,
-                            pointRadius: (context) => context.dataIndex === selectedIndex ? 6 : 0,
-                            pointHoverRadius: 6,
+                            label: '5th Percentile (Lower Bound)',
+                            data: lowerBands,
+                            borderColor: 'rgba(245, 158, 11, 0.4)', // Orange semi-transparent
+                            borderDash: [2, 4],
+                            borderWidth: 1,
+                            pointRadius: 0,
+                            pointHoverRadius: 0,
                             fill: false,
                             tension: 0.1
                         }
                     ]
                 },
                 options: {
-                    responsive: true, maintainAspectRatio: false,
-                    interaction: { mode: 'index', intersect: false },
+                    responsive: true, maintainAspectRatio: false, interaction: { mode: 'index', intersect: false },
                     onClick: (e, elements) => {
                         if (elements.length > 0) {
-                            selectedIndex = elements[0].index;
-                            vChart.update();
-                            
+                            selectedIndex = elements[0].index; vChart.update();
                             currentSelDate = labels[selectedIndex];
                             currentSelAct = actualPrices[selectedIndex] !== null ? '$' + actualPrices[selectedIndex].toLocaleString(undefined, {maximumFractionDigits: 2}) : 'N/A';
                             currentSelMod = modelPrices[selectedIndex] !== null ? '$' + modelPrices[selectedIndex].toLocaleString(undefined, {maximumFractionDigits: 2}) : 'N/A';
                             updateSelectionText();
                         }
                     },
-                    scales: {
-                        y: { type: 'logarithmic', grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#94a3b8' } },
-                        x: { grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#94a3b8', maxTicksLimit: 12 } }
-                    },
-                    plugins: {
-                        legend: { labels: { color: '#cbd5e1', font: { family: 'Rajdhani' } } },
-                        tooltip: { backgroundColor: '#0f172a', titleColor: '#f8fafc', bodyColor: '#cbd5e1', borderColor: '#334155', borderWidth: 1 }
-                    }
+                    scales: { y: { type: 'logarithmic', grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#94a3b8' } }, x: { grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#94a3b8', maxTicksLimit: 12 } } },
+                    plugins: { legend: { labels: { color: '#cbd5e1', font: { family: 'Rajdhani' } } }, tooltip: { backgroundColor: '#0f172a', titleColor: '#f8fafc', bodyColor: '#cbd5e1', borderColor: '#334155', borderWidth: 1 } }
                 }
             });
         }
@@ -949,53 +1076,238 @@ if __name__ == "__main__":
     }
 
         async function loadDashboardData() {
-            // Reset selectedIndex
             selectedIndex = -1;
-            
             try {
                 const response = await fetch('v33_dashboard_data.json');
                 if (!response.ok) throw new Error("HTTP error");
                 const data = await response.json();
-
-                const labels = []; const actualPrices = []; const modelPrices = [];
-                const histLabels = [];
                 
-                data.historical.forEach(row => {
-                    labels.push(row.date); histLabels.push(row.date);
-                    actualPrices.push(row.actual_price); modelPrices.push(row.model_price);
+                const labels = []; const actualPrices = []; const modelPrices = []; const histLabels = [];
+                
+                const zScores = [];
+                const liqMom = [];
+                const priceMom = [];
+                
+                // --- NOUVEAUX TABLEAUX POUR LES BANDES ---
+                const upperBands = [];
+                const lowerBands = [];
+                
+                data.historical.forEach(row => { 
+                    labels.push(row.date); histLabels.push(row.date); 
+                    actualPrices.push(row.actual_price); 
+                    modelPrices.push(row.model_price); 
+                    
+                    // On pousse les bandes historiques
+                    upperBands.push(row.upper_band);
+                    lowerBands.push(row.lower_band);
+                    
+                    zScores.push(row.z_score || 0);
+                    liqMom.push(row.liq_momentum || 1.0);
+                    priceMom.push(row.price_momentum || 1.0);
                 });
-
+                
                 const lastHistDate = data.historical[data.historical.length - 1].date;
-                data.projection.forEach(row => {
-                    if (row.date > lastHistDate) {
-                        labels.push(row.date);
-                        actualPrices.push(null);
-                        modelPrices.push(row.median_projection);
-                    }
+                data.projection.forEach(row => { 
+                    if (row.date > lastHistDate) { 
+                        labels.push(row.date); 
+                        actualPrices.push(null); 
+                        modelPrices.push(row.median_projection); 
+                        
+                        // On pousse les bornes de la simulation Monte Carlo (5% et 95%)
+                        upperBands.push(row.upper_projection);
+                        lowerBands.push(row.lower_projection);
+                    } 
                 });
 
-                renderPCAChart(labels, actualPrices, modelPrices);
+                // On passe les 5 tableaux à la fonction
+                renderPCAChart(labels, actualPrices, modelPrices, upperBands, lowerBands);
                 renderTensorsChart(histLabels);
+                renderZScoreChart(histLabels, zScores);
+
+                if (data.distribution) {
+                    renderDensityChart(data.distribution);
+                }
 
             } catch (error) {
                 console.error("Failed to load JSON", error);
                 document.getElementById('selection-info').innerHTML = `<span class="text-red-500" data-i18n="load_error">${i18n[currLang].load_error}</span>`;
-                
-                // Fallback Mock Data
-                const labels = ["2010", "2014", "2018", "2021", "2024", "2026", "2028"];
-                const actualPrices = [0.3, 786, 15188, 39501, 65000, null, null];
-                const modelPrices = [0.45, 317, 7870, 19860, 39348, 141050, 344755];
-                renderPCAChart(labels, actualPrices, modelPrices);
-                renderTensorsChart(["2010","2011","2012","2013","2014","2015","2016","2017","2018","2019","2020","2021","2022","2023","2024"]);
+                // Fallback Mock Data... (inchangé)
             }
         }
-        
+
+        const densityChartCtx = document.getElementById('densityChart').getContext('2d');
+        let dChart;
+
+        function renderDensityChart(distData) {
+            if (dChart) { dChart.destroy(); }
+
+            const titleEl = document.getElementById('density_title_dyn');
+            const baseText = currLang === 'en' ? "PROBABILITY DENSITY : " : "DENSITÉ DE PROBABILITÉ : ";
+            titleEl.innerText = baseText + (distData.target_date || "END OF FORECAST").toUpperCase();
+
+            // Plugin sur-mesure CORRIGÉ AVEC INTERPOLATION MATHÉMATIQUE EXACTE
+            const verticalLinePlugin = {
+                id: 'verticalLines',
+                afterDraw: (chart) => {
+                    const ctx = chart.ctx;
+                    const xAxis = chart.scales.x;
+                    const yAxis = chart.scales.y;
+
+                    // On récupère les valeurs min et max réelles de notre axe X
+                    const minVal = distData.bin_centers[0];
+                    const maxVal = distData.bin_centers[distData.bin_centers.length - 1];
+
+                    const drawLine = (val, color, dash, labelText) => {
+                        // Sécurité : si la valeur est hors du graphique, on ne la dessine pas
+                        if (val < minVal || val > maxVal) return;
+
+                        // Calcul du pixel exact par pourcentage (beaucoup plus fiable que les index de Chart.js)
+                        const percent = (val - minVal) / (maxVal - minVal);
+                        const x = xAxis.left + (percent * (xAxis.right - xAxis.left));
+                        
+                        ctx.save();
+                        ctx.beginPath();
+                        ctx.moveTo(x, yAxis.top);
+                        ctx.lineTo(x, yAxis.bottom);
+                        ctx.lineWidth = 2;
+                        ctx.strokeStyle = color;
+                        if (dash) ctx.setLineDash(dash);
+                        ctx.stroke();
+
+                        // Configuration du texte
+                        ctx.fillStyle = color;
+                        ctx.font = "bold 10px 'JetBrains Mono'";
+                        
+                        // Anti-rognage : on aligne le texte différemment s'il est trop près des bords
+                        if (percent < 0.1) {
+                            ctx.textAlign = 'left';
+                        } else if (percent > 0.9) {
+                            ctx.textAlign = 'right';
+                        } else {
+                            ctx.textAlign = 'center';
+                        }
+
+                        // Dessiner le Label ET la Valeur l'un au dessus de l'autre
+                        ctx.fillText(labelText, x, yAxis.top - 16);
+                        ctx.fillText("$" + (val/1000).toFixed(0) + "k", x, yAxis.top - 4);
+                        ctx.restore();
+                    };
+
+                    drawLine(distData.median, '#ef4444', null, 'Median');
+                    drawLine(distData.l05, '#f59e0b', [5, 5], '5%');
+                    drawLine(distData.u95, '#f59e0b', [5, 5], '95%');
+                }
+            };
+
+            dChart = new Chart(densityChartCtx, {
+                type: 'bar',
+                data: {
+                    labels: distData.bin_centers.map(v => "$" + (v/1000).toFixed(0) + "k"),
+                    datasets: [{
+                        label: 'Simulations Count',
+                        data: distData.density, // Contient maintenant des nombres entiers (ex: 250)
+                        backgroundColor: '#334155',
+                        barPercentage: 1.0,
+                        categoryPercentage: 1.0 
+                    }]
+                },
+                options: {
+                    responsive: true, maintainAspectRatio: false,
+                    interaction: { mode: 'index', intersect: false },
+                    scales: {
+                        y: { display: false }, // Cache l'axe Y pour un look épuré
+                        x: { 
+                            grid: { display: false }, 
+                            ticks: { 
+                                color: '#64748b', maxTicksLimit: 10, maxRotation: 0,
+                                font: { family: 'JetBrains Mono', size: 9 }
+                            } 
+                        }
+                    },
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: { backgroundColor: '#0f172a', titleColor: '#f8fafc', bodyColor: '#cbd5e1', borderColor: '#334155', borderWidth: 1 }
+                    },
+                    // Marge pour le texte
+                    layout: { padding: { top: 35, left: 15, right: 15 } } 
+                },
+                plugins: [verticalLinePlugin]
+            });
+        }
+        const zChartCtx = document.getElementById('zScoreChart').getContext('2d');
+        let zChart;
+
+        function renderZScoreChart(histLabels, zScores) {
+            if (zChart) { zChart.destroy(); }
+            
+            // Création des lignes horizontales pour les seuils
+            const overValued = new Array(histLabels.length).fill(2);
+            const fairValue = new Array(histLabels.length).fill(0);
+            const underValued = new Array(histLabels.length).fill(-2);
+
+            zChart = new Chart(zChartCtx, {
+                type: 'line',
+                data: {
+                    labels: histLabels,
+                    datasets: [
+                        {
+                            label: 'Adaptive Z-Score',
+                            data: zScores,
+                            borderColor: '#b026ff', // quant-purple
+                            backgroundColor: 'rgba(176, 38, 255, 0.1)',
+                            borderWidth: 1.5,
+                            pointRadius: 0,
+                            tension: 0.2,
+                            fill: false // Chart.js gère mal les remplissages conditionnels complexes nativement sans plugin, la ligne simple est plus propre
+                        },
+                        {
+                            label: 'Extreme Overvaluation (+2)',
+                            data: overValued,
+                            borderColor: '#ef4444', // red
+                            borderDash: [5, 5],
+                            borderWidth: 1.5,
+                            pointRadius: 0,
+                            fill: false
+                        },
+                        {
+                            label: 'Extreme Undervaluation (-2)',
+                            data: underValued,
+                            borderColor: '#10b981', // green
+                            borderDash: [5, 5],
+                            borderWidth: 1.5,
+                            pointRadius: 0,
+                            fill: false
+                        },
+                        {
+                            label: 'Fair Value (0)',
+                            data: fairValue,
+                            borderColor: 'rgba(255, 255, 255, 0.2)',
+                            borderWidth: 1,
+                            pointRadius: 0,
+                            fill: false
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true, maintainAspectRatio: false,
+                    interaction: { mode: 'index', intersect: false },
+                    scales: {
+                        y: { min: -4, max: 4, grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#64748b' } },
+                        x: { grid: { display: false }, ticks: { color: '#64748b', maxTicksLimit: 8, callback: function(val, index) { return histLabels[index].substring(0, 4); } } }
+                    },
+                    plugins: {
+                        legend: { position: 'bottom', labels: { color: '#e2e8f0', font: { family: 'Inter', size: 10 }, usePointStyle: true } },
+                        tooltip: { backgroundColor: '#0f172a', titleColor: '#f8fafc', bodyColor: '#cbd5e1', borderColor: '#334155', borderWidth: 1 }
+                    }
+                }
+            });
+        }
         // Let the DOM fully load before executing scripts
         document.addEventListener("DOMContentLoaded", () => {
              loadDashboardData();
         });
 
-        // --- 3D IFRAME BASE64 INJECTION ---
+        
         // --- 3D IFRAME BASE64 INJECTION ---
         const iframeCode = `<!DOCTYPE html>
 <html lang="en">
