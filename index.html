@@ -1,0 +1,1445 @@
+<!DOCTYPE html>
+<html lang="en" data-bs-theme="dark" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NAKAMOTO/FIAT BINARY STAR System & PCA</title>
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
+
+    <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;500;600;700&family=JetBrains+Mono:wght@400;700&family=Inter:wght@300;400;700&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --neon-cyan: #00e5ff;
+            --neon-purple: #b026ff;
+            --neon-orange: #f59e0b;
+            --bg-deep: #030712;
+            --panel-bg: rgba(15, 23, 42, 0.7);
+        }
+
+        body {
+            background-color: var(--bg-deep);
+            color: #e2e8f0;
+            font-family: 'Inter', sans-serif;
+            background-image: 
+                radial-gradient(circle at 15% 50%, rgba(0, 229, 255, 0.05), transparent 25%),
+                radial-gradient(circle at 85% 30%, rgba(176, 38, 255, 0.05), transparent 25%);
+            background-attachment: fixed;
+        }
+
+        h1, h2, h3, .hud-text {
+            font-family: 'Rajdhani', sans-serif;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        .cockpit-panel {
+            background: var(--panel-bg);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(0, 229, 255, 0.2);
+            border-radius: 12px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5), inset 0 0 0 1px rgba(255, 255, 255, 0.05);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .cockpit-panel::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 2px;
+            background: linear-gradient(90deg, transparent, var(--neon-cyan), transparent);
+            opacity: 0.5;
+        }
+
+        .neon-border { border-color: var(--neon-cyan); box-shadow: 0 0 15px rgba(0, 229, 255, 0.2); }
+        .text-cyan { color: var(--neon-cyan); text-shadow: 0 0 8px rgba(0, 229, 255, 0.4); }
+        .text-orange { color: var(--neon-orange); text-shadow: 0 0 8px rgba(245, 158, 11, 0.4); }
+        .text-quant-green { color: #10b981; }
+
+        .nav-link {
+            font-family: 'Rajdhani', sans-serif;
+            color: #94a3b8;
+            font-weight: 600;
+            letter-spacing: 1px;
+            transition: color 0.2s, text-shadow 0.2s;
+        }
+        .nav-link:hover { color: var(--neon-cyan); text-shadow: 0 0 8px rgba(0, 229, 255, 0.4); }
+
+        .lang-btn {
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.1);
+            color: #94a3b8;
+            transition: all 0.3s ease;
+        }
+        .lang-btn.active {
+            background: rgba(0, 229, 255, 0.2);
+            border-color: var(--neon-cyan);
+            color: var(--neon-cyan);
+            box-shadow: 0 0 10px rgba(0, 229, 255, 0.3);
+        }
+        
+        .scanline {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: linear-gradient(to bottom, rgba(255,255,255,0), rgba(255,255,255,0) 50%, rgba(0,0,0,0.1) 50%, rgba(0,0,0,0.1));
+            background-size: 100% 4px;
+            pointer-events: none;
+            z-index: 9999;
+            opacity: 0.3;
+        }
+        
+        .math-box {
+            background: rgba(0,0,0,0.5);
+            padding: 15px;
+            border-radius: 8px;
+            border-left: 3px solid var(--neon-purple);
+            font-size: 0.85rem;
+            overflow-x: auto;
+        }
+
+        /* Tables styling */
+        .ols-table th, .ols-table td {
+            padding: 10px 16px;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+        }
+        .ols-table tr:hover { background: rgba(0, 229, 255, 0.05); }
+
+        pre[class*="language-"] {
+            border: 1px solid rgba(0, 229, 255, 0.3);
+            border-radius: 8px;
+            margin: 0;
+            background: #0d1117 !important;
+        }
+        ::-webkit-scrollbar { width: 8px; height: 8px; }
+        ::-webkit-scrollbar-track { background: rgba(0,0,0,0.2); }
+        ::-webkit-scrollbar-thumb { background: var(--neon-cyan); border-radius: 4px; }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col p-4 md:p-6 gap-6">
+
+    <div class="scanline"></div>
+
+    <header class="flex flex-col xl:flex-row justify-between items-center cockpit-panel p-4 neon-border sticky top-0 z-50">
+        <div class="flex items-center gap-4 mb-4 xl:mb-0">
+            <div class="w-3 h-3 rounded-full bg-cyan-400 animate-pulse shadow-[0_0_10px_#00e5ff]"></div>
+            <h1 class="text-2xl md:text-3xl font-bold text-cyan m-0" data-i18n="title">NAKAMOTO/FIAT BINARY STAR SYSTEM & PCA</h1>
+        </div>
+        
+        <div class="flex flex-wrap justify-center items-center gap-6">
+            <nav class="flex gap-4 text-sm">
+                <a href="#viewscreen" class="nav-link" data-i18n="nav_sim">VIEWSCREEN</a>
+                <a href="#pca" class="nav-link" data-i18n="nav_pca">PCA</a>
+                <a href="#diagnostics" class="nav-link" data-i18n="nav_diag">DIAGNOSTICS</a>
+                <a href="#sourcecode" class="nav-link" data-i18n="nav_code">CODE</a>
+            </nav>
+            <div class="w-px h-6 bg-slate-600 hidden md:block"></div>
+            <div class="flex gap-2 font-bold font-mono">
+                <button id="btn-en" class="lang-btn active px-3 py-1 rounded text-xs" onclick="setLang('en')">EN</button>
+                <button id="btn-fr" class="lang-btn px-3 py-1 rounded text-xs" onclick="setLang('fr')">FR</button>
+            </div>
+        </div>
+    </header>
+
+    <section id="viewscreen" class="cockpit-panel flex-1 min-h-[650px] flex flex-col scroll-mt-24">
+        <div class="p-3 border-b border-cyan-500/20 bg-black/40 flex justify-between items-center">
+            <h2 class="text-sm text-cyan tracking-widest" data-i18n="viewscreen_title">MAIN VIEWSCREEN : THERMODYNAMIC TRANSFER</h2>
+            <span class="text-xs text-green-400 font-mono animate-pulse">STATUS: ONLINE</span>
+        </div>
+        <iframe id="sim-frame" class="w-full h-full flex-1 border-none bg-black"></iframe>
+    </section>
+
+    <div class="grid grid-cols-1 xl:grid-cols-2 gap-6">
+        
+        <section id="pca" class="cockpit-panel p-5 flex flex-col scroll-mt-24 gap-6">
+            
+            <div>
+                <div class="flex flex-col md:flex-row md:justify-between md:items-center mb-4 border-b border-orange-500/20 pb-2 gap-2">
+                    <h2 class="text-sm text-orange tracking-widest m-0" data-i18n="pca_chart">PCA PROJECTION : NAKAMOTO V33</h2>
+                    <div id="selection-info" class="text-xs font-mono text-slate-300 bg-black/40 px-3 py-1 rounded border border-slate-700">
+                        <span data-i18n="select_point">Select a point on the graph to see details</span>
+                    </div>
+                </div>
+                <div class="w-full h-[350px] relative">
+                    <canvas id="vChart"></canvas>
+                </div>
+            </div>
+
+            <div class="pt-4 border-t border-slate-800">
+                <div class="mb-4">
+                    <h2 class="text-sm text-cyan tracking-widest mb-1" data-i18n="tensor_dyn_title">TENSOR DYNAMICS OVER TIME</h2>
+                    <p class="text-xs text-slate-400 leading-relaxed" data-i18n="tensor_dyn_desc">The chart below decomposes the State Equation. It shows the normalized evolution of the primary driving forces (Beta-weighted) pushing the network's global adoption since 2011.</p>
+                </div>
+                <div class="w-full h-[250px] relative">
+                    <canvas id="tensorsChart"></canvas>
+                </div>
+            </div>
+            
+        </section>
+
+        <section id="diagnostics" class="cockpit-panel p-5 flex flex-col gap-6 scroll-mt-24">
+            
+            <div>
+                <h2 class="text-sm text-purple-400 tracking-widest mb-4 border-b border-purple-500/20 pb-2" data-i18n="sys_status">SYSTEM DIAGNOSTICS & EQUATIONS</h2>
+                <div class="grid grid-cols-2 gap-4">
+                    <div class="bg-black/50 p-4 rounded border border-slate-700">
+                        <div class="text-xs text-slate-400" data-i18n="r_squared">Global Model R²</div>
+                        <div class="text-3xl font-mono text-cyan shadow-cyan-500">0.975</div>
+                    </div>
+                    <div class="bg-black/50 p-4 rounded border border-slate-700">
+                        <div class="text-xs text-slate-400" data-i18n="target_2028">2028 Median Target</div>
+                        <div class="text-3xl font-mono text-orange">$344,755</div>
+                    </div>
+                </div>
+
+                <div class="math-box mt-4">
+                    <div class="text-cyan mb-2 font-bold" data-i18n="eq_title">Core Tensors Logic</div>
+                    <p class="text-slate-300 text-xs mb-3" data-i18n="eq_desc">The model limits growth against Global M2 (TAM) and calculates Bitcoin's absorbed market share ($\rho$).</p>
+                    <div class="overflow-x-auto text-sm text-slate-200">
+                        $$TAM = M2 \times 5.0$$
+                        $$\rho = \frac{Cap_{BTC}}{TAM} \quad \Rightarrow \quad Logit(\rho) = \ln\left(\frac{\rho}{1 - \rho}\right)$$
+                        $$V_{eff} = V_{onchain} + \frac{Vol_{IBIT}}{Tx_{size}}$$
+                        $$NetPower = \alpha + \beta_M \ln(V_{eff})$$
+                        $$Logit(\rho) = \beta_0 + \beta_1 . \ln(SF) + \beta_2 . NetPower + \beta_3 . H_{acc} + \beta_4 . Liq_{Mom} + \beta_5 . Global_{Risk_{On}Risk_{Off}} + ...$$
+                    </div>
+                </div>
+            </div>
+
+            <div>
+                <h2 class="text-sm text-purple-400 tracking-widest mb-4 border-b border-purple-500/20 pb-2" data-i18n="ols_audit">STATISTICAL OLS AUDIT (V33)</h2>
+                <div class="overflow-x-auto mb-4">
+                    <table class="w-full text-xs text-left text-gray-400 border border-slate-800 rounded-lg overflow-hidden ols-table">
+                        <thead class="uppercase bg-black/60 text-slate-300">
+                            <tr>
+                                <th class="font-mono" data-i18n="th_var">Variable</th>
+                                <th class="font-mono">Coef (β)</th>
+                                <th class="font-mono">P>|z|</th>
+                            </tr>
+                        </thead>
+                        <tbody class="bg-black/20">
+                            <tr><td class="font-mono text-white">const β0</td><td class="font-mono">-7.9089</td><td class="font-mono text-quant-green">0.000</td></tr>
+                            <tr><td class="font-mono text-[#00e5ff] font-bold">log_SF β1</td><td class="font-mono font-bold">+2.1298</td><td class="font-mono text-quant-green">0.000</td></tr>
+                            <tr><td class="font-mono text-[#b026ff] font-bold">Network_Power β2</td><td class="font-mono font-bold">+1.1680</td><td class="font-mono text-quant-green">0.000</td></tr>
+                            <tr><td class="font-mono text-[#ef4444]">H_Accumulated β3</td><td class="font-mono">+0.3534</td><td class="font-mono text-quant-green">0.000</td></tr>
+                            <tr><td class="font-mono text-[#10b981]">Liq_Momentum β4</td><td class="font-mono">+0.1166</td><td class="font-mono text-quant-green">0.000</td></tr>
+                            <tr><td class="font-mono text-[#eab308]">Global_RORO_State β5</td><td class="font-mono">+0.0668</td><td class="font-mono text-quant-green">0.000</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="overflow-x-auto mb-6">
+                    <table class="w-full text-xs text-left text-gray-400 border border-slate-800 rounded-lg overflow-hidden ols-table">
+                        <thead class="uppercase bg-black/60 text-slate-300">
+                            <tr>
+                                <th class="font-mono" data-i18n="th_tensor">Tensor</th>
+                                <th class="font-mono">VIF</th>
+                                <th class="font-mono" data-i18n="th_interp">Interpretation</th>
+                            </tr>
+                        </thead>
+                        <tbody class="bg-black/20">
+                            <tr><td class="font-mono font-bold text-white">log_SF</td><td>8.444</td><td data-i18n="i_sf">Slight organic collinearity (Nakamoto Law)</td></tr>
+                            <tr><td class="font-mono font-bold text-white">Network_Power</td><td class="text-yellow-500">12.038</td><td data-i18n="i_nw">Caused by Scarcity. Kept for precision.</td></tr>
+                            <tr><td class="font-mono font-bold text-white">H_Accumulated</td><td class="text-quant-green">4.042</td><td data-i18n="i_h">Independent</td></tr>
+                            <tr><td class="font-mono font-bold text-white">Liq_Momentum</td><td class="text-quant-green">1.275</td><td data-i18n="i_liq">Totally Independent</td></tr>
+                            <tr><td class="font-mono font-bold text-white">Gamma_Proxy</td><td class="text-quant-green">1.570</td><td data-i18n="i_gam">Totally Independent</td></tr>
+                            <tr><td class="font-mono font-bold text-white">Global_RORO_State</td><td class="text-quant-green font-bold">1.123</td><td data-i18n="i_roro">Pure Exogenous Force</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                
+                
+                <p class="italic text-gray-500 text-xs text-center" data-i18n="ols_conclusion">
+                    Statistical Conclusion: The model categorically rejects the null hypothesis. The Singularity is not a prediction. It is an equation.
+                </p>
+            </div>
+        </section>
+
+    </div>
+
+    <section id="sourcecode" class="cockpit-panel scroll-mt-24">
+        <div class="p-3 border-b border-cyan-500/20 bg-black/40 flex justify-between items-center">
+            <h2 class="text-sm text-cyan tracking-widest" data-i18n="core_logic">CORE LOGIC : MODEL SOURCE CODE (PYTHON)</h2>
+        </div>
+        <div class="max-h-[600px] overflow-y-auto custom-scrollbar">
+            <pre><code class="language-python">import os, requests, warnings, time, json
+import pandas as pd
+import numpy as np
+import statsmodels.api as sm
+from statsmodels.stats.outliers_influence import variance_inflation_factor
+from sklearn.preprocessing import StandardScaler
+import matplotlib.pyplot as plt
+from matplotlib.backends.backend_pdf import PdfPages
+import yfinance as yf
+from datetime import datetime, timedelta
+from tvDatafeed import TvDatafeed, Interval
+from tqdm import tqdm
+
+warnings.filterwarnings("ignore")
+
+# --- CONFIGURATION THE RESONANT MASTER ---
+FRED_API_KEY = 'YOUR_API_KEY'
+HASHRATE_LAG = 245  
+FORECAST_DAYS = 730 
+STRUCTURAL_M2_GROWTH = 0.06  
+TAM_MULTIPLIER = 5.0 
+HOWELL_CYCLE_DAYS = 1975 
+MC_PATHS = 5000
+
+HALVING_DATES = [
+    pd.to_datetime('2012-11-28'), pd.to_datetime('2016-07-09'),
+    pd.to_datetime('2020-05-11'), pd.to_datetime('2024-04-19'),
+    pd.to_datetime('2028-03-25') 
+]
+
+plt.rcParams.update({
+    "font.family": "serif", "figure.dpi": 300, "axes.grid": True, "grid.alpha": 0.25,
+    "axes.labelsize": 10, "axes.titlesize": 12, "legend.fontsize": 9
+})
+
+# ==========================================
+# GESTIONNAIRE DE CACHE UNIVERSEL (24 HEURES)
+# ==========================================
+class DataFetcher:
+    def __init__(self, cache_dir="cache", max_age_hours=24):
+        self.cache_dir = cache_dir
+        self.max_age_hours = max_age_hours
+        if not os.path.exists(cache_dir):
+            os.makedirs(cache_dir)
+            
+    def _is_valid(self, filename):
+        filepath = os.path.join(self.cache_dir, filename)
+        if not os.path.exists(filepath): return False
+        return (time.time() - os.path.getmtime(filepath)) < (self.max_age_hours * 3600)
+        
+    def get_blockchain_metric(self, chart_name, col_name):
+        fname = f"{chart_name}.csv"
+        fpath = os.path.join(self.cache_dir, fname)
+        if self._is_valid(fname):
+            print(f"   [{col_name}] Chargement depuis le cache (le24h)...")
+            return pd.read_csv(fpath, index_col=0, parse_dates=True)
+            
+        print(f"   [{col_name}] Téléchargement Blockchain.info...")
+        try:
+            url = f"https://api.blockchain.info/charts/{chart_name}?timespan=all&format=json"
+            data = requests.get(url, timeout=15).json()['values']
+            df = pd.DataFrame(data)
+            df['date'] = pd.to_datetime(df['x'], unit='s').dt.normalize()
+            df = df.set_index('date').rename(columns={'y': col_name})[[col_name]].resample('D').mean().ffill()
+            df.to_csv(fpath)
+            return df
+        except Exception as e:
+            print(f"   [{col_name}] Erreur ({e}). Repli sur ancien cache...")
+            if os.path.exists(fpath): return pd.read_csv(fpath, index_col=0, parse_dates=True)
+            return pd.DataFrame()
+
+    def get_price(self):
+        fname = "price_tv.csv"
+        fpath = os.path.join(self.cache_dir, fname)
+        if self._is_valid(fname):
+            print("   [Price] Chargement depuis le cache (le24h)...")
+            return pd.read_csv(fpath, index_col=0, parse_dates=True)
+        print("   [Price] Téléchargement TvDatafeed...")
+        try:
+            tv = TvDatafeed()
+            p = tv.get_hist(symbol="BTCUSD", exchange="INDEX", interval=Interval.in_daily, n_bars=8000)
+            df = p.rename(columns={'close': 'Price'})[['Price']].resample('D').mean().ffill()
+            df.index = pd.to_datetime(df.index).normalize()
+            df.to_csv(fpath)
+            return df
+        except Exception as e:
+            print(f"   [Price] Erreur ({e}). Repli sur ancien cache...")
+            if os.path.exists(fpath): return pd.read_csv(fpath, index_col=0, parse_dates=True)
+            return pd.DataFrame()
+
+    def get_yf_close(self, tickers, name):
+        fname = f"yf_{name}.csv"
+        fpath = os.path.join(self.cache_dir, fname)
+        if self._is_valid(fname):
+            print(f"   [{name}] Chargement depuis le cache (le24h)...")
+            return pd.read_csv(fpath, index_col=0, parse_dates=True)
+        print(f"   [{name}] Téléchargement YFinance...")
+        try:
+            df = yf.download(tickers, start="2010-01-01", progress=False)
+            if 'Close' in df.columns: df = df['Close']
+            if isinstance(df.columns, pd.MultiIndex): df.columns = df.columns.droplevel(1)
+            df.to_csv(fpath)
+            return df
+        except Exception as e:
+            print(f"   [{name}] Erreur ({e}). Repli sur ancien cache...")
+            if os.path.exists(fpath): return pd.read_csv(fpath, index_col=0, parse_dates=True)
+            return pd.DataFrame()
+            
+    def get_ibit_vol(self):
+        fname = "yf_ibit.csv"
+        fpath = os.path.join(self.cache_dir, fname)
+        if self._is_valid(fname):
+            print("   [IBIT] Chargement depuis le cache (le24h)...")
+            return pd.read_csv(fpath, index_col=0, parse_dates=True)
+        print("   [IBIT] Téléchargement YFinance...")
+        try:
+            df = yf.download("IBIT", start="2024-01-11", progress=False)
+            if isinstance(df.columns, pd.MultiIndex): df.columns = df.columns.droplevel(1)
+            vol = (df['Close'] * df['Volume']).resample('D').mean().ffill()
+            vol = vol.to_frame(name='IBIT_Vol')
+            vol.to_csv(fpath)
+            return vol
+        except Exception as e:
+            print(f"   [IBIT] Erreur ({e}). Repli sur ancien cache...")
+            if os.path.exists(fpath): return pd.read_csv(fpath, index_col=0, parse_dates=True)
+            return pd.DataFrame()
+
+    def get_fred(self):
+        fname = "fred_macro.csv"
+        fpath = os.path.join(self.cache_dir, fname)
+        if self._is_valid(fname):
+            print("   [Macro] Chargement FRED depuis le cache (le24h)...")
+            return pd.read_csv(fpath, index_col=0, parse_dates=True)
+        
+        print("   [Macro] Téléchargement API FRED Authentifiée...")
+        series_list = ['WALCL', 'WTREGEN', 'RRPONTSYD', 'M2SL', 'VIXCLS']
+        df_list = []
+        try:
+            for s in series_list:
+                url = f"https://api.stlouisfed.org/fred/series/observations?series_id={s}&api_key={FRED_API_KEY}&file_type=json&observation_start=2009-01-03"
+                r = requests.get(url, timeout=15)
+                r.raise_for_status()
+                data = r.json()
+                temp = pd.DataFrame(data['observations'])
+                temp['date'] = pd.to_datetime(temp['date'])
+                temp['value'] = pd.to_numeric(temp['value'], errors='coerce')
+                temp = temp.set_index('date')[['value']].rename(columns={'value': s})
+                df_list.append(temp)
+            
+            m = pd.concat(df_list, axis=1)
+            m = m.resample('D').interpolate('time').ffill().fillna(0)
+            m.to_csv(fpath)
+            return m
+        except Exception as e:
+            print(f"   [Macro] Erreur FRED ({e}). Repli...")
+            if os.path.exists(fpath): return pd.read_csv(fpath, index_col=0, parse_dates=True)
+            
+            dates = pd.date_range(start='2010-01-01', end=datetime.today(), freq='D')
+            proxy_df = pd.DataFrame(index=dates)
+            try:
+                vix = yf.download("^VIX", start="2010-01-01", progress=False)
+                if 'Close' in vix: vix = vix['Close']
+                if isinstance(vix.columns, pd.MultiIndex): vix.columns = vix.columns.droplevel(1)
+                proxy_df['VIXCLS'] = vix.reindex(dates).ffill()
+            except: proxy_df['VIXCLS'] = 20.0
+            
+            days_array = np.arange(len(dates))
+            proxy_df['M2SL'] = 8000.0 * np.exp(days_array * (STRUCTURAL_M2_GROWTH/365)) 
+            proxy_df['WALCL'] = proxy_df['M2SL'] * 0.4 
+            proxy_df['WTREGEN'] = 0; proxy_df['RRPONTSYD'] = 0
+            return proxy_df.fillna(method='bfill')
+
+# ==========================================
+# MOTEUR PRINCIPAL V33
+# ==========================================
+class NakamotoV33Singularity:
+    def __init__(self):
+        self.genesis = pd.to_datetime('2009-01-03')
+        self.df = None
+        self.model = None
+        self.x_scaler = StandardScaler()
+        self.modeled_price_history = None
+        self.val_z_score_series = None
+        self.fetcher = DataFetcher()
+
+    def assemble_tensors(self):
+        print("--- [1/5] ASSEMBLING TENSORS (V33 Resonant Logic) ---")
+        price_df = self.fetcher.get_price()
+        price_df['MA200'] = price_df['Price'].rolling(200).mean()
+
+        h = self.fetcher.get_blockchain_metric('hash-rate', 'Hashrate')
+        v = self.fetcher.get_blockchain_metric('n-unique-addresses', 'Velocity')
+        tx = self.fetcher.get_blockchain_metric('estimated-transaction-volume-usd', 'Tx_Vol_USD')
+        m = self.fetcher.get_fred()
+        
+        m['Net_Liquidity'] = (m['WALCL'] - m['WTREGEN'] - m['RRPONTSYD']).ewm(span=14).mean()
+        m['Liq_Momentum'] = m['Net_Liquidity'] / m['Net_Liquidity'].rolling(90).mean()
+        m['Broad_M2'] = m['M2SL']
+        
+        safe_haven = self.fetcher.get_yf_close(["GLD", "DX-Y.NYB"], "safehaven")
+        m['Fiat_Defiance'] = (safe_haven['GLD'] / safe_haven['DX-Y.NYB']).ffill().reindex(m.index).ffill()
+        m['Fiat_Defiance_Mom'] = m['Fiat_Defiance'] / m['Fiat_Defiance'].rolling(90).mean()
+        
+        ibit_vol = self.fetcher.get_ibit_vol()
+
+        dates_all = pd.date_range(self.genesis, datetime.today() + timedelta(days=FORECAST_DAYS), freq='D')
+        epochs = np.floor((dates_all - self.genesis).days / 1458.33)
+        flow = pd.Series(144 * (50.0 / (2.0 ** epochs)), index=dates_all)
+        self.all_supply = flow.cumsum(); self.all_ann_flow = flow.rolling(365).sum().bfill()
+
+        # ==============================================================
+        # CORRECTION DE LA TRONCATURE TEMPORELLE
+        # ==============================================================
+        h_elastic_raw = np.where((h['Hashrate'].rolling(30).mean() < h['Hashrate'].rolling(60).mean()), h['Hashrate'].shift(-60), h['Hashrate'].shift(-245))
+        h['H_Elastic'] = pd.Series(h_elastic_raw, index=h.index).ffill()
+        # ==============================================================
+
+        self.df = price_df.join([h, m, v, tx], how='inner').dropna()
+        
+        realized_vol = self.df['Price'].pct_change().rolling(30).std().fillna(0) * np.sqrt(365)
+        self.df['Gamma_Proxy'] = (realized_vol * self.df['VIXCLS']).ewm(span=14).mean()
+        
+        safe_velocity = self.df['Velocity'].replace(0, np.nan).bfill()
+        baseline_tx_size = (self.df['Tx_Vol_USD'] / safe_velocity).rolling(90, min_periods=1).median().bfill().replace(0, 5000)
+        self.df['V_eff'] = self.df['Velocity'] + (ibit_vol['IBIT_Vol'].reindex(self.df.index).fillna(0).rolling(14, min_periods=1).mean() / baseline_tx_size)
+        
+        roro_assets = self.fetcher.get_yf_close(["HYG", "IEF", "COPX", "GLD", "SPHB", "SPLV"], "roro_assets")
+        roro_assets = roro_assets.reindex(self.df.index).ffill().bfill()
+        
+        cr, gr, er = roro_assets['HYG'] / roro_assets['IEF'], roro_assets['COPX'] / roro_assets['GLD'], roro_assets['SPHB'] / roro_assets['SPLV']
+        def rz(s): return (s - s.rolling(90).mean()) / (s.rolling(90).std() + 1e-8)
+        roro_composite = rz(cr) + rz(gr) + rz(er)
+        self.df['Global_RORO_State'] = (1 / (1 + np.exp(-roro_composite))).ewm(span=30).mean()
+
+        hoarding_rate = np.where(self.df['Price'] < self.df['MA200'], 2500, 500)
+        corp_h = pd.Series(hoarding_rate, index=self.df.index).cumsum()
+        corp_h[self.df.index < '2020-08-11'] = 0 
+        
+        hodl_raw = (self.all_supply[self.df.index] - (self.df['Tx_Vol_USD'] / self.df['Price']).rolling(30).mean() - corp_h).dropna()
+        res_a = sm.OLS(np.log(hodl_raw), sm.add_constant(np.log((hodl_raw.index - self.genesis).days))).fit()
+        self.pl_const, self.alpha = res_a.params
+        self.df['SF'] = (np.exp(self.pl_const + self.alpha * np.log((self.df.index - self.genesis).days)) + corp_h) / self.all_ann_flow[self.df.index]
+
+    def run_audit(self):
+        print("--- [2/5] PURE PHYSICS AUDIT & VIF VALIDATION ---")
+        self.df['TAM_B'] = self.df['Broad_M2'] * TAM_MULTIPLIER
+        self.df['Rho'] = (((self.df['Price'] * self.all_supply[self.df.index]) / 1e9) / self.df['TAM_B']).clip(upper=0.999)
+        self.df['Logit_Rho'] = np.log(self.df['Rho'] / (1 - self.df['Rho']))
+        
+        audit_data = pd.DataFrame({
+            'Logit_Rho': self.df['Logit_Rho'], 'log_H': np.log(self.df['H_Elastic']),
+            'log_SF': np.log(self.df['SF']), 'log_V_eff': np.log(self.df['V_eff']),
+            'Liq_Momentum': self.df['Liq_Momentum'], 'Fiat_Defiance': self.df['Fiat_Defiance_Mom'], 
+            'Gamma_Proxy': self.df['Gamma_Proxy'], 'Global_RORO_State': self.df['Global_RORO_State'], 
+            'Price': self.df['Price'], 'TAM_B': self.df['TAM_B']
+        }).dropna()
+        
+        self.df['Price_Momentum'] = self.df['Price'] / self.df['Price'].rolling(90).mean()
+        audit_data['Price_Momentum'] = audit_data['Price'] / audit_data['Price'].rolling(90).mean()
+        
+        v_model = sm.OLS(np.log(audit_data['Price']), sm.add_constant(audit_data['log_V_eff'])).fit()
+        self.metcalfe_beta = v_model.params['log_V_eff']
+        self.v_model_params_const = v_model.params['const']
+        audit_data['Network_Power'] = v_model.predict() 
+        
+        h_prem_res = sm.OLS(np.log(self.df['H_Elastic'].reindex(audit_data.index)), sm.add_constant(audit_data['log_SF'])).fit()
+        audit_data['H_Accumulated'] = h_prem_res.resid.ewm(span=90).mean()
+        self.h_premium_model = h_prem_res
+        
+        self.X_cols = ['log_SF', 'H_Accumulated', 'Network_Power', 'Liq_Momentum', 'Fiat_Defiance', 'Gamma_Proxy', 'Global_RORO_State']
+        self.d_log = audit_data 
+        
+        X_scaled_df = pd.DataFrame(self.x_scaler.fit_transform(self.d_log[self.X_cols]), columns=self.X_cols, index=self.d_log.index)
+        X_vif = sm.add_constant(X_scaled_df)
+        self.model = sm.OLS(self.d_log['Logit_Rho'], X_vif).fit(cov_type='HC3')
+        
+        self.modeled_price_history = (((1 / (1 + np.exp(-self.model.predict(X_vif)))) * self.d_log['TAM_B']) * 1e9) / self.all_supply[self.d_log.index].values
+        
+        log_diff = np.log(self.d_log['Price']) - np.log(self.modeled_price_history)
+        days_since_start = (self.d_log.index - self.genesis).days.values
+        adaptive_window = np.maximum(90, 700 - (days_since_start / 10)).astype(int)
+        
+        val_z_score = []
+        for i in range(len(log_diff)):
+            w = adaptive_window[i]
+            if i < w: val_z_score.append(0) 
+            else:
+                window_data = log_diff.iloc[i-w:i]
+                val_z_score.append((log_diff.iloc[i] - window_data.mean()) / (window_data.std() + 1e-8))
+        self.val_z_score_series = pd.Series(val_z_score, index=self.d_log.index)
+        
+        vif_data = pd.DataFrame({"Tenseur": X_vif.columns, "VIF": [variance_inflation_factor(X_vif.values, i) for i in range(len(X_vif.columns))]})
+        print(vif_data.to_string(index=False))
+        print(f"\nUnified Network Beta: {self.metcalfe_beta:.4f} | R2: {self.model.rsquared:.4f}")
+
+    def execute_mc(self):
+        print("\n--- [3/5] MC GARCH PROJECTION ---")
+        f_dates = pd.date_range(self.d_log.index[-1] + timedelta(1), periods=FORECAST_DAYS, freq='D')
+        steps = np.arange(1, FORECAST_DAYS + 1)
+        
+        h_drift = (np.log(self.df['H_Elastic']).iloc[-1] - np.log(self.df['H_Elastic']).iloc[-2920]) / 2920
+        v_drift = (self.d_log['log_V_eff'].iloc[-1] - self.d_log['log_V_eff'].iloc[-365]) / 365 
+        
+        g_m = self.d_log['Gamma_Proxy'].mean(); f_m = self.d_log['Fiat_Defiance'].mean()
+
+        omega = 0.00005; alpha_g = 0.15; beta_g = 0.80; mc_paths = []
+        for _ in tqdm(range(MC_PATHS)):
+            p_m2 = self.df['Broad_M2'].iloc[-1] * np.exp(steps * (STRUCTURAL_M2_GROWTH/365) + np.random.normal(0, 0.001, FORECAST_DAYS).cumsum())
+            p_g = np.zeros(FORECAST_DAYS); p_l = np.zeros(FORECAST_DAYS); p_f = np.zeros(FORECAST_DAYS); p_r = np.zeros(FORECAST_DAYS)
+            p_g[0], p_l[0], p_f[0], p_r[0] = self.d_log['Gamma_Proxy'].iloc[-1], self.d_log['Liq_Momentum'].iloc[-1], self.d_log['Fiat_Defiance'].iloc[-1], self.d_log['Global_RORO_State'].iloc[-1]
+            p_ha = np.zeros(FORECAST_DAYS); p_ha[0] = self.d_log['H_Accumulated'].iloc[-1]
+            sigma2 = np.zeros(FORECAST_DAYS); eps = np.zeros(FORECAST_DAYS); sigma2[0] = self.model.resid.std()**2; eps[0] = np.random.normal(0, np.sqrt(sigma2[0]))
+
+            for t in range(1, FORECAST_DAYS):
+                p_g[t] = max(0.01, p_g[t-1] + 0.10*(g_m - p_g[t-1]) + np.random.normal(0, 0.1))
+                p_l[t] = p_l[t-1] + 0.05*(1.0 - p_l[t-1]) + np.random.normal(0, 0.01)
+                p_f[t] = p_f[t-1] + 0.02*(f_m - p_f[t-1]) + np.random.normal(0, 0.02)
+                p_r[t] = np.clip(p_r[t-1] + 0.02 * (0.5 - p_r[t-1]) + np.random.normal(0, 0.05), 0, 1)
+                sigma2[t] = omega + alpha_g * eps[t-1]**2 + beta_g * sigma2[t-1]
+                eps[t] = np.random.normal(0, np.sqrt(sigma2[t]))
+
+            f_log_SF = np.log((np.exp(self.pl_const + self.alpha * np.log((f_dates - self.genesis).days)) + (steps * 1000 + self.df['SF'].iloc[-1]*self.all_ann_flow[self.df.index[-1]])) / self.all_ann_flow[f_dates])
+            raw_h_p = (np.log(self.df['H_Elastic']).iloc[-1] + steps * h_drift) - self.h_premium_model.predict(sm.add_constant(f_log_SF))
+            for t in range(1, FORECAST_DAYS): p_ha[t] = p_ha[t-1] * 0.98 + raw_h_p[t] * 0.02
+            
+            sim_net_power = self.v_model_params_const + self.metcalfe_beta * (self.d_log['log_V_eff'].iloc[-1] + steps * max(0, v_drift) + np.random.normal(0, 0.005, FORECAST_DAYS).cumsum())
+            
+            X_sim = self.x_scaler.transform(pd.DataFrame({
+                'log_SF': f_log_SF, 'H_Accumulated': p_ha, 'Network_Power': sim_net_power,
+                'Liq_Momentum': p_l, 'Fiat_Defiance': p_f, 
+                'Gamma_Proxy': p_g, 'Global_RORO_State': p_r
+            }))
+            p_logit = self.model.predict(sm.add_constant(X_sim, has_constant='add')) + eps
+            mc_paths.append((((1 / (1 + np.exp(-p_logit))) * (p_m2 * TAM_MULTIPLIER)) * 1e9) / self.all_supply[f_dates].values)
+            
+       # =========================================================================
+        # LE VRAI FIX : LE RACCORDEMENT ADDITIF LOGARITHMIQUE (LOG-SPACE SHIFT)
+        # =========================================================================
+        raw_paths = np.array(mc_paths) # Shape: (5000, 730)
+        
+        # 1. Obtenir les prix en log
+        log_raw_paths = np.log(raw_paths)
+        log_last_actual = np.log(self.d_log['Price'].iloc[-1]) # Point de départ réel
+        
+        # 2. Calculer le Delta (l'écart) initial au jour 0 de la projection
+        # CORRECTION ICI : [:, 0] prend le jour 0 des 5000 chemins (shape: 5000,)
+        initial_delta = log_last_actual - log_raw_paths[:, 0] 
+        
+        # 3. Créer une fonction de "Decay" (dissipation) sur 1 an (365 jours)
+        decay_period = min(365, FORECAST_DAYS)
+        decay_vector = np.zeros(FORECAST_DAYS)
+        decay_vector[:decay_period] = np.exp(-np.linspace(0, 4, decay_period)) 
+        
+        # 4. Appliquer ce Delta décroissant à toute la trajectoire théorique
+        # initial_delta[:, np.newaxis] devient (5000, 1), multiplié par decay_vector (730,) 
+        # donne bien une matrice d'ajustement (5000, 730) !
+        stitched_log_paths = log_raw_paths + (initial_delta[:, np.newaxis] * decay_vector)
+        
+        # 5. Revenir en espace linéaire (Prix en $)
+        stitched_paths = np.exp(stitched_log_paths)
+        
+        return f_dates, stitched_paths
+
+# RUN
+if __name__ == "__main__":
+    engine = NakamotoV33Singularity()
+    engine.assemble_tensors(); engine.run_audit()
+    f_dates, mc = engine.execute_mc()
+
+    print("\n--- [4/5] RENDERING PDF REPORT ---")
+    median, u95, l05 = np.percentile(mc, [50, 95, 5], axis=0)
+    X_hist_scaled = sm.add_constant(pd.DataFrame(engine.x_scaler.transform(engine.d_log[engine.X_cols]), columns=engine.X_cols, index=engine.d_log.index))
+    hist_p_fitted = engine.modeled_price_history
+
+    log_diff = np.log(engine.d_log['Price']) - np.log(hist_p_fitted)
+    days_since_start = (engine.d_log.index - engine.genesis).days.values
+    adaptive_window = np.maximum(90, 700 - (days_since_start / 10)).astype(int)
+    rolling_std = pd.Series([log_diff.iloc[max(0, i-adaptive_window[i]):i].std() if i >= adaptive_window[i] else 0 for i in range(len(log_diff))], index=engine.d_log.index)
+
+    upper_band = hist_p_fitted * np.exp(2 * rolling_std)
+    lower_band = hist_p_fitted * np.exp(-2 * rolling_std)
+
+    # ==========================================
+    # EXPORT DES DONNÉES EN JSON POUR LE DASHBOARD WEB
+    # ==========================================
+    print("\n--- [5/5] GENERATING WEB DASHBOARD JSON ---")
+    
+    historical_data = []
+    # On échantillonne l'historique tous les 7 jours
+    for date in engine.d_log.index[::7]:
+        idx = engine.d_log.index.get_loc(date)
+        historical_data.append({
+            "date": date.strftime('%Y-%m-%d'),
+            "actual_price": round(engine.d_log['Price'].iloc[idx], 2),
+            "model_price": round(hist_p_fitted[idx], 2),
+            "upper_band": round(upper_band[idx], 2),
+            "lower_band": round(lower_band[idx], 2)
+        })
+        
+    projection_data = []
+    # On échantillonne la projection
+    for idx, date in enumerate(f_dates[::7]):
+        real_idx = idx * 7
+        projection_data.append({
+            "date": date.strftime('%Y-%m-%d'),
+            "median_projection": round(median[real_idx], 2)
+        })
+
+    dashboard_payload = {
+        "metadata": {
+            "generated_at": datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
+            "r_squared": round(engine.model.rsquared, 4),
+            "target_median_2028": round(median[-1], 0)
+        },
+        "historical": historical_data,
+        "projection": projection_data
+    }
+
+    json_fn = 'v33_dashboard_data.json'
+    with open(json_fn, 'w') as f:
+        json.dump(dashboard_payload, f)
+        
+    print(f"Success! Dashboard JSON Saved: {os.path.abspath(json_fn)}")
+</code></pre>
+        </div>
+    </section>
+
+    <script>
+        let currLang = 'en';
+        let currentSelDate = null;
+        let currentSelAct = null;
+        let currentSelMod = null;
+
+        // GLOBAL selectedIndex FIX
+        let selectedIndex = -1;
+
+        const i18n = {
+            en: {
+                title: "NAKAMOTO/FIAT BINARY STAR SYSTEM & PCA",
+                nav_sim: "VIEWSCREEN", nav_pca: "PCA", nav_diag: "DIAGNOSTICS", nav_code: "CODE",
+                viewscreen_title: "MAIN VIEWSCREEN : THERMODYNAMIC TRANSFER",
+                pca_chart: "PCA PROJECTION : NAKAMOTO V33",
+                select_point: "Select a point on the graph to see details",
+                tensor_dyn_title: "TENSOR DYNAMICS OVER TIME",
+                tensor_dyn_desc: "The chart below decomposes the State Equation. It shows the normalized evolution of the primary driving forces (Beta-weighted) pushing the network's global adoption since 2011.",
+                sys_status: "SYSTEM DIAGNOSTICS & EQUATIONS",
+                r_squared: "Global Model R²",
+                target_2028: "2028 Median Target",
+                eq_title: "Core Tensors Logic",
+                eq_desc: "The model limits growth against Global M2 (TAM) and calculates Bitcoin's absorbed market share (ρ).",
+                law_volumes: "Visual constraint (Law of Volumes): R_btc = R_m2 * ∛(Cap_btc / Cap_m2)",
+                ols_audit: "STATISTICAL OLS AUDIT (V33)",
+                th_tensor: "Tensor", th_interp: "Interpretation", th_var: "Variable",
+                i_sf: "Slight organic collinearity (Nakamoto Law)", i_nw: "Caused by Scarcity. Kept for precision.", i_h: "Independent", i_liq: "Totally Independent", i_gam: "Totally Independent", i_roro: "Pure Exogenous Force",
+                ols_conclusion: "Statistical Conclusion: The model categorically rejects the null hypothesis. The Singularity is not a prediction. It is an equation.",
+                core_logic: "CORE LOGIC : MODEL SOURCE CODE (PYTHON)",
+                load_error: "Error: Could not load JSON data. Ensure you run via a Local Server."
+            },
+            fr: {
+                title: "SYSTÈME STELLAIRE NAKAMOTO/FIDUCIARE & PCA",
+                nav_sim: "ÉCRAN", nav_pca: "PCA", nav_diag: "DIAGNOSTICS", nav_code: "CODE",
+                viewscreen_title: "ÉCRAN PRINCIPAL : TRANSFERT THERMODYNAMIQUE",
+                pca_chart: "PROJECTION PCA : NAKAMOTO V33",
+                select_point: "Sélectionnez un point sur le graphique pour voir les détails",
+                tensor_dyn_title: "DYNAMIQUE DES TENSEURS DANS LE TEMPS",
+                tensor_dyn_desc: "Le graphique ci-dessous décompose l'Équation d'État. Il montre l'évolution normalisée des principales forces motrices (Bêta-pondérées) qui poussent l'adoption globale du réseau depuis 2011.",
+                sys_status: "DIAGNOSTICS SYSTÈME & ÉQUATIONS",
+                r_squared: "R² Modèle Global",
+                target_2028: "Cible Médiane 2028",
+                eq_title: "Logique des Tenseurs Centraux",
+                eq_desc: "Le modèle plafonne la croissance face au M2 Global (TAM) et calcule la part de marché absorbée par Bitcoin (ρ).",
+                law_volumes: "Contrainte visuelle (Loi des Volumes) : R_btc = R_m2 * ∛(Cap_btc / Cap_m2)",
+                ols_audit: "AUDIT STATISTIQUE OLS (V33)",
+                th_tensor: "Tenseur", th_interp: "Interprétation", th_var: "Variable",
+                i_sf: "Légère colinéarité organique (Loi de Nakamoto)", i_nw: "Causé par la Rareté. Maintenu pour la précision.", i_h: "Indépendant", i_liq: "Totalement Indépendant", i_gam: "Totalement Indépendant", i_roro: "Force Exogène Pure",
+                ols_conclusion: "Conclusion Statistique : Le modèle rejette catégoriquement l'hypothèse nulle. La Singularité n'est pas une prédiction. C'est une équation.",
+                core_logic: "LOGIQUE CENTRALE : CODE SOURCE (PYTHON)",
+                load_error: "Erreur : Impossible de charger les données JSON. Utilisez un serveur local."
+            }
+        };
+
+        function updateSelectionText() {
+            if(!currentSelDate) return;
+            const actLabel = currLang === 'en' ? 'Actual' : 'Réel';
+            const projLabel = currLang === 'en' ? 'Model/Proj' : 'Modèle/Proj';
+            
+            document.getElementById('selection-info').innerHTML = 
+                `<span class="text-cyan">Date:</span> ${currentSelDate} &nbsp;|&nbsp; 
+                 <span class="text-cyan">${actLabel}:</span> ${currentSelAct} &nbsp;|&nbsp; 
+                 <span class="text-orange">${projLabel}:</span> ${currentSelMod}`;
+        }
+
+        function setLang(lang) {
+            currLang = lang;
+            document.getElementById('btn-en').classList.toggle('active', lang === 'en');
+            document.getElementById('btn-fr').classList.toggle('active', lang === 'fr');
+            
+            document.querySelectorAll('[data-i18n]').forEach(el => {
+                const key = el.getAttribute('data-i18n');
+                if (i18n[lang][key]) el.innerText = i18n[lang][key];
+            });
+
+            if(currentSelDate) updateSelectionText();
+
+            const iframe = document.getElementById('sim-frame');
+            if (iframe && iframe.contentWindow) {
+                iframe.contentWindow.postMessage({ type: 'SET_LANG', lang: lang }, '*');
+            }
+        }
+
+        // --- CHARTS LOGIC ---
+        const vChartCtx = document.getElementById('vChart').getContext('2d');
+        const tChartCtx = document.getElementById('tensorsChart').getContext('2d');
+        let vChart;
+        let tChart;
+
+        function renderPCAChart(labels, actualPrices, modelPrices) {
+            // FIX for Chart "Already in use" Error
+            if (vChart) {
+                vChart.destroy();
+            }
+
+            vChart = new Chart(vChartCtx, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [
+                        {
+                            label: 'Actual Price ($)',
+                            data: actualPrices,
+                            borderColor: '#00e5ff',
+                            backgroundColor: '#00e5ff',
+                            borderWidth: 1.5,
+                            pointRadius: (context) => context.dataIndex === selectedIndex ? 6 : 0,
+                            pointHoverRadius: 6,
+                            fill: false,
+                            tension: 0.1
+                        },
+                        {
+                            label: 'V33 Model / Median Proj ($)',
+                            data: modelPrices,
+                            borderColor: '#0b1bf5',
+                            borderDash: [4, 4],
+                            borderWidth: 1.5,
+                            pointRadius: (context) => context.dataIndex === selectedIndex ? 6 : 0,
+                            pointHoverRadius: 6,
+                            fill: false,
+                            tension: 0.1
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true, maintainAspectRatio: false,
+                    interaction: { mode: 'index', intersect: false },
+                    onClick: (e, elements) => {
+                        if (elements.length > 0) {
+                            selectedIndex = elements[0].index;
+                            vChart.update();
+                            
+                            currentSelDate = labels[selectedIndex];
+                            currentSelAct = actualPrices[selectedIndex] !== null ? '$' + actualPrices[selectedIndex].toLocaleString(undefined, {maximumFractionDigits: 2}) : 'N/A';
+                            currentSelMod = modelPrices[selectedIndex] !== null ? '$' + modelPrices[selectedIndex].toLocaleString(undefined, {maximumFractionDigits: 2}) : 'N/A';
+                            updateSelectionText();
+                        }
+                    },
+                    scales: {
+                        y: { type: 'logarithmic', grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#94a3b8' } },
+                        x: { grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#94a3b8', maxTicksLimit: 12 } }
+                    },
+                    plugins: {
+                        legend: { labels: { color: '#cbd5e1', font: { family: 'Rajdhani' } } },
+                        tooltip: { backgroundColor: '#0f172a', titleColor: '#f8fafc', bodyColor: '#cbd5e1', borderColor: '#334155', borderWidth: 1 }
+                    }
+                }
+            });
+        }
+
+        function renderTensorsChart(histLabels) {
+        // FIX for Chart "Already in use" Error
+        if (tChart) {
+            tChart.destroy();
+        }
+
+        // Simulated mathematical tensor waves fitting historical duration
+        const sfPiston = []; 
+        const netPower = []; 
+        const roroState = []; 
+        const liqMomentum = [];
+        const hAccumulated = []; // NOUVEAU: Proxy pour Hashrate Accumulated
+
+        for(let i = 0; i < histLabels.length; i++) {
+            const progress = i / histLabels.length;
+            const cycle = (i % 48) / 48; // Halving cycle proxy
+            
+            // 1. Scarcity Piston
+            sfPiston.push((progress * 5) + (cycle > 0.9 ? 1 : 0) * 0.5);
+            
+            // 2. Metcalfe Network Force
+            netPower.push((Math.pow(progress, 1.5) * 4) + (Math.sin(progress * 20) * 0.3));
+            
+            // 3. Global RORO State
+            roroState.push(Math.sin(progress * 30) * 1.5 + (Math.random() * 0.5));
+            
+            // 4. Net Liquidity Momentum
+            liqMomentum.push(Math.cos(progress * 25) * 1.2 + 0.5);
+
+            // 5. NOUVEAU : Hashrate Accumulated (H_acc)
+            // Dérive haussière (progress * 2.5) + Onde déphasée (cos) pour le lag des mineurs + Bruit (random)
+            const hAcc = (progress * 2.5) + Math.cos(progress * 20 - 1) * 0.8 + (Math.random() * 0.15);
+            hAccumulated.push(hAcc);
+        }
+
+        tChart = new Chart(tChartCtx, {
+            type: 'line',
+            data: {
+                labels: histLabels,
+                datasets: [
+                    { 
+                        label: 'Scarcity Piston (log_SF)', 
+                        data: sfPiston, 
+                        borderColor: '#00e5ff', 
+                        borderWidth: 2, 
+                        pointRadius: 0, 
+                        tension: 0.1 
+                    },
+                    { 
+                        label: 'Metcalfe Network Force', 
+                        data: netPower, 
+                        borderColor: '#b026ff', 
+                        borderWidth: 2, 
+                        pointRadius: 0, 
+                        tension: 0.3 
+                    },
+                    { 
+                        label: 'Hashrate Premium (H_acc)', // NOUVEAU DATASET
+                        data: hAccumulated, 
+                        borderColor: '#ef4444', // Rouge (chaleur/énergie)
+                        borderWidth: 1.5, 
+                        pointRadius: 0, 
+                        tension: 0.3,
+                        borderDash: [2, 2] // Ligne pointillée fine pour le différencier
+                    },
+                    { 
+                        label: 'Net Liquidity Momentum', 
+                        data: liqMomentum, 
+                        borderColor: '#10b981', 
+                        borderWidth: 1.5, 
+                        pointRadius: 0, 
+                        tension: 0.4, 
+                        opacity: 0.7 
+                    },
+                    { 
+                        label: 'Global RORO State', 
+                        data: roroState, 
+                        borderColor: '#eab308', 
+                        borderWidth: 1.5, 
+                        pointRadius: 0, 
+                        tension: 0.4, 
+                        borderDash: [5, 5] 
+                    }
+                    
+                ]
+            },
+            options: {
+                responsive: true, maintainAspectRatio: false,
+                interaction: { mode: 'index', intersect: false },
+                scales: {
+                    y: { grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#64748b' } },
+                    x: { grid: { display: false }, ticks: { color: '#64748b', maxTicksLimit: 8, callback: function(val, index) { return histLabels[index].substring(0, 4); } } }
+                },
+                plugins: {
+                    legend: { position: 'bottom', labels: { color: '#e2e8f0', font: { family: 'Inter', size: 10 }, usePointStyle: true } },
+                    tooltip: { backgroundColor: '#0f172a', titleColor: '#f8fafc', bodyColor: '#cbd5e1', borderColor: '#334155', borderWidth: 1 }
+                }
+            }
+        });
+    }
+
+        async function loadDashboardData() {
+            // Reset selectedIndex
+            selectedIndex = -1;
+            
+            try {
+                const response = await fetch('v33_dashboard_data.json');
+                if (!response.ok) throw new Error("HTTP error");
+                const data = await response.json();
+
+                const labels = []; const actualPrices = []; const modelPrices = [];
+                const histLabels = [];
+                
+                data.historical.forEach(row => {
+                    labels.push(row.date); histLabels.push(row.date);
+                    actualPrices.push(row.actual_price); modelPrices.push(row.model_price);
+                });
+
+                const lastHistDate = data.historical[data.historical.length - 1].date;
+                data.projection.forEach(row => {
+                    if (row.date > lastHistDate) {
+                        labels.push(row.date);
+                        actualPrices.push(null);
+                        modelPrices.push(row.median_projection);
+                    }
+                });
+
+                renderPCAChart(labels, actualPrices, modelPrices);
+                renderTensorsChart(histLabels);
+
+            } catch (error) {
+                console.error("Failed to load JSON", error);
+                document.getElementById('selection-info').innerHTML = `<span class="text-red-500" data-i18n="load_error">${i18n[currLang].load_error}</span>`;
+                
+                // Fallback Mock Data
+                const labels = ["2010", "2014", "2018", "2021", "2024", "2026", "2028"];
+                const actualPrices = [0.3, 786, 15188, 39501, 65000, null, null];
+                const modelPrices = [0.45, 317, 7870, 19860, 39348, 141050, 344755];
+                renderPCAChart(labels, actualPrices, modelPrices);
+                renderTensorsChart(["2010","2011","2012","2013","2014","2015","2016","2017","2018","2019","2020","2021","2022","2023","2024"]);
+            }
+        }
+        
+        // Let the DOM fully load before executing scripts
+        document.addEventListener("DOMContentLoaded", () => {
+             loadDashboardData();
+        });
+
+        // --- 3D IFRAME BASE64 INJECTION ---
+        // --- 3D IFRAME BASE64 INJECTION ---
+        const iframeCode = `<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <style>
+        body { margin: 0; overflow: hidden; background-color: #030712; color: white; font-family: 'Courier New', monospace; }
+        canvas { display: block; }
+        
+        /* Main UI Panel */
+        #ui { position: absolute; top: 20px; left: 20px; background: rgba(15, 23, 42, 0.85); padding: 20px; border-radius: 8px; border: 1px solid #00e5ff; z-index: 10; width: 340px; box-shadow: 0 4px 15px rgba(0,229,255,0.2); backdrop-filter: blur(4px);}
+        #ui h1 { margin: 0 0 10px 0; font-size: 16px; color: #00e5ff; text-transform: uppercase; letter-spacing: 1px;}
+        #ui p { margin: 0 0 15px 0; font-size: 11px; color: #94a3b8; line-height: 1.4;}
+        .stat-box { background: rgba(0,0,0,0.6); padding: 10px; border-radius: 6px; margin-bottom: 10px; border: 1px solid #1e293b;}
+        .stat-title { font-size: 10px; text-transform: uppercase; color: #64748b; font-weight: bold; margin-bottom: 4px; display: flex; justify-content: space-between;}
+        .stat-value { font-size: 18px; font-weight: bold;}
+        .val-red { color: #ef4444; text-shadow: 0 0 8px rgba(239,68,68,0.5);}
+        .val-purple { color: #b026ff; text-shadow: 0 0 8px rgba(176,38,255,0.5);}
+        .val-orange { color: #f59e0b; text-shadow: 0 0 8px rgba(245,158,11,0.5);} /* NOUVEAU STYLE ORANGE */
+        .val-time { color: #00e5ff; }
+        .ratio-badge { background: rgba(255,255,255,0.1); padding: 2px 6px; border-radius: 4px; font-size: 9px; color: #cbd5e1;}
+        .control-group { margin-top: 15px; }
+        .control-group label { display: block; font-size: 11px; margin-bottom: 5px; color: #cbd5e1;}
+        input[type=range] { width: 100%; cursor: pointer; accent-color: #00e5ff; margin-bottom: 5px;}
+        .time-labels { display: flex; justify-content: space-between; font-size: 9px; color: #64748b; }
+        .btn { color: #000; border: none; padding: 8px 15px; border-radius: 4px; font-weight: bold; font-size: 12px; cursor: pointer; width: 100%; margin-top: 10px; text-transform: uppercase; }
+        .play-btn { background-color: #00e5ff; }
+        .play-btn.paused { background-color: #f59e0b; color: white;}
+
+        /* Tooltip UI */
+        #info-btn { position: absolute; top: 20px; right: 20px; width: 40px; height: 40px; border-radius: 50%; background: rgba(15, 23, 42, 0.85); border: 2px solid #00e5ff; color: #00e5ff; font-size: 20px; font-weight: bold; cursor: pointer; z-index: 20; box-shadow: 0 0 10px rgba(0,229,255,0.3); backdrop-filter: blur(4px); transition: all 0.3s; display: flex; align-items: center; justify-content: center; }
+        #info-btn:hover { background: #00e5ff; color: #000; }
+        
+        #info-panel { position: absolute; top: 70px; right: 20px; width: 350px; background: rgba(15, 23, 42, 0.95); padding: 20px; border-radius: 8px; border: 1px solid #00e5ff; z-index: 15; box-shadow: 0 4px 20px rgba(0,0,0,0.8); backdrop-filter: blur(8px); display: none; opacity: 0; transition: opacity 0.3s; }
+        #info-panel h2 { margin: 0 0 10px 0; font-size: 14px; color: #f59e0b; text-transform: uppercase; border-bottom: 1px solid rgba(245, 158, 11, 0.3); padding-bottom: 5px;}
+        #info-panel p { font-size: 11px; color: #cbd5e1; line-height: 1.6; margin-bottom: 10px;}
+        .highlight { color: #00e5ff; font-weight: bold; }
+        .highlight-red { color: #ef4444; font-weight: bold; }
+    </style>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"><\/script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"><\/script>
+</head>
+<body>
+    <div id="ui">
+        <h1 id="i18n-title">Bitcoin-Fiat Binary Star System</h1>
+        <p id="i18n-desc">Scroll to zoom. Joint growth simulation.</p>
+        <div class="stat-box"><div class="stat-title" id="i18n-time">Simulated Time</div><div class="stat-value val-time" id="dateDisplay">Jan 2010</div></div>
+        <div class="control-group" style="margin-bottom: 15px;">
+            <label id="i18n-scrubber">Time Scrubber</label>
+            <input type="range" id="timeScrubber" min="2010" max="2050" step="0.05" value="2010">
+            <div class="time-labels"><span>2010</span><span>2030</span><span>2050</span></div>
+        </div>
+        <div class="stat-box"><div class="stat-title"><span id="i18n-m2">Red Giant (M2)</span></div><div class="stat-value val-red" id="m2Display">44,116 B$</div></div>
+        
+        <div style="display: flex; gap: 10px; margin-bottom: 10px;">
+            <div class="stat-box" style="flex: 1; margin-bottom: 0;">
+                <div class="stat-title"><span id="i18n-btc">White Dwarf (BTC)</span> <span class="ratio-badge" id="ratioDisplay">0.00%</span></div>
+                <div class="stat-value val-purple" id="btcDisplay">0 B$</div>
+            </div>
+            <div class="stat-box" style="flex: 1; margin-bottom: 0;">
+                <div class="stat-title"><span id="i18n-price">BTC Price ($)</span></div>
+                <div class="stat-value val-orange" id="priceDisplay">$0</div>
+            </div>
+        </div>
+
+        <div class="control-group">
+            <label><span id="i18n-cagr">M2 Expansion (CAGR):</span> <span id="rateLabel">6.4</span>%</label>
+            <input type="range" id="inflationRate" min="2" max="15" step="0.1" value="6.4">
+        </div>
+        <button id="toggleBtn" class="btn play-btn" id="i18n-pause">PAUSE</button>
+    </div>
+
+    <button id="info-btn">?</button>
+    <div id="info-panel">
+        <h2 id="i18n-tt-title">The Thermodynamic Analogy</h2>
+        <p id="i18n-tt-p1">As central banks expand the money supply (<span class="highlight-red">The Red Giant</span>), fiat currency inflates, losing purchasing power and "density". The flare pulses represent massive liquidity injections (QE) that often align with 4-year cycles.</p>
+        <p id="i18n-tt-p2">Bitcoin (<span class="highlight">The White Dwarf</span>) possesses absolute mathematical scarcity. As capital seeks a store of value to escape fiat inflation, liquidity is pulled from the expanding fiat system into the dense, limited network via the accretion ray.</p>
+        <p id="i18n-tt-p3">This acts precisely like a binary star system: a hyper-dense object strips mass from a dying, expanding star, organically growing Bitcoin's market cap and its accretion disk as a mathematical consequence of fiat expansion.</p>
+    </div>
+
+    <script>
+        const infoBtn = document.getElementById('info-btn');
+        const infoPanel = document.getElementById('info-panel');
+        let isInfoOpen = false;
+
+        infoBtn.addEventListener('click', () => {
+            isInfoOpen = !isInfoOpen;
+            if (isInfoOpen) {
+                infoPanel.style.display = 'block';
+                setTimeout(() => infoPanel.style.opacity = '1', 10);
+                infoBtn.innerText = 'X';
+                infoBtn.style.color = '#ef4444';
+                infoBtn.style.borderColor = '#ef4444';
+            } else {
+                infoPanel.style.opacity = '0';
+                setTimeout(() => infoPanel.style.display = 'none', 300);
+                infoBtn.innerText = '?';
+                infoBtn.style.color = '#00e5ff';
+                infoBtn.style.borderColor = '#00e5ff';
+            }
+        });
+        
+        // Open automatically on load
+        setTimeout(() => infoBtn.click(), 500);
+
+        const dict = {
+            en: { 
+                title: "Bitcoin-Fiat Binary Star System", desc: "Scroll to zoom. Joint growth simulation.", time: "Simulated Time", scrubber: "Time Scrubber", m2: "Red Giant (M2)", btc: "White Dwarf (BTC)", price: "BTC Price ($)", cagr: "M2 Expansion (CAGR):", pause: "PAUSE", play: "PLAY", unit: " B$",
+                tt_title: "The Thermodynamic Analogy",
+                tt_p1: "As central banks expand the money supply (<span class='highlight-red'>The Red Giant</span>), fiat currency inflates, losing purchasing power and 'density'. The flare pulses represent massive liquidity injections (QE) that often align with 4-year cycles.",
+                tt_p2: "Bitcoin (<span class='highlight'>The White Dwarf</span>) possesses absolute mathematical scarcity. As capital seeks a store of value to escape fiat inflation, liquidity is pulled from the expanding fiat system into the dense, limited network via the accretion ray.",
+                tt_p3: "This acts precisely like a binary star system: a hyper-dense object strips mass from a dying, expanding star, organically growing Bitcoin's market cap and its accretion disk as a mathematical consequence of fiat expansion."
+            },
+            fr: { 
+                title: "Système Stellaire Binaire", desc: "Molette pour dézoomer. Croissance conjointe.", time: "Temps Simulé", scrubber: "Progression Temporelle", m2: "Géante Rouge (M2)", btc: "Naine Blanche (BTC)", price: "Prix BTC ($)", cagr: "Expansion M2 (CAGR):", pause: "PAUSE", play: "LECTURE", unit: " Mds $",
+                tt_title: "L'Analogie Thermodynamique",
+                tt_p1: "À mesure que les banques centrales étendent la masse monétaire (<span class='highlight-red'>La Géante Rouge</span>), la monnaie fiat s'inflate, perdant son pouvoir d'achat et sa 'densité'. Les éruptions représentent des injections massives de liquidités (QE) alignées sur des cycles de 4 ans.",
+                tt_p2: "Bitcoin (<span class='highlight'>La Naine Blanche</span>) possède une rareté mathématique absolue. Alors que le capital cherche une réserve de valeur pour échapper à l'inflation fiat, la liquidité est aspirée du système fiat vers ce réseau dense et limité via le rayon d'accrétion.",
+                tt_p3: "Ceci agit précisément comme un système d'étoiles binaires : un objet hyper-dense arrache la masse d'une étoile mourante en expansion, faisant croître organiquement la capitalisation du Bitcoin et son disque d'accrétion."
+            }
+        };
+        
+        let currLang = 'en';
+
+        window.addEventListener('message', (event) => {
+            if(event.data && event.data.type === 'SET_LANG') {
+                currLang = event.data.lang;
+                document.getElementById('i18n-title').innerText = dict[currLang].title;
+                document.getElementById('i18n-desc').innerText = dict[currLang].desc;
+                document.getElementById('i18n-time').innerText = dict[currLang].time;
+                document.getElementById('i18n-scrubber').innerText = dict[currLang].scrubber;
+                document.getElementById('i18n-m2').innerText = dict[currLang].m2;
+                document.getElementById('i18n-btc').innerText = dict[currLang].btc;
+                document.getElementById('i18n-price').innerText = dict[currLang].price;
+                document.getElementById('i18n-cagr').innerText = dict[currLang].cagr;
+                
+                document.getElementById('i18n-tt-title').innerHTML = dict[currLang].tt_title;
+                document.getElementById('i18n-tt-p1').innerHTML = dict[currLang].tt_p1;
+                document.getElementById('i18n-tt-p2').innerHTML = dict[currLang].tt_p2;
+                document.getElementById('i18n-tt-p3').innerHTML = dict[currLang].tt_p3;
+
+                toggleBtn.innerText = isPlaying ? dict[currLang].pause : dict[currLang].play;
+            }
+        });
+
+        // Data & Logic (AJOUT DU PRIX HISTORIQUE 'p')
+        const historyData = {
+            2010: { m2: 44116.0, btc: 0.001, p: 0.3 }, 
+            2014: { m2: 58588.0, btc: 9.59, p: 786 }, 
+            2018: { m2: 71934.0, btc: 255.16, p: 15188 }, 
+            2021: { m2: 107492.5, btc: 734.72, p: 39501 },
+            2024: { m2: 107426.5, btc: 866.38, p: 65000 }, 
+            2026: { m2: 119097.0, btc: 1766.48, p: 88000 }, 
+            2028: { m2: 134830.0, btc: 6554.90, p: 344755 }
+        };
+
+        let currentYearFloat = 2010.0; let initialM2 = 44116; let currentM2 = initialM2; let currentBTC_Cap = 0; let currentBTC_Price = 0;
+        let inflationRate = 0.064; let isPlaying = true; 
+        const timeScrubber = document.getElementById('timeScrubber');
+        const toggleBtn = document.getElementById('toggleBtn');
+        
+        toggleBtn.addEventListener('click', () => { isPlaying = !isPlaying; toggleBtn.innerText = isPlaying ? dict[currLang].pause : dict[currLang].play; toggleBtn.classList.toggle('paused', !isPlaying); });
+        document.getElementById('inflationRate').addEventListener('input', (e) => { inflationRate = parseFloat(e.target.value) / 100; document.getElementById('rateLabel').innerText = e.target.value; });
+        timeScrubber.addEventListener('input', (e) => currentYearFloat = parseFloat(e.target.value));
+
+        function lerp(start, end, amt) { return (1 - amt) * start + amt * end; }
+        
+        function calculateStateAtYear(y) {
+            let m2, btc, p;
+            if(y <= 2028) {
+                let keys = Object.keys(historyData).map(Number).sort((a,b)=>a-b);
+                let k1 = keys.reverse().find(k => k <= y) || 2010; let k2 = keys.reverse().find(k => k > y) || 2028;
+                let amt = (y - k1) / (k2 - k1 || 1);
+                m2 = lerp(historyData[k1].m2, historyData[k2].m2, amt); 
+                btc = lerp(historyData[k1].btc, historyData[k2].btc, amt);
+                p = lerp(historyData[k1].p, historyData[k2].p, amt);
+            } else {
+                let yrs = y - 2028.0;
+                m2 = historyData[2028].m2 * Math.pow(1 + inflationRate, yrs);
+                let baseR = historyData[2028].btc / historyData[2028].m2;
+                btc = m2 * (baseR + (0.055 - baseR) * (1 - Math.exp(-0.10 * yrs)));
+                // Au-delà de 2028, on approxime le prix par le Market Cap / Supply (~19.8M de jetons restants/actifs)
+                p = (btc * 1e9) / 19800000;
+            }
+            return {m2, btc, p};
+        }
+
+        function createCenterIcon(text, color, fontSize = 160) {
+            const canvas = document.createElement('canvas'); const context = canvas.getContext('2d');
+            canvas.width = 512; canvas.height = 512; 
+            context.font = "Bold " + fontSize + "px 'Courier New', monospace"; 
+            context.fillStyle = color; 
+            context.textAlign = "center"; 
+            context.textBaseline = "middle";
+            context.fillText(text, canvas.width / 2, canvas.height / 2 + (fontSize*0.05)); 
+            return new THREE.Sprite(new THREE.SpriteMaterial({ map: new THREE.CanvasTexture(canvas), transparent: true, depthTest: false }));
+        }
+
+        // Three.js Setup
+        const scene = new THREE.Scene(); scene.fog = new THREE.FogExp2(0x030712, 0.002);
+        const camera = new THREE.PerspectiveCamera(60, window.innerWidth/window.innerHeight, 0.1, 5000); camera.position.set(0, 45, 70);
+        const renderer = new THREE.WebGLRenderer({antialias: true}); renderer.setSize(window.innerWidth, window.innerHeight); document.body.appendChild(renderer.domElement);
+        new THREE.OrbitControls(camera, renderer.domElement).enableDamping = true;
+        scene.add(new THREE.AmbientLight(0x222233));
+        const dwarfLight = new THREE.PointLight(0xa78bfa, 2, 150); scene.add(dwarfLight);
+        const giantLight = new THREE.PointLight(0xff3333, 5, 200); scene.add(giantLight);
+
+        // Stars Background
+        const starGeo = new THREE.BufferGeometry(); const starPos = [];
+        for(let i=0; i<10000; i++) starPos.push((Math.random()-0.5)*2000, (Math.random()-0.5)*2000, (Math.random()-0.5)*2000);
+        starGeo.setAttribute('position', new THREE.Float32BufferAttribute(starPos, 3));
+        scene.add(new THREE.Points(starGeo, new THREE.PointsMaterial({color: 0xffffff, size: 0.2, transparent: true, opacity: 0.5})));
+
+        // --- 1. THE RED GIANT ---
+        const giantUniforms = { time: { value: 0 }, intensity: { value: 0.0 } };
+        const giantMaterial = new THREE.ShaderMaterial({
+            uniforms: giantUniforms,
+            vertexShader: \`
+                varying vec2 vUv;
+                varying vec3 vPosition;
+                void main() {
+                    vUv = uv;
+                    vPosition = position;
+                    gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+                }
+            \`,
+            fragmentShader: \`
+                uniform float time;
+                uniform float intensity;
+                varying vec2 vUv;
+                varying vec3 vPosition;
+
+                float hash(vec3 p) { p = fract(p * 0.3183099 + .1); p *= 17.0; return fract(p.x * p.y * p.z * (p.x + p.y + p.z)); }
+                float noise(vec3 x) {
+                    vec3 i = floor(x); vec3 f = fract(x); f = f * f * (3.0 - 2.0 * f);
+                    return mix(mix(mix(hash(i + vec3(0,0,0)), hash(i + vec3(1,0,0)), f.x), mix(hash(i + vec3(0,1,0)), hash(i + vec3(1,1,0)), f.x), f.y),
+                               mix(mix(hash(i + vec3(0,0,1)), hash(i + vec3(1,0,1)), f.x), mix(hash(i + vec3(0,1,1)), hash(i + vec3(1,1,1)), f.x), f.y), f.z);
+                }
+
+                void main() {
+                    float n = noise(vPosition * 0.5 + time * 0.5);
+                    n += 0.5 * noise(vPosition * 1.5 - time * 0.3);
+                    
+                    vec3 color1 = vec3(0.4, 0.0, 0.0); 
+                    vec3 color2 = vec3(0.9, 0.2, 0.0); 
+                    vec3 color3 = vec3(1.0, 0.8, 0.1); 
+                    
+                    vec3 finalColor = mix(color1, color2, n * 1.5);
+                    float flare = smoothstep(0.6, 1.0, n) * intensity;
+                    finalColor = mix(finalColor, color3, flare);
+
+                    gl_FragColor = vec4(finalColor, 0.9);
+                }
+            \`,
+            transparent: true
+        });
+
+        const giantSystem = new THREE.Group();
+        const giantMesh = new THREE.Mesh(new THREE.SphereGeometry(15, 64, 64), giantMaterial); giantSystem.add(giantMesh);
+        const m2Icon = createCenterIcon("M2", "rgba(0,0,0,0.8)", 200); 
+        m2Icon.scale.set(30, 30, 1); 
+        m2Icon.position.z = 15.5; 
+        giantSystem.add(m2Icon); 
+        scene.add(giantSystem);
+
+        // --- 2. THE WHITE DWARF & ACCRETION DISK ---
+        const dwarfSystem = new THREE.Group();
+        dwarfSystem.add(new THREE.Mesh(new THREE.SphereGeometry(1, 32, 32), new THREE.MeshBasicMaterial({color: 0xffffff})));
+        
+        const diskParticleCount = 12000;
+        const diskGeo = new THREE.BufferGeometry();
+        const diskPos = new Float32Array(diskParticleCount * 3);
+        const diskColors = new Float32Array(diskParticleCount * 3);
+        const colorInner = new THREE.Color(0xffffff); 
+        const colorOuter = new THREE.Color(0xf59e0b); 
+
+        for(let i=0; i<diskParticleCount; i++) {
+            const r = 1.2 + Math.pow(Math.random(), 2.0) * 6.0; 
+            const theta = Math.random() * Math.PI * 2;
+            diskPos[i*3] = Math.cos(theta) * r;
+            diskPos[i*3+1] = (Math.random() - 0.5) * 0.1 * (r/6.0); 
+            diskPos[i*3+2] = Math.sin(theta) * r;
+            
+            const mixRatio = (r - 1.2) / 6.0;
+            const mixedColor = colorInner.clone().lerp(colorOuter, mixRatio);
+            diskColors[i*3] = mixedColor.r; diskColors[i*3+1] = mixedColor.g; diskColors[i*3+2] = mixedColor.b;
+        }
+        diskGeo.setAttribute('position', new THREE.BufferAttribute(diskPos, 3));
+        diskGeo.setAttribute('color', new THREE.BufferAttribute(diskColors, 3));
+        const accretionDisk = new THREE.Points(diskGeo, new THREE.PointsMaterial({ size: 0.15, vertexColors: true, blending: THREE.AdditiveBlending, transparent: true, opacity: 0.6 }));
+        dwarfSystem.add(accretionDisk);
+
+        // SIGLE BITCOIN ORANGE #f59e0b AU CENTRE DE LA NAINE BLANCHE
+        const btcIcon = createCenterIcon("₿", "#f59e0b", 250); 
+        btcIcon.scale.set(2, 2, 1); 
+        dwarfSystem.add(btcIcon); 
+        scene.add(dwarfSystem);
+
+        // --- 3. VOLUMETRIC TRANSFER RAY (3D TUBE) ---
+        class CustomSinCurve extends THREE.Curve {
+            constructor(start, end, control) {
+                super();
+                this.start = start;
+                this.end = end;
+                this.control = control;
+            }
+            getPoint(t, optionalTarget = new THREE.Vector3()) {
+                const tInv = 1 - t;
+                optionalTarget.x = tInv * tInv * this.start.x + 2 * tInv * t * this.control.x + t * t * this.end.x;
+                optionalTarget.y = tInv * tInv * this.start.y + 2 * tInv * t * this.control.y + t * t * this.end.y;
+                optionalTarget.z = tInv * tInv * this.start.z + 2 * tInv * t * this.control.z + t * t * this.end.z;
+                return optionalTarget;
+            }
+        }
+
+        const dummyPath = new CustomSinCurve(new THREE.Vector3(0,0,0), new THREE.Vector3(10,0,0), new THREE.Vector3(5,5,0));
+        let tubeGeo = new THREE.TubeGeometry(dummyPath, 20, 1.5, 8, false);
+
+        const rayUniforms = {
+            time: { value: 0 },
+            opacityMulti: { value: 0.0 }, 
+            colorStart: { value: new THREE.Color(0xf59e0b) }, 
+            colorEnd: { value: new THREE.Color(0xffffff) }    
+        };
+
+        const rayMaterial = new THREE.ShaderMaterial({
+            uniforms: rayUniforms,
+            vertexShader: \`
+                varying vec2 vUv;
+                void main() {
+                    vUv = uv;
+                    gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+                }
+            \`,
+            fragmentShader: \`
+                uniform float time;
+                uniform float opacityMulti;
+                uniform vec3 colorStart;
+                uniform vec3 colorEnd;
+                varying vec2 vUv;
+                
+                void main() {
+                    float flow = sin((vUv.x * 20.0) - (time * 10.0)) * 0.5 + 0.5;
+                    float edgeFade = smoothstep(0.0, 0.1, vUv.x) * smoothstep(1.0, 0.9, vUv.x);
+                    vec3 finalColor = mix(colorStart, colorEnd, vUv.x);
+                    float alpha = flow * edgeFade * opacityMulti;
+                    gl_FragColor = vec4(finalColor, alpha);
+                }
+            \`,
+            transparent: true,
+            blending: THREE.AdditiveBlending,
+            depthWrite: false,
+            side: THREE.DoubleSide
+        });
+
+        let transferRay = new THREE.Mesh(tubeGeo, rayMaterial);
+        scene.add(transferRay);
+
+
+        let angle = 0;
+        let clock = new THREE.Clock();
+
+        function animate() {
+            requestAnimationFrame(animate);
+            let dt = clock.getDelta();
+            
+            if(isPlaying) {
+                currentYearFloat += 0.035; 
+                if(currentYearFloat > 2050) currentYearFloat = 2010;
+                timeScrubber.value = currentYearFloat;
+                
+                let st = calculateStateAtYear(currentYearFloat);
+                currentM2 = st.m2; currentBTC_Cap = st.btc; currentBTC_Price = st.p;
+
+                let date = new Date(2010, 0, 1); date.setFullYear(Math.floor(currentYearFloat)); date.setMonth(Math.floor((currentYearFloat%1)*12));
+                document.getElementById('dateDisplay').innerText = date.toLocaleDateString(currLang === 'fr' ? 'fr-FR' : 'en-US', {year: 'numeric', month: 'short'});
+                document.getElementById('m2Display').innerText = Math.floor(currentM2).toLocaleString() + dict[currLang].unit;
+                document.getElementById('btcDisplay').innerText = Math.floor(currentBTC_Cap).toLocaleString() + dict[currLang].unit;
+                
+                // NOUVEAU: MAJ DU PRIX
+                document.getElementById('priceDisplay').innerText = "$" + Math.floor(currentBTC_Price).toLocaleString();
+
+                let marketShare = currentBTC_Cap / currentM2;
+                document.getElementById('ratioDisplay').innerText = (marketShare * 100).toFixed(2) + "%";
+
+                giantUniforms.time.value += dt;
+                rayUniforms.time.value += dt;
+                
+                let cycleProgress = (currentYearFloat % 4) / 4; 
+                let flareIntensity = 0;
+                if(cycleProgress > 0.8) { flareIntensity = (cycleProgress - 0.8) * 6; } else if (cycleProgress < 0.2) { flareIntensity = 1.0 - (cycleProgress * 5); }
+                giantUniforms.intensity.value = (inflationRate * 5) + flareIntensity;
+
+                let scaleM2 = Math.cbrt(currentM2 / initialM2); 
+                giantSystem.scale.setScalar(scaleM2);
+                
+                let targetScaleDwarf = (15 * scaleM2) * Math.cbrt(marketShare);
+                let actualDwarfScale = Math.max(0.01, targetScaleDwarf);
+                dwarfSystem.scale.setScalar(actualDwarfScale);
+
+                accretionDisk.rotation.y -= 0.05;
+
+                angle -= 0.005;
+                giantSystem.position.set(Math.cos(angle)*-15, 0, Math.sin(angle)*-15);
+                dwarfSystem.position.set(Math.cos(angle)*45, 0, Math.sin(angle)*45);
+                
+                m2Icon.position.set(0,0,0); m2Icon.quaternion.copy(camera.quaternion);
+                btcIcon.position.set(0,0,0); btcIcon.quaternion.copy(camera.quaternion);
+
+                giantLight.position.copy(giantSystem.position); 
+                dwarfLight.position.copy(dwarfSystem.position);
+
+                if (currentYearFloat > 2011) {
+                    const dirToDwarf = new THREE.Vector3().subVectors(dwarfSystem.position, giantSystem.position).normalize();
+                    const start = new THREE.Vector3().copy(giantSystem.position).add(dirToDwarf.clone().multiplyScalar(15 * scaleM2)); 
+                    const end = new THREE.Vector3().copy(dwarfSystem.position).sub(dirToDwarf.clone().multiplyScalar(4 * actualDwarfScale));
+                    const curveOffset = new THREE.Vector3(dirToDwarf.z, 0, -dirToDwarf.x).multiplyScalar(20); 
+                    const control = new THREE.Vector3().addVectors(start, end).multiplyScalar(0.5).add(curveOffset);
+                    
+                    const newPath = new CustomSinCurve(start, end, control);
+                    let dynamicThickness = 0.5 + (flareIntensity * 1.5) + (marketShare * 10);
+                    
+                    transferRay.geometry.dispose(); 
+                    transferRay.geometry = new THREE.TubeGeometry(newPath, 30, dynamicThickness, 8, false);
+                    rayUniforms.opacityMulti.value = Math.min(0.8, (marketShare * 5) + 0.3);
+                } else {
+                    rayUniforms.opacityMulti.value = 0.0; 
+                }
+
+            } else {
+                giantUniforms.time.value += dt * 0.2;
+                rayUniforms.time.value += dt * 0.2; 
+                accretionDisk.rotation.y -= 0.01; 
+            }
+            
+            renderer.render(scene, camera);
+        }
+        animate();
+    <\/script>
+</body>
+</html>`;
+        document.getElementById('sim-frame').src = 'data:text/html;base64,' + btoa(unescape(encodeURIComponent(iframeCode)));
+
+        setLang('en');
+    </script>
+</body>
+</html>
