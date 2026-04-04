@@ -9,7 +9,7 @@ This repository contains the **Nakamoto V33 Resonant Master**, an interactive an
 The model uses a thermodynamic analogy: as Central Banks expand the M2 money supply (the inflating *Red Giant*), capital seeks a dense, absolutely scarce store of value (Bitcoin, the *White Dwarf*). The resulting liquidity transfer is modeled as an accretion disk, mathematically driven by a generalized Metcalfe's Law and Scale-Free Network dynamics.
 
 ## 🚀 Live Demo
-*(If you are hosting the HTML file on GitHub Pages, Vercel, or Netlify, put the link here: `[View Live Dashboard](https://pascalranaora.github.io/BinaryStarSystem/)`)*
+[View Live Dashboard](https://pascalranaora.github.io/BinaryStarSystem/)
 
 ---
 
