@@ -1,4 +1,3 @@
-```markdown
 # 🌌 The Nakamoto V33 Resonant Master: Bitcoin-Fiat Binary Star System
 
 > **A Thermodynamic & Statistical Projection Model for Bitcoin Adoption**
@@ -96,7 +95,6 @@ The V33 OLS model currently operates with an $R^2$ of **0.975**. It categoricall
 
 ## 📄 License
 This project is open-source and available under the [MIT License](LICENSE).
-```
 
 ### Next Steps for you:
 1. Copy this markdown text.
