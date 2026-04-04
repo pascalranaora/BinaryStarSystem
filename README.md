@@ -1,4 +1,4 @@
-# 🌌 The Nakamoto V33 Resonant Master: Bitcoin-Fiat Binary Star System
+# 🌌 The Nakamoto PCA Model & Bitcoin-Fiat Binary Star System
 
 > **A Thermodynamic & Statistical Projection Model for Bitcoin Adoption**
 
