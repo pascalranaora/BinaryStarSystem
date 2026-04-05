@@ -123,6 +123,84 @@
         ::-webkit-scrollbar { width: 8px; height: 8px; }
         ::-webkit-scrollbar-track { background: rgba(0,0,0,0.2); }
         ::-webkit-scrollbar-thumb { background: var(--neon-cyan); border-radius: 4px; }
+
+        /* --- TENSOR TOOLTIP STYLES --- */
+        .tensor-tooltip {
+            position: relative;
+            display: inline-block;
+            cursor: help;
+            color: #f39c12; /* Couleur dorée/orange pour attirer l'oeil */
+            font-weight: bold;
+            font-size: 0.9em;
+            margin-left: 10px;
+            padding: 2px 6px;
+            border: 1px solid #f39c12;
+            border-radius: 4px;
+            background-color: rgba(243, 156, 18, 0.1);
+        }
+
+        .tensor-tooltip .tooltip-content {
+            visibility: hidden;
+            width: 480px; /* Assez large pour contenir la traduction */
+            background-color: #1e272e;
+            color: #d2dae2;
+            text-align: left;
+            border-radius: 8px;
+            padding: 15px 20px;
+            position: absolute;
+            z-index: 999;
+            bottom: 150%; /* S'affiche au-dessus du bouton */
+            left: 50%;
+            transform: translateX(-50%);
+            box-shadow: 0px 8px 16px rgba(0,0,0,0.6);
+            font-size: 0.9em;
+            line-height: 1.5;
+            opacity: 0;
+            transition: opacity 0.3s ease, bottom 0.3s ease;
+            pointer-events: none; /* Empêche le tooltip de clignoter si la souris le survole */
+        }
+
+        /* La petite flèche en bas du tooltip */
+        .tensor-tooltip .tooltip-content::after {
+            content: "";
+            position: absolute;
+            top: 100%;
+            left: 50%;
+            margin-left: -8px;
+            border-width: 8px;
+            border-style: solid;
+            border-color: #1e272e transparent transparent transparent;
+        }
+
+        .tensor-tooltip:hover .tooltip-content {
+            visibility: visible;
+            opacity: 1;
+            bottom: 130%;
+        }
+
+        .tooltip-lang {
+            margin-bottom: 12px;
+        }
+
+        .tooltip-lang h4 { 
+            margin: 0 0 8px 0; 
+            color: #f39c12; 
+            font-size: 1.05em;
+            border-bottom: 1px solid #485460;
+            padding-bottom: 4px;
+        }
+
+        .tooltip-lang ul {
+            margin: 0;
+            padding-left: 20px;
+        }
+
+        .tooltip-lang li {
+            margin-bottom: 6px;
+        }
+        .tooltip-lang li b {
+            color: #0fb9b1; /* Un petit cyan pour faire ressortir les noms des tenseurs */
+        }
     </style>
 </head>
 <body class="min-h-screen flex flex-col p-4 md:p-6 gap-6">
@@ -183,6 +261,32 @@
                     <canvas id="tensorsChart"></canvas>
                 </div>
             </div>
+            <div class="tensor-tooltip">
+                ℹ️ Tensors Math Decoder
+                <div class="tooltip-content">
+                    <div class="tooltip-lang">
+                        <h4>🇬🇧 The Physics of the 5 Tensors</h4>
+                        <ul>
+                            <li><b>β1 Scarcity (log_SF):</b> <code>ln(Total Supply / Annual Flow)</code>. The deflationary floor pushing the baseline value.</li>
+                            <li><b>β2 Adoption (Network_Power):</b> <code>ln(On-chain Velocity + IBIT Vol/Tx_size)</code>. Metcalfe's Law adapted for modern ETF flows. The demand engine.</li>
+                            <li><b>β3 Security (H_Accumulated):</b> Elastic lag (60d/245d) of TH/s. Represents the "compressed kinetic energy" of miner capital expenditure.</li>
+                            <li><b>β4 Fiat Tide (Liq_Momentum):</b> <code>Fed Net Liquidity / 90d MA</code>. The macroeconomic solar wind dictating the fiat escape velocity.</li>
+                            <li><b>β5 Sentiment (RORO):</b> Composite Z-score of Copper/Gold, Credit (HYG/IEF), and Equities (SPHB/SPLV). The global fear & greed probability.</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="tooltip-lang">
+                        <h4>🇫🇷 La Physique des 5 Tenseurs</h4>
+                        <ul>
+                            <li><b>β1 Rareté (log_SF):</b> <code>ln(Offre / Flux Annuel)</code>. Le plancher déflationniste qui pousse la valeur fondamentale.</li>
+                            <li><b>β2 Adoption (Network_Power):</b> <code>ln(Vélocité On-chain + Vol IBIT/Tx_size)</code>. Loi de Metcalfe adaptée aux flux ETF. Le moteur de demande.</li>
+                            <li><b>β3 Sécurité (H_Accumulated):</b> Décalage élastique (60j/245j) des TH/s. L'énergie cinétique "compressée" des infrastructures de minage.</li>
+                            <li><b>β4 Marée Fiat (Liq_Momentum):</b> <code>Liquidité Nette Fed / Moyenne 90j</code>. Le vent solaire macroéconomique qui dicte la vitesse de libération.</li>
+                            <li><b>β5 Sentiment (RORO):</b> Z-score composite Cuivre/Or, Crédit (HYG/IEF) et Actions (SPHB/SPLV). La probabilité mondiale de peur/avidité.</li>
+                        </ul>
+                    </div>
+                </div>
+            </div> 
             <div class="pt-4 border-t border-slate-800 mt-6">
                 <div class="mb-4">
                     <h2 class="text-sm text-cyan tracking-widest mb-1" id="density_title_dyn" data-i18n="density_title">PROBABILITY DENSITY (FORECAST END)</h2>
@@ -204,7 +308,6 @@
         </section>
 
         <section id="diagnostics" class="cockpit-panel p-5 flex flex-col gap-6 scroll-mt-24">
-            
             <div>
                 <h2 class="text-sm text-purple-400 tracking-widest mb-4 border-b border-purple-500/20 pb-2" data-i18n="sys_status">SYSTEM DIAGNOSTICS & EQUATIONS</h2>
                 <div class="grid grid-cols-2 gap-4">
@@ -217,7 +320,7 @@
                         <div class="text-3xl font-mono text-orange">$320,901</div>
                     </div>
                 </div>
-
+                    
                 <div class="math-box mt-4">
                     <div class="text-cyan mb-2 font-bold" data-i18n="eq_title">Core Tensors Logic</div>
                     <p class="text-slate-300 text-xs mb-3" data-i18n="eq_desc">The model limits growth against Global M2 (TAM) and calculates Bitcoin's absorbed market share ($\rho$).</p>
@@ -271,17 +374,450 @@
                         </tbody>
                     </table>
                 </div>
-
-                
-                
                 <p class="italic text-gray-500 text-xs text-center" data-i18n="ols_conclusion">
                     Statistical Conclusion: The model categorically rejects the null hypothesis. The Singularity is not a prediction. It is an equation.
                 </p>
             </div>
+            
         </section>
-
+    </div>    
+    <div class="mt-16 mb-16 bg-[#1e272e] p-6 rounded-xl border border-gray-700 shadow-2xl" id="backtester-module">
+    <h2 class="text-2xl font-bold text-[#f39c12] mb-4">⚙️ ADAPTIVE Z-SCORE : DCA vs BUY & HOLD</h2>
+    
+    <div class="bg-[#2f3640] p-4 rounded-lg mb-6 border-l-4 border-[#f39c12]">
+        <p class="text-gray-300 text-sm mb-2">
+            <strong>How it works:</strong> This module simulates a dynamic Dollar Cost Averaging (DCA) strategy driven by the Thermodynamic Z-Score. Instead of blindly buying every month, the system deploys capital when Bitcoin is statistically undervalued (Buy Zone) and takes profits when it becomes overvalued (Sell Zone).
+        </p>
+        <p class="text-gray-300 text-sm font-semibold text-blue-400">
+            🔒 Accumulation Rule: To ensure a meaningful position is built over time, the algorithm is strictly forbidden from selling any Bitcoin until the initial starting balance has been fully deployed (Cash < $1) at least once.
+        </p>
     </div>
 
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-6 text-sm items-end">
+        
+        <div class="bg-[#222f3e] p-3 rounded-lg border border-purple-600">
+            <label class="block text-purple-400 font-bold mb-1">Start Year</label>
+            <div class="text-xs text-gray-400 mb-2">Begins in: <span id="val-start-year" class="font-bold text-white">2014</span></div>
+            <input type="range" id="start-year" min="2011" max="2023" step="1" value="2014" class="w-full accent-purple-500">
+        </div>
+
+        <div class="bg-[#222f3e] p-3 rounded-lg border border-blue-600">
+            <label class="block text-blue-400 font-bold mb-1">Starting Balance</label>
+            <div class="text-xs text-gray-400 mb-2">Initial fiat: <span id="val-start-balance" class="font-bold text-white">$10,000</span></div>
+            <input type="range" id="start-balance" min="1000" max="100000" step="1000" value="10000" class="w-full accent-blue-500">
+        </div>
+
+        <div class="bg-[#222f3e] p-3 rounded-lg border border-green-800">
+            <label class="block text-green-400 font-bold mb-1">Buy Threshold Offset</label>
+            <div class="text-xs text-gray-400 mb-2">Triggers below: -2 - <span id="val-fraction-short" class="font-bold text-white">0.2</span></div>
+            <input type="range" id="fraction-short" min="0.1" max="1" step="0.1" value="0.2" class="w-full accent-green-500">
+        </div>
+
+        <div class="bg-[#222f3e] p-3 rounded-lg border border-green-800">
+            <label class="block text-green-400 font-bold mb-1">Buy Position Size (%)</label>
+            <div class="text-xs text-gray-400 mb-2">Uses <span id="val-pct-long" class="font-bold text-white">10</span>% of available Cash</div>
+            <input type="range" id="pct-long" min="5" max="100" step="5" value="10" class="w-full accent-green-500">
+        </div>
+
+        <div class="bg-[#222f3e] p-3 rounded-lg border border-red-800">
+            <label class="block text-red-400 font-bold mb-1">Sell Threshold Offset</label>
+            <div class="text-xs text-gray-400 mb-2">Triggers above: +2 + <span id="val-fraction-long" class="font-bold text-white">0.5</span></div>
+            <input type="range" id="fraction-long" min="0.1" max="1" step="0.1" value="0.5" class="w-full accent-red-500">
+        </div>
+
+        <div class="bg-[#222f3e] p-3 rounded-lg border border-red-800">
+            <label class="block text-red-400 font-bold mb-1">Sell Position Size (%)</label>
+            <div class="text-xs text-gray-400 mb-2">Sells <span id="val-pct-short" class="font-bold text-white">25</span>% of held BTC</div>
+            <input type="range" id="pct-short" min="5" max="100" step="5" value="25" class="w-full accent-red-500">
+        </div>
+        
+        <button id="btn-optimize" class="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-500 hover:to-purple-500 text-white font-bold py-3 px-4 rounded-lg shadow-lg transition-all h-full flex flex-col justify-center items-center border border-blue-400 lg:col-span-3">
+            <span class="text-lg">⚡ AI Optimize for Selected Period</span>
+            <span class="text-xs font-normal opacity-80">Test 40,000 paths for max return</span>
+        </button>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+        <div class="bg-[#222f3e] p-4 rounded-lg border border-[#f39c12] text-center shadow-[0_0_15px_rgba(243,156,18,0.2)]">
+            <div class="text-gray-400 uppercase text-xs font-bold tracking-wider">Z-Score DCA Value</div>
+            <div class="text-2xl xl:text-3xl font-bold text-[#f39c12]" id="stat-total-value">$0.00</div>
+        </div>
+        <div class="bg-[#222f3e] p-4 rounded-lg border border-gray-500 text-center relative overflow-hidden">
+            <div class="text-gray-400 uppercase text-xs font-bold tracking-wider">Buy & Hold Value</div>
+            <div class="text-2xl xl:text-3xl font-bold text-gray-300" id="stat-buy-hold">$0.00</div>
+            <div class="absolute -right-4 -bottom-4 text-gray-700 opacity-20 transform -rotate-12">
+                <svg class="w-16 h-16" fill="currentColor" viewBox="0 0 20 20"><path d="M2 11a1 1 0 011-1h2a1 1 0 011 1v5a1 1 0 01-1 1H3a1 1 0 01-1-1v-5zM8 7a1 1 0 011-1h2a1 1 0 011 1v9a1 1 0 01-1 1H9a1 1 0 01-1-1V7zM14 4a1 1 0 011-1h2a1 1 0 011 1v12a1 1 0 01-1 1h-2a1 1 0 01-1-1V4z"></path></svg>
+            </div>
+        </div>
+        <div class="bg-[#222f3e] p-4 rounded-lg border border-green-800 text-center relative">
+            <div class="text-gray-400 uppercase text-xs font-bold tracking-wider">Available Cash</div>
+            <div class="text-xl xl:text-2xl font-bold text-green-400" id="stat-cash">$0.00</div>
+            <div id="badge-fully-invested" class="absolute top-2 right-2 text-[10px] bg-blue-900 text-blue-200 px-2 py-1 rounded hidden border border-blue-500">Fully Invested ✓</div>
+        </div>
+        <div class="bg-[#222f3e] p-4 rounded-lg border border-blue-800 text-center">
+            <div class="text-gray-400 uppercase text-xs font-bold tracking-wider">BTC Held (DCA)</div>
+            <div class="text-xl xl:text-2xl font-bold text-blue-400" id="stat-btc">0.0000</div>
+        </div>
+    </div>
+
+    <div class="relative w-full h-[500px] bg-[#11141a] rounded-lg border border-gray-700 p-2">
+        <canvas id="dcaBacktestChart"></canvas>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    let fullData = []; 
+    let backtestChart = null;
+
+    // Elements
+    const elStartYear = document.getElementById('start-year');
+    const elStartBalance = document.getElementById('start-balance');
+    const elFracShort = document.getElementById('fraction-short');
+    const elPctLong = document.getElementById('pct-long');
+    const elFracLong = document.getElementById('fraction-long');
+    const elPctShort = document.getElementById('pct-short');
+
+    // Display Values
+    const valStartYear = document.getElementById('val-start-year');
+    const valStartBalance = document.getElementById('val-start-balance');
+    const valFracShort = document.getElementById('val-fraction-short');
+    const valPctLong = document.getElementById('val-pct-long');
+    const valFracLong = document.getElementById('val-fraction-long');
+    const valPctShort = document.getElementById('val-pct-short');
+
+    // Stats & UI Badges
+    const statTotal = document.getElementById('stat-total-value');
+    const statBuyHold = document.getElementById('stat-buy-hold');
+    const statCash = document.getElementById('stat-cash');
+    const statBtc = document.getElementById('stat-btc');
+    const badgeFullyInvested = document.getElementById('badge-fully-invested');
+
+    // Formatters
+    const currency = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 });
+    const crypto = new Intl.NumberFormat('en-US', { minimumFractionDigits: 4, maximumFractionDigits: 4 });
+
+    // Load Data
+    fetch('v33_dashboard_data.json')
+        .then(response => response.json())
+        .then(data => {
+            fullData = data.historical.filter(d => d.actual_price != null && d.z_score != null);
+            runBacktest();
+        })
+        .catch(err => console.error("Error loading backtest data:", err));
+
+    // Listeners for sliders
+    [elStartYear, elStartBalance, elFracShort, elPctLong, elFracLong, elPctShort].forEach(el => {
+        el.addEventListener('input', runBacktest);
+    });
+
+    function runBacktest() {
+        if(fullData.length === 0) return;
+
+        // Get Params
+        const startYear = parseInt(elStartYear.value);
+        const initialBalance = parseFloat(elStartBalance.value);
+        const offsetBuy = parseFloat(elFracShort.value);
+        const pctBuy = parseFloat(elPctLong.value) / 100;
+        const offsetSell = parseFloat(elFracLong.value);
+        const pctSell = parseFloat(elPctShort.value) / 100;
+
+        // Update labels
+        valStartYear.innerText = startYear;
+        valStartBalance.innerText = currency.format(initialBalance);
+        valFracShort.innerText = offsetBuy.toFixed(1);
+        valPctLong.innerText = (pctBuy * 100).toFixed(0);
+        valFracLong.innerText = offsetSell.toFixed(1);
+        valPctShort.innerText = (pctSell * 100).toFixed(0);
+
+        // Filter data based on selected year
+        const activeData = fullData.filter(d => parseInt(d.date.substring(0, 4)) >= startYear);
+        if(activeData.length === 0) return;
+
+        // Constants & State for DCA
+        const thresholdBuy = -2 - offsetBuy;
+        const thresholdSell = 2 + offsetSell;
+        
+        let cash = initialBalance;
+        let btc = 0;
+        let hasBeenFullyInvested = false;
+
+        // Variables for Buy & Hold reference
+        const firstPrice = parseFloat(activeData[0].actual_price);
+        const btcBuyAndHold = initialBalance / firstPrice;
+
+        const dates = [];
+        const prices = [];
+        const zscores = [];
+        const portfolioValues = [];
+        const buyHoldValues = [];
+        const buySignals = [];
+        const sellSignals = [];
+
+        activeData.forEach(day => {
+            const price = parseFloat(day.actual_price);
+            const z = parseFloat(day.z_score);
+            
+            dates.push(day.date);
+            prices.push(price);
+            zscores.push(z);
+
+            let actionBuy = null;
+            let actionSell = null;
+
+            // 1. DCA Buy Logic
+            if (z <= thresholdBuy && cash > 0) {
+                const investment = cash * pctBuy;
+                if(investment >= 1) { 
+                    const btcBought = investment / price;
+                    btc += btcBought;
+                    cash -= investment;
+                    actionBuy = price;
+                }
+            }
+
+            // 2. Check Fully Invested State
+            if (cash < 1) {
+                hasBeenFullyInvested = true;
+            }
+
+            // 3. DCA Sell Logic
+            if (z >= thresholdSell && btc > 0 && hasBeenFullyInvested) {
+                const btcSold = btc * pctSell;
+                if(btcSold * price >= 1) {
+                    const cashGained = btcSold * price;
+                    btc -= btcSold;
+                    cash += cashGained;
+                    actionSell = price;
+                }
+            }
+
+            buySignals.push(actionBuy);
+            sellSignals.push(actionSell);
+            portfolioValues.push(cash + (btc * price));
+            buyHoldValues.push(btcBuyAndHold * price);
+        });
+
+        // Update UI Stats
+        const finalPrice = prices[prices.length - 1];
+        const finalValue = cash + (btc * finalPrice);
+        const finalBuyHoldValue = btcBuyAndHold * finalPrice;
+        
+        statTotal.innerText = currency.format(finalValue);
+        statBuyHold.innerText = currency.format(finalBuyHoldValue);
+        statCash.innerText = currency.format(cash);
+        statBtc.innerText = crypto.format(btc);
+
+        if(finalValue > finalBuyHoldValue) {
+            statTotal.classList.replace('text-[#f39c12]', 'text-green-400');
+        } else {
+            statTotal.classList.replace('text-green-400', 'text-[#f39c12]');
+        }
+
+        if(hasBeenFullyInvested) {
+            badgeFullyInvested.classList.remove('hidden');
+        } else {
+            badgeFullyInvested.classList.add('hidden');
+        }
+
+        renderChart(dates, prices, zscores, buySignals, sellSignals, portfolioValues, buyHoldValues);
+    }
+
+    // --- MOTEUR D'OPTIMISATION ---
+    const btnOptimize = document.getElementById('btn-optimize');
+    
+    btnOptimize.addEventListener('click', function() {
+        if (fullData.length === 0) return;
+        
+        const originalText = btnOptimize.innerHTML;
+        btnOptimize.innerHTML = '<span class="text-lg">⏳ Computing...</span><span class="text-xs opacity-80">Testing limits...</span>';
+        btnOptimize.disabled = true;
+
+        setTimeout(() => {
+            const startYear = parseInt(elStartYear.value);
+            const initialBalance = parseFloat(elStartBalance.value);
+            let bestValue = 0;
+            let bestParams = { ob: 0.2, pb: 10, os: 0.5, ps: 25 };
+            
+            const activeData = fullData.filter(d => parseInt(d.date.substring(0, 4)) >= startYear);
+            if(activeData.length === 0) {
+                btnOptimize.innerHTML = originalText;
+                btnOptimize.disabled = false;
+                return;
+            }
+            
+            const simData = activeData.map(d => ({ price: parseFloat(d.actual_price), z: parseFloat(d.z_score) }));
+            const finalPrice = simData[simData.length - 1].price;
+
+            for (let ob = 0.1; ob <= 1.0; ob += 0.1) {
+                for (let pb = 5; pb <= 100; pb += 5) {
+                    for (let os = 0.1; os <= 1.0; os += 0.1) {
+                        for (let ps = 5; ps <= 100; ps += 5) {
+                            
+                            let cash = initialBalance;
+                            let btc = 0;
+                            let hasBeenFullyInvested = false;
+
+                            const tBuy = -2 - ob;
+                            const tSell = 2 + os;
+                            const pctBuy = pb / 100;
+                            const pctSell = ps / 100;
+
+                            for (let i = 0; i < simData.length; i++) {
+                                const { price, z } = simData[i];
+                                
+                                if (z <= tBuy && cash > 0) {
+                                    const investment = cash * pctBuy;
+                                    if (investment >= 1) {
+                                        btc += investment / price;
+                                        cash -= investment;
+                                    }
+                                }
+
+                                if (cash < 1) {
+                                    hasBeenFullyInvested = true;
+                                }
+
+                                if (z >= tSell && btc > 0 && hasBeenFullyInvested) {
+                                    const btcSold = btc * pctSell;
+                                    if (btcSold * price >= 1) {
+                                        cash += btcSold * price;
+                                        btc -= btcSold;
+                                    }
+                                }
+                            }
+
+                            const finalValue = cash + (btc * finalPrice);
+
+                            if (finalValue > bestValue) {
+                                bestValue = finalValue;
+                                bestParams = { ob, pb, os, ps };
+                            }
+                        }
+                    }
+                }
+            }
+
+            elFracShort.value = bestParams.ob.toFixed(1);
+            elPctLong.value = bestParams.pb;
+            elFracLong.value = bestParams.os.toFixed(1);
+            elPctShort.value = bestParams.ps;
+
+            btnOptimize.innerHTML = originalText;
+            btnOptimize.disabled = false;
+
+            runBacktest();
+
+        }, 50); 
+    });
+
+    function renderChart(dates, prices, zscores, buys, sells, portfolio, buyHold) {
+        const ctx = document.getElementById('dcaBacktestChart').getContext('2d');
+        
+        if(backtestChart) {
+            backtestChart.destroy();
+        }
+
+        backtestChart = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: dates,
+                datasets: [
+                    {
+                        label: 'Z-Score DCA Value ($)',
+                        data: portfolio,
+                        borderColor: '#f39c12',
+                        backgroundColor: 'rgba(243, 156, 18, 0.2)',
+                        yAxisID: 'yPort',
+                        borderWidth: 2,
+                        fill: true,
+                        pointRadius: 0,
+                        tension: 0.1,
+                        order: 2
+                    },
+                    {
+                        label: 'Buy & Hold Value ($)',
+                        data: buyHold,
+                        borderColor: 'rgba(200, 200, 200, 0.5)',
+                        borderDash: [5, 5],
+                        yAxisID: 'yPort',
+                        borderWidth: 1.5,
+                        fill: false,
+                        pointRadius: 0,
+                        tension: 0.1,
+                        order: 3
+                    },
+                    {
+                        label: 'BTC Price (Log)',
+                        data: prices,
+                        borderColor: 'rgba(255, 255, 255, 0.15)',
+                        borderWidth: 1,
+                        yAxisID: 'yPrice',
+                        pointRadius: 0,
+                        order: 4
+                    },
+                    {
+                        label: 'Buy Signal',
+                        data: buys,
+                        type: 'scatter',
+                        pointStyle: 'triangle',
+                        pointBackgroundColor: '#2ecc71',
+                        pointBorderColor: '#27ae60',
+                        pointRadius: 6,
+                        pointHoverRadius: 8,
+                        yAxisID: 'yPrice',
+                        order: 1
+                    },
+                    {
+                        label: 'Sell Signal (Profit)',
+                        data: sells,
+                        type: 'scatter',
+                        pointStyle: 'triangle',
+                        rotation: 180,
+                        pointBackgroundColor: '#e74c3c',
+                        pointBorderColor: '#c0392b',
+                        pointRadius: 6,
+                        pointHoverRadius: 8,
+                        yAxisID: 'yPrice',
+                        order: 1
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                interaction: { mode: 'index', intersect: false },
+                plugins: {
+                    legend: { labels: { color: '#d2dae2', usePointStyle: true } },
+                    tooltip: { theme: 'dark' }
+                },
+                scales: {
+                    x: {
+                        ticks: { color: '#7f8fa6', maxTicksLimit: 12 },
+                        grid: { color: 'rgba(255,255,255,0.05)' }
+                    },
+                    yPort: {
+                        type: 'linear',
+                        display: true,
+                        position: 'left',
+                        title: { display: true, text: 'Portfolio Value ($)', color: '#f39c12' },
+                        ticks: { color: '#f39c12' },
+                        grid: { color: 'rgba(255,255,255,0.05)' }
+                    },
+                    yPrice: {
+                        type: 'logarithmic',
+                        display: true,
+                        position: 'right',
+                        title: { display: true, text: 'BTC Price ($)', color: '#d2dae2' },
+                        ticks: { color: '#d2dae2' },
+                        grid: { drawOnChartArea: false }
+                    }
+                }
+            }
+        });
+    }
+});
+</script>
     <section id="sourcecode" class="cockpit-panel scroll-mt-24">
         <div class="p-3 border-b border-cyan-500/20 bg-black/40 flex justify-between items-center">
             <h2 class="text-sm text-cyan tracking-widest" data-i18n="core_logic">CORE LOGIC : MODEL SOURCE CODE (PYTHON)</h2>
@@ -1753,5 +2289,22 @@ if __name__ == "__main__":
 
         setLang('en');
     </script>
+<div class="mt-16 mb-8 pt-6 border-t border-gray-800 text-center text-xs text-gray-500 opacity-80 hover:opacity-100 transition-opacity" id="scientific-disclaimer">
+    
+    <p class="lang-en max-w-4xl mx-auto leading-relaxed">
+        <span class="font-bold text-[#f39c12]">⚠️ Disclaimer:</span> Past performance is not indicative of future results. 
+        The Nakamoto/Fiat Binary Star System model is a theoretical and scientific experiment designed to study macroeconomic thermodynamics and network effects. 
+        It is <strong class="text-gray-400 uppercase tracking-wide">strictly not financial or investment advice</strong>. 
+        Cryptocurrencies and financial markets are highly volatile. Always conduct your own independent research.
+    </p>
+
+    <p class="lang-fr max-w-4xl mx-auto leading-relaxed mt-4">
+        <span class="font-bold text-[#f39c12]">⚠️ Avertissement :</span> Les performances passées ne préjugent pas des résultats futurs. 
+        Le modèle du Système Binaire Nakamoto/Fiat est une expérience théorique et scientifique conçue pour étudier la thermodynamique macroéconomique et les effets de réseau. 
+        Il ne s'agit <strong class="text-gray-400 uppercase tracking-wide">en aucun cas d'un conseil financier ou en investissement</strong>. 
+        Les marchés financiers et des cryptomonnaies sont extrêmement volatils. Faites toujours vos propres recherches indépendantes.
+    </p>
+
+</div>
 </body>
 </html>
