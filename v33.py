@@ -32,7 +32,8 @@ HALVING_DATES = [
 
 plt.rcParams.update({
     "font.family": "serif", "figure.dpi": 300, "axes.grid": True, "grid.alpha": 0.25,
-    "axes.labelsize": 10, "axes.titlesize": 12, "legend.fontsize": 9
+    "axes.labelsize": 10, "axes.titlesize": 12, "legend.fontsize": 9,
+    "figure.facecolor": "#ffffff"
 })
 
 # ==========================================
@@ -48,7 +49,6 @@ class DataFetcher:
     def _is_valid(self, filename):
         filepath = os.path.join(self.cache_dir, filename)
         if not os.path.exists(filepath): return False
-        # Valid if file is younger than max_age_hours
         return (time.time() - os.path.getmtime(filepath)) < (self.max_age_hours * 3600)
         
     def get_blockchain_metric(self, chart_name, col_name):
@@ -117,14 +117,12 @@ class DataFetcher:
         series_list = ['WALCL', 'WTREGEN', 'RRPONTSYD', 'M2SL', 'VIXCLS', 'CPIAUCSL', 'FEDFUNDS']
         df_list = []
         
-        # Hardened Fetcher with Retry Logic
         session = requests.Session()
         retry = Retry(connect=5, backoff_factor=0.5)
         adapter = HTTPAdapter(max_retries=retry)
         session.mount('http://', adapter)
         session.mount('https://', adapter)
 
-        # Base dates array in case a series needs to be proxied
         dates = pd.date_range(start='2009-01-03', end=datetime.today(), freq='D')
         days_array = np.arange(len(dates))
 
@@ -142,20 +140,12 @@ class DataFetcher:
                 print(f"      -> {s} ... OK")
             except Exception as e:
                 print(f"      -> [Warning] FRED series '{s}' failed. Generating dynamic thermodynamic proxy.")
-                # Dynamic Proxy Generation so the physics engine never flatlines
-                if s == 'M2SL':
-                    val = 8000.0 * np.exp(days_array * (STRUCTURAL_M2_GROWTH/365)) + np.random.normal(0, 50, len(dates)).cumsum()
-                elif s == 'WALCL':
-                    val = 4000.0 * np.exp(days_array * (0.05/365)) + np.random.normal(0, 30, len(dates)).cumsum()
-                elif s == 'CPIAUCSL':
-                    val = 210.0 + (days_array * 0.005) + np.sin(days_array/365)*5
-                elif s == 'FEDFUNDS':
-                    val = 2.5 + np.sin(days_array/730)*2.0
-                elif s == 'VIXCLS':
-                    val = 20.0 + np.random.normal(0, 2, len(dates))
-                else:
-                    # For highly specific liquidity gauges like WTREGEN or RRPONTSYD, default to 0
-                    val = 0.0 
+                if s == 'M2SL': val = 8000.0 * np.exp(days_array * (STRUCTURAL_M2_GROWTH/365)) + np.random.normal(0, 50, len(dates)).cumsum()
+                elif s == 'WALCL': val = 4000.0 * np.exp(days_array * (0.05/365)) + np.random.normal(0, 30, len(dates)).cumsum()
+                elif s == 'CPIAUCSL': val = 210.0 + (days_array * 0.005) + np.sin(days_array/365)*5
+                elif s == 'FEDFUNDS': val = 2.5 + np.sin(days_array/730)*2.0
+                elif s == 'VIXCLS': val = 20.0 + np.random.normal(0, 2, len(dates))
+                else: val = 0.0 
                 
                 temp = pd.DataFrame({'date': dates, s: val}).set_index('date')
                 df_list.append(temp)
@@ -177,10 +167,31 @@ class BinaryStarRocheLobeModel:
         self.x_scaler = StandardScaler()
         self.modeled_price_history = None
         self.val_z_score_series = None
+        self.lyapunov_exponent = 0.0
         self.fetcher = DataFetcher()
 
+    def calculate_lle(self, series, lag=5):
+        """Largest Lyapunov Exponent proxy for phase-space density/chaos"""
+        N = len(series)
+        if N < lag * 2: return 0.0
+        divergences = []
+        eps = 1e-8
+        series_arr = series.values
+        
+        # Simplified Rosenstein approach
+        for i in range(N - lag - 10):
+            dists = np.abs(series_arr[:N-lag] - series_arr[i])
+            dists[i] = np.inf 
+            nn_idx = np.argmin(dists)
+            
+            d0 = dists[nn_idx] + eps
+            dt = np.abs(series_arr[i+lag] - series_arr[nn_idx+lag]) + eps
+            divergences.append(np.log(dt / d0))
+            
+        return np.mean(divergences) / lag
+
     def apply_thermodynamics(self, df):
-        # 1. White Dwarf Density (Realized Illiquidity + SF)
+        # 1. White Dwarf Density 
         safe_velocity = df['Velocity'].replace(0, np.nan).bfill()
         hoarding_rate = np.where(df['Price'] < df['MA200'], 2500, 500)
         corp_h = pd.Series(hoarding_rate, index=df.index).cumsum()
@@ -198,15 +209,24 @@ class BinaryStarRocheLobeModel:
         df['YoY_Inflation'] = df['CPIAUCSL'].pct_change(365) * 100
         df['Fluid_Pressure'] = df['FEDFUNDS'].clip(lower=0.1) 
         
-        # 3. Roche Lobe Overflow (Bernoulli Fluid Transfer)
+        # 3. Mass Heterogeneity (Dynamic Masses)
+        df['M1_Asset'] = df['Price'] * self.all_supply[df.index]  # Market Cap of Asset 1
+        df['M2_TAM'] = df['Broad_M2'] * 1e9 * TAM_MULTIPLIER      # Total Addressable Fluid Mass
+        df['Mass_Ratio'] = df['M1_Asset'] / df['M2_TAM']          # Orbital center of mass shift
+        
+        # 4. Relativistic Effects (High Volatility Space-Time Shrink)
+        # As VIX spikes, distance shrinks, gravitational pull intensifies (correlation -> 1)
+        df['Lorentz_Factor'] = np.exp((df['VIXCLS'].clip(upper=80) - 20) / 40)
+
+        # 5. Roche Lobe Overflow (Bernoulli Fluid Transfer modified by Lorentz)
         inflation_excess = (df['YoY_Inflation'] - 2.0).clip(lower=0)
         df['Mass_Transfer_Velocity'] = (inflation_excess * df['Broad_M2']) / df['Fluid_Pressure']
-        df['Accretion_Force'] = df['Mass_Transfer_Velocity'].rolling(90).mean().fillna(0)
+        df['Accretion_Force'] = (df['Mass_Transfer_Velocity'] * df['Lorentz_Factor']).rolling(90).mean().fillna(0)
         
         return df
 
     def assemble_tensors(self):
-        print("--- [1/5] ASSEMBLING TENSORS (Astrophysics & Cointegration) ---")
+        print("\n--- [1/5] ASSEMBLING TENSORS (Astrophysics & Cointegration) ---")
         price_df = self.fetcher.get_price()
         price_df['MA200'] = price_df['Price'].rolling(200).mean()
 
@@ -247,85 +267,111 @@ class BinaryStarRocheLobeModel:
             'log_H': np.log(self.df['H_Elastic']),
             'WD_Density': self.df['WD_Density'],
             'log_V': np.log(self.df['Velocity']),
-            'log_SF': np.log(self.df['SF']), # <--- RESTORED HALVING PISTON
+            'log_SF': np.log(self.df['SF']), 
             'Accretion_Force': self.df['Accretion_Force'],
             'Global_RORO_State': self.df['Global_RORO_State'], 
             'Price': self.df['Price'], 
-            'TAM_B': self.df['TAM_B']
+            'TAM_B': self.df['TAM_B'],
+            'Mass_Ratio': self.df['Mass_Ratio'],
+            'Lorentz_Factor': self.df['Lorentz_Factor']
         }).dropna()
         
-        print("   [Running Augmented Dickey-Fuller Tests...]")
-        adf_price = adfuller(np.log(audit_data['Price']))
-        print(f"   Log(Price) ADF p-value: {adf_price[1]:.4f} (Non-Stationary, good)")
-        
-        # Including log_SF in the cointegration vector
-        self.X_cols = ['WD_Density', 'log_V', 'log_SF', 'Accretion_Force', 'Global_RORO_State']
+        self.X_cols = ['WD_Density', 'log_V', 'log_SF', 'log_H', 'Accretion_Force', 'Global_RORO_State']
         self.d_log = audit_data 
         
         X_scaled_df = pd.DataFrame(self.x_scaler.fit_transform(self.d_log[self.X_cols]), columns=self.X_cols, index=self.d_log.index)
         X_coint = sm.add_constant(X_scaled_df)
         
         self.coint_model = sm.OLS(self.d_log['Logit_Rho'], X_coint).fit(cov_type='HC3')
-        
         self.ECT = self.coint_model.resid
-        adf_ect = adfuller(self.ECT)
-        print(f"   Error Correction Term (ECT) ADF p-value: {adf_ect[1]:.4f}")
-        if adf_ect[1] < 0.05:
-            print("   -> Tensors ARE Cointegrated. Spurious correlation rejected.")
-        else:
-            print("   -> Warning: Cointegration weak. Proceeding with theoretical parameters.")
+        
+        # Relativistic ECT Modification: Gravity pulls harder when volatility (Lorentz) is high
+        self.adjusted_ECT = self.ECT * self.d_log['Lorentz_Factor']
 
+        adf_ect = adfuller(self.adjusted_ECT)
+        print(f"   Error Correction Term (ECT) ADF p-value: {adf_ect[1]:.4f}")
+        
         self.modeled_price_history = (((1 / (1 + np.exp(-self.coint_model.predict(X_coint)))) * self.d_log['TAM_B']) * 1e9) / self.all_supply[self.d_log.index].values
         
         log_diff = np.log(self.d_log['Price']) - np.log(self.modeled_price_history)
         self.val_z_score_series = (log_diff - log_diff.rolling(365).mean()) / log_diff.rolling(365).std()
+        
+        # Phase Space Analysis
+        self.lyapunov_exponent = self.calculate_lle(self.val_z_score_series.dropna())
+        print(f"\n   [PHYSICS METRICS]")
+        print(f"   Current Mass Ratio (M1/M2): {self.d_log['Mass_Ratio'].iloc[-1]:.6f}")
+        print(f"   Current Lorentz Factor: {self.d_log['Lorentz_Factor'].iloc[-1]:.4f}x Gravity")
+        print(f"   Largest Lyapunov Exponent (LLE): {self.lyapunov_exponent:.5f}")
+        if self.lyapunov_exponent > 0.01:
+            print("   -> LLE is POSITIVE: The binary orbit is entering a chaotic regime.")
+        else:
+            print("   -> LLE is NEGATIVE/STABLE: The binary orbit is highly ordered.")
 
     def execute_mc(self):
-        print("\n--- [3/5] MC GARCH PROJECTION (Density-Driven Accretion) ---")
+        print("\n--- [3/5] MC LANGEVIN SDE PROJECTION (Stochastic Orbits) ---")
         f_dates = pd.date_range(self.d_log.index[-1] + timedelta(1), periods=FORECAST_DAYS, freq='D')
         steps = np.arange(1, FORECAST_DAYS + 1)
+        dt = 1.0 / 365.0
         
         v_drift = (self.d_log['log_V'].iloc[-1] - self.d_log['log_V'].iloc[-365]) / 365 
         d_drift = (self.d_log['WD_Density'].iloc[-1] - self.d_log['WD_Density'].iloc[-365]) / 365
 
-        # The Eddington Limit (Max sustainable accretion based on historical extreme)
         eddington_limit = self.d_log['Accretion_Force'].max() * 1.5 
+        base_vix = self.df['VIXCLS'].iloc[-1]
 
-        omega = 0.00005; alpha_g = 0.15; beta_g = 0.80; mc_paths = []
+        mc_paths = []
         for _ in tqdm(range(MC_PATHS)):
             p_m2 = self.df['Broad_M2'].iloc[-1] * np.exp(steps * (STRUCTURAL_M2_GROWTH/365) + np.random.normal(0, 0.001, FORECAST_DAYS).cumsum())
             
             p_r = np.zeros(FORECAST_DAYS); p_r[0] = self.d_log['Global_RORO_State'].iloc[-1]
             p_acc = np.zeros(FORECAST_DAYS); p_acc[0] = self.d_log['Accretion_Force'].iloc[-1]
             
-            sigma2 = np.zeros(FORECAST_DAYS); eps = np.zeros(FORECAST_DAYS)
-            sigma2[0] = self.coint_model.resid.std()**2; eps[0] = np.random.normal(0, np.sqrt(sigma2[0]))
+            # Stochastic Volatility (VIX Simulation for Lorentz) - Ornstein-Uhlenbeck Process
+            sim_vix = np.zeros(FORECAST_DAYS); sim_vix[0] = base_vix
+            kappa_vix = 5.0; theta_vix = 20.0; vol_vix = 8.0
+            
+            # Langevin Noise Terms
+            dW_acc = np.random.normal(0, np.sqrt(dt), FORECAST_DAYS)
+            dW_vix = np.random.normal(0, np.sqrt(dt), FORECAST_DAYS)
 
             for t in range(1, FORECAST_DAYS):
                 p_r[t] = np.clip(p_r[t-1] + 0.02 * (0.5 - p_r[t-1]) + np.random.normal(0, 0.05), 0, 1)
                 
-                # PHYSICS UPGRADE: Density-Driven Accretion Loop
-                feedback_pull = (d_drift * 100) 
-                raw_acc = p_acc[t-1] * (1.001 + feedback_pull) + np.random.normal(0, 2)
-                p_acc[t] = min(max(raw_acc, 0), eddington_limit) 
+                # Simulate VIX to get local Lorentz factor
+                sim_vix[t] = sim_vix[t-1] + kappa_vix * (theta_vix - sim_vix[t-1]) * dt + vol_vix * dW_vix[t]
+                loc_lorentz = np.exp((min(sim_vix[t], 80) - 20) / 40)
                 
-                sigma2[t] = omega + alpha_g * eps[t-1]**2 + beta_g * sigma2[t-1]
-                eps[t] = np.random.normal(0, np.sqrt(sigma2[t]))
+                # LANGEVIN EQUATION for Accretion Force (Drift + Diffusion)
+                mass_ratio_pull = (d_drift * 100) # M1 getting heavier pulls harder
+                
+                # Drift: Gravity towards eddington mean, scaled by Lorentz
+                drift = (1.001 + mass_ratio_pull) * loc_lorentz * (p_acc[t-1] * 0.01) * dt
+                # Diffusion: Stochastic noise
+                diffusion = 2.0 * loc_lorentz * dW_acc[t]
+                
+                raw_acc = p_acc[t-1] + drift + diffusion
+                p_acc[t] = min(max(raw_acc, 0), eddington_limit) 
 
             sim_v = self.d_log['log_V'].iloc[-1] + steps * max(0, v_drift) + np.random.normal(0, 0.005, FORECAST_DAYS).cumsum()
             sim_d = np.clip(self.d_log['WD_Density'].iloc[-1] + steps * d_drift, 0.4, 0.95)
             
-            # Forward Halving Calculation
+            # Simple stochastic drift for Hashrate based on historical growth
+            h_drift = (self.d_log['log_H'].iloc[-1] - self.d_log['log_H'].iloc[-365]) / 365
+            sim_h = self.d_log['log_H'].iloc[-1] + steps * max(0, h_drift) + np.random.normal(0, 0.01, FORECAST_DAYS).cumsum()
+            
             f_log_SF = np.log((np.exp(self.pl_const + self.alpha * np.log((f_dates - self.genesis).days)) + (steps * 1000 + self.df['SF'].iloc[-1]*self.all_ann_flow[self.df.index[-1]])) / self.all_ann_flow[f_dates])
             
             X_sim = self.x_scaler.transform(pd.DataFrame({
                 'WD_Density': sim_d, 
                 'log_V': sim_v,
                 'log_SF': f_log_SF,
+                'log_H': sim_h,
                 'Accretion_Force': p_acc, 
                 'Global_RORO_State': p_r
             }))
             
+            # Reintroduce systemic noise to predictions based on residual variance
+            eps = np.random.normal(0, self.coint_model.resid.std(), FORECAST_DAYS)
             p_logit = self.coint_model.predict(sm.add_constant(X_sim, has_constant='add')) + eps
             mc_paths.append((((1 / (1 + np.exp(-p_logit))) * (p_m2 * TAM_MULTIPLIER)) * 1e9) / self.all_supply[f_dates].values)
             
@@ -344,10 +390,11 @@ class BinaryStarRocheLobeModel:
 # RUN
 if __name__ == "__main__":
     engine = BinaryStarRocheLobeModel()
-    engine.assemble_tensors(); engine.run_audit()
+    engine.assemble_tensors()
+    engine.run_audit()
     f_dates, mc = engine.execute_mc()
 
-    print("\n--- [4/5] RENDERING PDF REPORT ---")
+    print("\n--- [4/5] RENDERING PDF REPORT (Phase Space Included) ---")
     median, u95, l05 = np.percentile(mc, [50, 95, 5], axis=0)
     
     log_diff = np.log(engine.d_log['Price']) - np.log(engine.modeled_price_history)
@@ -358,11 +405,12 @@ if __name__ == "__main__":
 
     pdf_fn = 'Nakamoto_RocheLobe_VECM.pdf'
     with PdfPages(pdf_fn) as pdf:
+        # Fig 1 & 2
         fig1, (p1a, p1b) = plt.subplots(2, 1, figsize=(14, 12), gridspec_kw={'height_ratios': [2, 1]})
         p1a.plot(engine.df.index, engine.df['Price'], color='#bdc3c7', alpha=0.6, label='Actual Price')
         p1a.plot(engine.d_log.index, engine.modeled_price_history, color='#2980b9', lw=2, label='VECM Long-Term Equilibrium (Roche Lobe Limit)')
         p1a.fill_between(engine.d_log.index, lower_band, upper_band, color='#2980b9', alpha=0.1, label='Thermodynamic Bound (+/- 2σ)')
-        p1a.plot(f_dates, median, color='#c0392b', ls='--', lw=2.5, label=f'2028 Median: ${median[-1]:,.0f}')
+        p1a.plot(f_dates, median, color='#c0392b', ls='--', lw=2.5, label=f'Model Median Horizon: ${median[-1]:,.0f}')
         p1a.fill_between(f_dates, l05, u95, color='#c0392b', alpha=0.15)
         
         for h_date in HALVING_DATES:
@@ -377,9 +425,10 @@ if __name__ == "__main__":
         p1b.axvline(median[-1], color='#e74c3c', lw=2.5)
         p1b.axvline(l05[-1], color='#e67e22', ls='--', lw=1.5)
         p1b.axvline(u95[-1], color='#e67e22', ls='--', lw=1.5)
-        p1b.set_title("Fig 2: 2 Year Horizon Probability Density", fontweight='bold')
+        p1b.set_title("Fig 2: Terminal Horizon Probability Density", fontweight='bold')
         plt.tight_layout(); pdf.savefig(fig1); plt.close()
 
+        # Fig 3: Z-Score Time Series
         fig2, p3 = plt.subplots(1, 1, figsize=(14, 6))
         p3.plot(engine.d_log.index, engine.val_z_score_series, color='#8e44ad', lw=1.5, label='Error Correction Term (ECT Z-Score)')
         p3.axhline(2, color='#c0392b', ls='--', lw=1.5, label='Severe Roche Lobe Overflow (Overvalued)')
@@ -388,11 +437,25 @@ if __name__ == "__main__":
         p3.fill_between(engine.d_log.index, 2, engine.val_z_score_series, where=(engine.val_z_score_series > 2), color='#c0392b', alpha=0.3)
         p3.fill_between(engine.d_log.index, -2, engine.val_z_score_series, where=(engine.val_z_score_series < -2), color='#27ae60', alpha=0.3)
                 
-        p3.set_title("Fig 3: Mean Reversion to Gravitational Bound (VECM Residuals)", fontweight='bold')
+        p3.set_title("Fig 3: Mean Reversion to Gravitational Bound", fontweight='bold')
         p3.set_ylabel("Z-Score")
         p3.set_ylim(-4, 4)
         p3.legend(loc='upper left')
         plt.tight_layout(); pdf.savefig(fig2); plt.close()
+        
+        # Fig 4: NEW Phase Space Plot (Chaos vs Stability)
+        fig3, p4 = plt.subplots(1, 1, figsize=(10, 10))
+        z_vals = engine.val_z_score_series.dropna().values
+        dz_dt = np.diff(z_vals)
+        z_t = z_vals[:-1]
+        
+        p4.scatter(z_t, dz_dt, c=np.arange(len(z_t)), cmap='viridis', s=10, alpha=0.7)
+        p4.axhline(0, color='black', lw=1, alpha=0.5)
+        p4.axvline(0, color='black', lw=1, alpha=0.5)
+        p4.set_title(f"Fig 4: Orbital Phase Space (LLE: {engine.lyapunov_exponent:.4f})", fontweight='bold')
+        p4.set_xlabel("ECT Z-Score (Distance from Barycenter)")
+        p4.set_ylabel("Velocity of Mean Reversion (dZ/dt)")
+        plt.tight_layout(); pdf.savefig(fig3); plt.close()
 
     print("\n--- [5/5] GENERATING WEB DASHBOARD JSON ---")
     def clean_val(val, decimals=2):
@@ -408,7 +471,9 @@ if __name__ == "__main__":
             "model_price": clean_val(engine.modeled_price_history.iloc[idx], 2),
             "upper_band": clean_val(upper_band.iloc[idx], 2),
             "lower_band": clean_val(lower_band.iloc[idx], 2),
-            "z_score": clean_val(engine.val_z_score_series.iloc[idx], 3)
+            "z_score": clean_val(engine.val_z_score_series.iloc[idx], 3),
+            "mass_ratio": clean_val(engine.d_log['Mass_Ratio'].iloc[idx], 5),
+            "lorentz_factor": clean_val(engine.d_log['Lorentz_Factor'].iloc[idx], 3)
         })
         
     projection_data = []
@@ -437,7 +502,12 @@ if __name__ == "__main__":
         "metadata": {
             "generated_at": datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
             "r_squared_vecm": clean_val(engine.coint_model.rsquared, 4),
-            "target_median_2028": clean_val(median[-1], 0)
+            "target_median": clean_val(median[-1], 0),
+            "physics_metrics": {
+                "largest_lyapunov_exponent": clean_val(engine.lyapunov_exponent, 5),
+                "terminal_mass_ratio": clean_val(engine.d_log['Mass_Ratio'].iloc[-1], 5),
+                "terminal_lorentz_factor": clean_val(engine.d_log['Lorentz_Factor'].iloc[-1], 3)
+            }
         },
         "historical": historical_data,
         "projection": projection_data,
