@@ -398,7 +398,7 @@
         <div class="bg-[#222f3e] p-3 rounded-lg border border-purple-600">
             <label class="block text-purple-400 font-bold mb-1">Start Year</label>
             <div class="text-xs text-gray-400 mb-2">Begins in: <span id="val-start-year" class="font-bold text-white">2014</span></div>
-            <input type="range" id="start-year" min="2011" max="2023" step="1" value="2014" class="w-full accent-purple-500">
+            <input type="range" id="start-year" min="2011" max="2023" step="1" value="2015" class="w-full accent-purple-500">
         </div>
 
         <div class="bg-[#222f3e] p-3 rounded-lg border border-blue-600">
@@ -410,25 +410,25 @@
         <div class="bg-[#222f3e] p-3 rounded-lg border border-green-800">
             <label class="block text-green-400 font-bold mb-1">Buy Threshold Offset</label>
             <div class="text-xs text-gray-400 mb-2">Triggers below: -2 - <span id="val-fraction-short" class="font-bold text-white">0.2</span></div>
-            <input type="range" id="fraction-short" min="0.1" max="1" step="0.1" value="0.2" class="w-full accent-green-500">
+            <input type="range" id="fraction-short" min="0.1" max="1" step="0.1" value="0.8" class="w-full accent-green-500">
         </div>
 
         <div class="bg-[#222f3e] p-3 rounded-lg border border-green-800">
             <label class="block text-green-400 font-bold mb-1">Buy Position Size (%)</label>
             <div class="text-xs text-gray-400 mb-2">Uses <span id="val-pct-long" class="font-bold text-white">10</span>% of available Cash</div>
-            <input type="range" id="pct-long" min="5" max="100" step="5" value="10" class="w-full accent-green-500">
+            <input type="range" id="pct-long" min="5" max="100" step="5" value="95" class="w-full accent-green-500">
         </div>
 
         <div class="bg-[#222f3e] p-3 rounded-lg border border-red-800">
             <label class="block text-red-400 font-bold mb-1">Sell Threshold Offset</label>
             <div class="text-xs text-gray-400 mb-2">Triggers above: +2 + <span id="val-fraction-long" class="font-bold text-white">0.5</span></div>
-            <input type="range" id="fraction-long" min="0.1" max="1" step="0.1" value="0.5" class="w-full accent-red-500">
+            <input type="range" id="fraction-long" min="0.1" max="1" step="0.1" value="0.2" class="w-full accent-red-500">
         </div>
 
         <div class="bg-[#222f3e] p-3 rounded-lg border border-red-800">
             <label class="block text-red-400 font-bold mb-1">Sell Position Size (%)</label>
             <div class="text-xs text-gray-400 mb-2">Sells <span id="val-pct-short" class="font-bold text-white">25</span>% of held BTC</div>
-            <input type="range" id="pct-short" min="5" max="100" step="5" value="25" class="w-full accent-red-500">
+            <input type="range" id="pct-short" min="5" max="100" step="5" value="75" class="w-full accent-red-500">
         </div>
         
         <button id="btn-optimize" class="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-500 hover:to-purple-500 text-white font-bold py-3 px-4 rounded-lg shadow-lg transition-all h-full flex flex-col justify-center items-center border border-blue-400 lg:col-span-3">
