@@ -289,7 +289,8 @@ class BinaryStarRocheLobeModel:
         self.adjusted_ECT = self.ECT * self.d_log['Lorentz_Factor']
 
         adf_ect = adfuller(self.adjusted_ECT)
-        print(f"   Error Correction Term (ECT) ADF p-value: {adf_ect[1]:.4f}")
+        self.ect_p_value = adf_ect[1]
+        print(f"   Error Correction Term (ECT) ADF p-value: {self.ect_p_value:.4f}")
         
         self.modeled_price_history = (((1 / (1 + np.exp(-self.coint_model.predict(X_coint)))) * self.d_log['TAM_B']) * 1e9) / self.all_supply[self.d_log.index].values
         
@@ -506,7 +507,8 @@ if __name__ == "__main__":
             "physics_metrics": {
                 "largest_lyapunov_exponent": clean_val(engine.lyapunov_exponent, 5),
                 "terminal_mass_ratio": clean_val(engine.d_log['Mass_Ratio'].iloc[-1], 5),
-                "terminal_lorentz_factor": clean_val(engine.d_log['Lorentz_Factor'].iloc[-1], 3)
+                "terminal_lorentz_factor": clean_val(engine.d_log['Lorentz_Factor'].iloc[-1], 4),
+                "ect_p_value": clean_val(engine.ect_p_value, 4)
             }
         },
         "historical": historical_data,

@@ -1238,7 +1238,8 @@ class BinaryStarRocheLobeModel:
         self.adjusted_ECT = self.ECT * self.d_log['Lorentz_Factor']
 
         adf_ect = adfuller(self.adjusted_ECT)
-        print(f"   Error Correction Term (ECT) ADF p-value: {adf_ect[1]:.4f}")
+        self.ect_p_value = adf_ect[1]
+        print(f"   Error Correction Term (ECT) ADF p-value: {self.ect_p_value:.4f}")
         
         self.modeled_price_history = (((1 / (1 + np.exp(-self.coint_model.predict(X_coint)))) * self.d_log['TAM_B']) * 1e9) / self.all_supply[self.d_log.index].values
         
@@ -1455,7 +1456,8 @@ if __name__ == "__main__":
             "physics_metrics": {
                 "largest_lyapunov_exponent": clean_val(engine.lyapunov_exponent, 5),
                 "terminal_mass_ratio": clean_val(engine.d_log['Mass_Ratio'].iloc[-1], 5),
-                "terminal_lorentz_factor": clean_val(engine.d_log['Lorentz_Factor'].iloc[-1], 3)
+                "terminal_lorentz_factor": clean_val(engine.d_log['Lorentz_Factor'].iloc[-1], 4),
+                "ect_p_value": clean_val(engine.ect_p_value, 4)
             }
         },
         "historical": historical_data,
@@ -1849,13 +1851,37 @@ if __name__ == "__main__":
                 // Dynamically update System Diagnostics from metadata
                 if (data.metadata) {
                     const r2El = document.getElementById('stat-r2');
-                    if (r2El && data.metadata.r_squared_vecm) {
+                    if (r2El && data.metadata.r_squared_vecm !== undefined) {
                         r2El.innerText = data.metadata.r_squared_vecm.toFixed(4);
                     }
                     
                     const targetEl = document.getElementById('stat-target-2028');
-                    if (targetEl && data.metadata.target_median_2028) {
-                        targetEl.innerText = '$' + data.metadata.target_median_2028.toLocaleString();
+                    if (targetEl && data.metadata.target_median !== undefined) {
+                        targetEl.innerText = '$' + data.metadata.target_median.toLocaleString();
+                    }
+                    
+                    if (data.metadata.physics_metrics) {
+                        const pm = data.metadata.physics_metrics;
+                        
+                        const lleEl = document.getElementById('stat-lle');
+                        if (lleEl && pm.largest_lyapunov_exponent !== undefined) {
+                            lleEl.innerText = pm.largest_lyapunov_exponent.toFixed(5);
+                        }
+                        
+                        const massEl = document.getElementById('stat-mass');
+                        if (massEl && pm.terminal_mass_ratio !== undefined) {
+                            massEl.innerText = pm.terminal_mass_ratio.toFixed(5);
+                        }
+                        
+                        const lorentzEl = document.getElementById('stat-lorentz');
+                        if (lorentzEl && pm.terminal_lorentz_factor !== undefined) {
+                            lorentzEl.innerText = pm.terminal_lorentz_factor.toFixed(4) + 'x';
+                        }
+                        
+                        const pvalEl = document.getElementById('stat-pvalue');
+                        if (pvalEl && pm.ect_p_value !== undefined) {
+                            pvalEl.innerText = pm.ect_p_value.toFixed(4);
+                        }
                     }
                 }
 
