@@ -247,7 +247,7 @@
             </nav>
             <div class="w-px h-6 bg-slate-600 hidden md:block"></div>
             <div class="flex gap-2 font-bold font-mono">
-                <button id="btn-en" class="lang-btn active px-3 py-1 rounded text-xs" onclick="setLang('en')">EN</button>
+                <button id="btn-en" class="lang-btn px-3 py-1 rounded text-xs" onclick="setLang('en')">EN</button>
                 <button id="btn-fr" class="lang-btn px-3 py-1 rounded text-xs" onclick="setLang('fr')">FR</button>
             </div>
         </div>
@@ -1488,7 +1488,13 @@ if __name__ == "__main__":
     </section>
 
     <script>
-        let currLang = 'en';
+        // Initialisation de la langue : URL (?lg=FR) > Défaut (fr)
+        const urlParams = new URLSearchParams(window.location.search);
+        let urlLang = urlParams.get('lg') ? urlParams.get('lg').toLowerCase() : null;
+        
+        // On vérifie si la langue passée en URL existe dans notre dictionnaire, sinon 'fr'
+        let currLang = (urlLang === 'en' || urlLang === 'fr') ? urlLang : 'fr';
+        
         let currentSelDate = null;
         let currentSelAct = null;
         let currentSelMod = null;
@@ -2080,7 +2086,7 @@ if __name__ == "__main__":
         
         // --- 3D IFRAME BASE64 INJECTION ---
         const iframeCode = `<!DOCTYPE html>
-<html lang="en">
+<html lang="fr">
 <head>
     <meta charset="UTF-8">
     <style>
@@ -2124,9 +2130,9 @@ if __name__ == "__main__":
     <div id="ui">
         <h1 id="i18n-title">Bitcoin-Fiat Binary Star System</h1>
         <p id="i18n-desc">Scroll to zoom. Joint growth simulation.</p>
-        <div class="stat-box"><div class="stat-title" id="i18n-time">Simulated Time</div><div class="stat-value val-time" id="dateDisplay">Jan 2010</div></div>
+        <div class="stat-box"><div class="stat-title" id="i18n-time">Temps Simulé</div><div class="stat-value val-time" id="dateDisplay">Jan 2010</div></div>
         <div class="control-group" style="margin-bottom: 15px;">
-            <label id="i18n-scrubber">Time Scrubber</label>
+            <label id="i18n-scrubber">Curseur Temporel</label>
             <input type="range" id="timeScrubber" min="2010" max="2050" step="0.05" value="2010">
             <div class="time-labels"><span>2010</span><span>2030</span><span>2050</span></div>
         </div>
@@ -2191,7 +2197,17 @@ if __name__ == "__main__":
                 tt_p3: "This acts precisely like a binary star system: a hyper-dense object strips mass from a dying, expanding star, organically growing Bitcoin's market cap and its accretion disk as a mathematical consequence of fiat expansion."
             },
             fr: { 
-                title: "Système Stellaire Binaire", desc: "Molette pour dézoomer. Croissance conjointe.", time: "Temps Simulé", scrubber: "Progression Temporelle", m2: "Géante Rouge (M2)", btc: "Naine Blanche (BTC)", price: "Prix BTC ($)", cagr: "Expansion M2 (CAGR):", pause: "PAUSE", play: "LECTURE", unit: " Mds $",
+                title: "Système Stellaire Binaire Bitcoin-Fiat", 
+                desc: "Défilez pour zoomer. Simulation de croissance conjointe.", 
+                time: "Temps Simulé", 
+                scrubber: "Curseur Temporel", 
+                m2: "Géante Rouge (M2)", 
+                btc: "Naine Blanche (BTC)", 
+                price: "Prix BTC ($)", 
+                cagr: "Expansion M2 (TCAM):", 
+                pause: "PAUSE", 
+                play: "LECTURE", 
+                unit: " Mds $",
                 tt_title: "L'Analogie Thermodynamique",
                 tt_p1: "À mesure que les banques centrales étendent la masse monétaire (<span class='highlight-red'>La Géante Rouge</span>), la monnaie fiat s'inflate, perdant son pouvoir d'achat et sa 'densité'. Les éruptions représentent des injections massives de liquidités (QE) alignées sur des cycles de 4 ans.",
                 tt_p2: "Bitcoin (<span class='highlight'>La Naine Blanche</span>) possède une rareté mathématique absolue. Alors que le capital cherche une réserve de valeur pour échapper à l'inflation fiat, la liquidité est aspirée du système fiat vers ce réseau dense et limité via le rayon d'accrétion.",
@@ -2199,7 +2215,7 @@ if __name__ == "__main__":
             }
         };
         
-        let currLang = 'en';
+        let currLang = 'fr';
 
         window.addEventListener('message', (event) => {
             if(event.data && event.data.type === 'SET_LANG') {
@@ -2481,7 +2497,13 @@ if __name__ == "__main__":
 </html>`;
         document.getElementById('sim-frame').src = 'data:text/html;base64,' + btoa(unescape(encodeURIComponent(iframeCode)));
 
-        setLang('en');
+        const simFrame = document.getElementById('sim-frame');
+        simFrame.src = 'data:text/html;base64,' + btoa(unescape(encodeURIComponent(iframeCode)));
+
+        // Ensure language sync occurs ONLY after the iframe is fully loaded to prevent missing the message
+        simFrame.onload = () => {
+            setLang(currLang);
+        };
     </script>
 <div class="mt-16 mb-8 pt-6 border-t border-gray-800 text-center text-xs text-gray-500 opacity-80 hover:opacity-100 transition-opacity" id="scientific-disclaimer">
     
