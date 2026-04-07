@@ -24,7 +24,9 @@ The model rejects the premise that Bitcoin's price is purely random or driven so
 This mass transfer is modeled using actual astrophysics and thermodynamics:
 
 ### I. Relativistic Volatility (Lorentz Factor)
-$$\gamma_{Lorentz} = \exp\left(\frac{\min(VIX_t, 80) - 20}{40}\right)$$
+```math
+\gamma_{Lorentz} = \exp\left(\frac{\min(VIX_t, 80) - 20}{40}\right)$$
+```
 Simulates spacetime compression. High VIX shrinks the 'distance' between assets, forcing tighter cointegration and violently increasing gravitational pull (correlations trending to 1 during market panics).
 
 ### II. Mass Transfer Velocity (Bernoulli Overflow)
@@ -34,15 +36,21 @@ Simulates spacetime compression. High VIX shrinks the 'distance' between assets,
 Calculates the velocity of liquidity escaping the expanding 'Red Giant' (M2), multiplied by the Lorentz Factor during volatile regimes.
 
 ### III. The Cointegrating Vector (Gravitational Equilibrium)
-$$Logit(\rho)_t = \beta_0 + \beta_1 \ln(SF)_t + \beta_2 \ln(V)_t + \beta_3 \ln(H)_t + \beta_4 Density_{WD,t} + \beta_5 \dot{M}_{Acc,t} + \epsilon_t$$
+```math
+Logit(\rho)_t = \beta_0 + \beta_1 \ln(SF)_t + \beta_2 \ln(V)_t + \beta_3 \ln(H)_t + \beta_4 Density_{WD,t} + \beta_5 \dot{M}_{Acc,t} + \epsilon_t
+```
 Defined in the VECM framework, this vector represents the stable, long-run path where Bitcoin’s TAM absorption ($\rho$) is balanced against fundamental scarcity, internal heat/energy (Hashrate $H$), and network power.
 
 ### IV. Langevin SDE (Stochastic Orbital Accretion)
-$$d(\dot{M}_{Acc}) = \mu(M_{ratio}, \gamma_{Lorentz}) dt + \sigma(\gamma_{Lorentz}) dW_t$$
+```math
+d(\dot{M}_{Acc}) = \mu(M_{ratio}, \gamma_{Lorentz}) dt + \sigma(\gamma_{Lorentz}) dW_t
+```
 Replaces deterministic Keplerian orbits. The accretion force follows a stochastic differential equation driven by dynamic mass ratios and random market entropy ($dW_t$).
 
 ### V. Phase Space Chaos (Lyapunov Exponent)
-$$\lambda = \lim_{t \to \infty} \lim_{\delta Z_0 \to 0} \frac{1}{t} \ln \frac{|\delta Z(t)|}{|\delta Z_0|}$$
+```math
+\lambda = \lim_{t \to \infty} \lim_{\delta Z_0 \to 0} \frac{1}{t} \ln \frac{|\delta Z(t)|}{|\delta Z_0|}
+```
 If the Largest Lyapunov Exponent ($\lambda > 0$), the binary orbit is in deterministic chaos. Initial minor divergences in the macro state lead to exponentially divergent short-term price paths.
 
 ---
