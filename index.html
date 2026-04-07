@@ -343,12 +343,12 @@
         <div class="grid grid-cols-2 md:grid-cols-3 gap-4 mb-6">
             <div class="bg-black/50 p-4 rounded border border-slate-700">
                 <div class="text-xs text-slate-400" data-i18n="r_squared">VECM Cointegration R²</div>
-                <div class="text-3xl font-mono text-cyan shadow-cyan-500" id="stat-r2">0.9705</div>
+                <div class="text-3xl font-mono text-cyan shadow-cyan-500" id="stat-r2">0.9726</div>
                 <p class="text-[10px] text-slate-500 mt-2" data-i18n="r_squared_desc">Measures the long-term stochastic tether between M2 expansion and BTC market cap.</p>
             </div>
             <div class="bg-black/50 p-4 rounded border border-slate-700">
                 <div class="text-xs text-slate-400" data-i18n="target_2028">Terminal Median Target</div>
-                <div class="text-3xl font-mono text-orange" id="stat-target-2028">$436,456</div>
+                <div class="text-3xl font-mono text-orange" id="stat-target-2028">$264,494</div>
                 <p class="text-[10px] text-slate-500 mt-2" data-i18n="target_2028_desc">The projected equilibrium state based on a Langevin SDE simulation.</p>
             </div>
              <div class="bg-black/50 p-4 rounded border border-red-900/50">
@@ -2431,7 +2431,7 @@ if __name__ == "__main__":
             if(isPlaying) {
                 // PHYSICS UPDATE: Multiply by delta time (dt) for hardware independence
                 // Advances exactly 0.5 simulated years per real-world second, regardless of monitor Hz
-                currentYearFloat += 0.5 * dt; 
+                currentYearFloat += 0.2 * dt; 
                 if(currentYearFloat > 2050) currentYearFloat = 2010;
                 timeScrubber.value = currentYearFloat;
                 
@@ -2440,8 +2440,22 @@ if __name__ == "__main__":
 
                 let date = new Date(2010, 0, 1); date.setFullYear(Math.floor(currentYearFloat)); date.setMonth(Math.floor((currentYearFloat%1)*12));
                 document.getElementById('dateDisplay').innerText = date.toLocaleDateString(currLang === 'fr' ? 'fr-FR' : 'en-US', {year: 'numeric', month: 'short'});
+                
+                // M2 is always large, so floor and format is fine
                 document.getElementById('m2Display').innerText = Math.floor(currentM2).toLocaleString() + dict[currLang].unit;
-                document.getElementById('btcDisplay').innerText = Math.floor(currentBTC_Cap).toLocaleString() + dict[currLang].unit;
+                
+                // BTC Cap formatting logic based on the 1 Billion threshold
+                let btcFormatted;
+                if (currentBTC_Cap < 1) {
+                    // Less than 1 Billion: show 3 decimal places (e.g., "0.001 B$")
+                    btcFormatted = currentBTC_Cap.toFixed(3);
+                } else {
+                    // 1 Billion or more: floor to whole number and add commas
+                    btcFormatted = Math.floor(currentBTC_Cap).toLocaleString();
+                }
+                document.getElementById('btcDisplay').innerText = btcFormatted + dict[currLang].unit;
+                
+                // Price formatting (kept the same)
                 document.getElementById('priceDisplay').innerText = "$" + Math.floor(currentBTC_Price).toLocaleString();
 
                 let marketShare = currentBTC_Cap / currentM2;
