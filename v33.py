@@ -39,15 +39,11 @@ plt.rcParams.update({
     "figure.facecolor": "#ffffff"
 })
 
-# ==========================================
-# UNIVERSAL CACHE MANAGER
-# ==========================================
 class DataFetcher:
     def __init__(self, cache_dir="cache", max_age_hours=24):
         self.cache_dir = cache_dir
         self.max_age_hours = max_age_hours
-        if not os.path.exists(cache_dir):
-            os.makedirs(cache_dir)
+        if not os.path.exists(cache_dir): os.makedirs(cache_dir)
             
     def _is_valid(self, filename):
         filepath = os.path.join(self.cache_dir, filename)
@@ -60,8 +56,7 @@ class DataFetcher:
         if self._is_valid(fname): return pd.read_csv(fpath, index_col=0, parse_dates=True)
         try:
             url = f"https://api.blockchain.info/charts/{chart_name}?timespan=all&format=json"
-            data = requests.get(url, timeout=15).json()['values']
-            df = pd.DataFrame(data)
+            df = pd.DataFrame(requests.get(url, timeout=15).json()['values'])
             df['date'] = pd.to_datetime(df['x'], unit='s').dt.normalize()
             df = df.set_index('date').rename(columns={'y': col_name})[[col_name]].resample('D').mean().ffill()
             df.to_csv(fpath)
@@ -75,8 +70,7 @@ class DataFetcher:
         fpath = os.path.join(self.cache_dir, fname)
         if self._is_valid(fname): return pd.read_csv(fpath, index_col=0, parse_dates=True)
         try:
-            tv = TvDatafeed()
-            p = tv.get_hist(symbol="BTCUSD", exchange="INDEX", interval=Interval.in_daily, n_bars=8000)
+            p = TvDatafeed().get_hist(symbol="BTCUSD", exchange="INDEX", interval=Interval.in_daily, n_bars=8000)
             df = p.rename(columns={'close': 'Price'})[['Price']].resample('D').mean().ffill()
             df.index = pd.to_datetime(df.index).normalize()
             df.to_csv(fpath)
@@ -90,44 +84,25 @@ class DataFetcher:
         fpath = os.path.join(self.cache_dir, fname)
         if self._is_valid(fname): return pd.read_csv(fpath, index_col=0, parse_dates=True)
         try:
-            # CORRECTION CRITIQUE : Ajout de la date de début pour contourner la limite par défaut de 1 mois
             df = yf.download(tickers, start="2010-01-01", progress=False)
-            
             if isinstance(df.columns, pd.MultiIndex):
                 if 'Close' in df.columns.levels[0]: df = df['Close']
             elif 'Close' in df.columns:
                 df = df['Close']
-            if isinstance(df, pd.Series):
-                df = df.to_frame(name=name)
+            if isinstance(df, pd.Series): df = df.to_frame(name=name)
             df.to_csv(fpath)
             return df
-        except Exception as e:
+        except Exception:
             if os.path.exists(fpath): return pd.read_csv(fpath, index_col=0, parse_dates=True)
             return pd.DataFrame()
             
-    def get_stablecoins(self):
-        fname = "defillama_stables.csv"
-        fpath = os.path.join(self.cache_dir, fname)
-        if self._is_valid(fname): return pd.read_csv(fpath, index_col=0, parse_dates=True)
-        try:
-            url = "https://stablecoins.llama.fi/stablecoincharts/all"
-            r = requests.get(url, timeout=15)
-            records = [{'date': pd.to_datetime(int(row['date']), unit='s').normalize(), 'Stablecoins': row.get('totalCirculating', {}).get('peggedUSD', 0)} for row in r.json() if row.get('totalCirculating', {}).get('peggedUSD', 0) > 0]
-            df = pd.DataFrame(records).set_index('date').resample('D').ffill()
-            df.to_csv(fpath)
-            return df
-        except Exception as e:
-            print(f"      -> DefiLlama API failed: {e}. Using neutral proxy.")
-            if os.path.exists(fpath): return pd.read_csv(fpath, index_col=0, parse_dates=True)
-            dates = pd.date_range(start='2010-01-01', end=datetime.today(), freq='D')
-            return pd.DataFrame({'Stablecoins': 1.0}, index=dates)
-
     def get_fred(self):
         fname = "fred_macro_v4.csv"
         fpath = os.path.join(self.cache_dir, fname)
         if self._is_valid(fname): return pd.read_csv(fpath, index_col=0, parse_dates=True)
         
-        series_list = ['WALCL', 'WTREGEN', 'RRPONTSYD', 'M2SL', 'VIXCLS', 'CPIAUCSL', 'FEDFUNDS']
+        # Ajout de BAMLH0A0HYM2 (Credit Spreads) et T10Y2Y (Yield Curve) pour le Régime Macro
+        series_list = ['WALCL', 'WTREGEN', 'RRPONTSYD', 'M2SL', 'VIXCLS', 'CPIAUCSL', 'FEDFUNDS', 'BAMLH0A0HYM2', 'T10Y2Y']
         df_list = []
         session = requests.Session()
         adapter = HTTPAdapter(max_retries=Retry(connect=5, backoff_factor=0.5))
@@ -137,22 +112,17 @@ class DataFetcher:
         for s in series_list:
             try:
                 url = f"https://api.stlouisfed.org/fred/series/observations?series_id={s}&api_key={FRED_API_KEY}&file_type=json&observation_start=2009-01-03"
-                r = session.get(url, timeout=30)
-                temp = pd.DataFrame(r.json()['observations'])
+                temp = pd.DataFrame(session.get(url, timeout=30).json()['observations'])
                 temp['date'] = pd.to_datetime(temp['date'])
                 temp['value'] = pd.to_numeric(temp['value'], errors='coerce')
                 df_list.append(temp.set_index('date')[['value']].rename(columns={'value': s}))
             except Exception:
                 df_list.append(pd.DataFrame({'date': dates, s: 0.0}).set_index('date'))
         
-        # PANDAS UPDATE FIX: Use bfill() directly instead of fillna(method='bfill')
         m = pd.concat(df_list, axis=1).resample('D').interpolate('time').ffill().bfill()
         m.to_csv(fpath)
         return m
 
-# ==========================================
-# MAIN VECM & ROCHE LOBE ENGINE
-# ==========================================
 class BinaryStarRocheLobeModel:
     def __init__(self):
         self.genesis = pd.to_datetime('2009-01-03')
@@ -177,30 +147,32 @@ class BinaryStarRocheLobeModel:
         return np.mean(divergences) / lag
 
     def optimize_liquidity_space(self, df):
-        print("   🔍 Optimizing Arthur Hayes' Net Liquidity Lag...")
+        print("   🔍 Optimizing Regime-Switching Accretion Force (Pal + Hayes + Newton)...")
         df['Net_Liquidity'] = df['WALCL'].fillna(0) - df['WTREGEN'].fillna(0) - df['RRPONTSYD'].fillna(0)
         df['Net_Liquidity'] = np.where(df['Net_Liquidity'] > 1e6, df['Net_Liquidity'], df['M2SL'] * 1000)
 
-        log_nl = np.log(df['Net_Liquidity'])
+        injection_90d = df['Net_Liquidity'].diff(90)
         btc_momentum = np.log(df['Price']).diff(30).shift(-30)
 
         best_corr, best_params = 0, {'lag': 15, 'smooth': 30}
         
-        for smooth in [30, 60, 90]:
-            v_nl = log_nl.diff(smooth)
+        for smooth in [15, 30, 60, 90]:
+            acceleration = injection_90d.diff(smooth)
+            # APPLICATION DU FILTRE DE RÉGIME : Force Effective = Accélération * Phi
+            effective_force = acceleration * df['Regime_Phi']
+            
             for lag in np.arange(15, 200, 15):
-                v_lagged = v_nl.shift(lag)
-                valid = v_lagged.notna() & btc_momentum.notna()
+                f_lagged = effective_force.shift(lag)
+                valid = f_lagged.notna() & btc_momentum.notna()
                 if valid.sum() > 100:
-                    corr = np.corrcoef(v_lagged[valid], btc_momentum[valid])[0, 1]
+                    corr = np.corrcoef(f_lagged[valid], btc_momentum[valid])[0, 1]
                     if corr > best_corr:
                         best_corr, best_params = corr, {'lag': lag, 'smooth': smooth}
 
-        print(f"   ✅ True Macro Lag Found (Max Corr: {best_corr:.4f}): {best_params['lag']} days")
+        print(f"   ✅ Regime-Switching Lag Found (Max Corr: {best_corr:.4f}): {best_params['lag']} days")
         return best_params
 
     def apply_thermodynamics(self, df):
-        safe_velocity = df['Velocity'].replace(0, np.nan).bfill()
         hoarding_rate = np.where(df['Price'] < df['MA200'], 2500, 500)
         corp_h = pd.Series(hoarding_rate, index=df.index).cumsum()
         corp_h[df.index < '2020-08-11'] = 0 
@@ -217,22 +189,28 @@ class BinaryStarRocheLobeModel:
         df['Mass_Ratio'] = df['M1_Asset'] / df['M2_TAM']
         df['Lorentz_Factor'] = np.exp((df['VIXCLS'].clip(upper=80) - 20) / 40)
 
-        # The Grand Accretion Force (Hayes + Woo + Pal)
-        eq_params = self.optimize_liquidity_space(df)
-        v_nl = np.log(df['Net_Liquidity']).diff(eq_params['smooth']).shift(eq_params['lag'])
+        # --- CALCUL DU MULTIPLICATEUR DE RÉGIME (PHI) ---
+        # 1. Spreads de Crédit (Stress). Moyenne historique ~ 4%. Si > 4%, on ferme la valve exponentiellement.
+        cs = df['BAMLH0A0HYM2'].fillna(4.0)
+        cs_valve = np.exp(-(cs - 4.0) / 3.0).clip(upper=1.2)
         
-        dxy_mom = df['DXY'].pct_change(eq_params['smooth']).fillna(0)
-        dxy_multiplier = np.where(dxy_mom > 0, 1.0 / (1.0 + dxy_mom * 10), 1.0 + abs(dxy_mom) * 5)
+        # 2. Courbe des Taux (Récession). Inversée (<0) = danger. Normale (>0) = saine.
+        yc = df['T10Y2Y'].fillna(1.0)
+        yc_valve = 1 / (1 + np.exp(-yc * 2)) # Fonction logistique douce (0 à 1)
         
-        # CRITICAL FIX: Neutralize Stablecoin momentum before 2018 to prevent data poisoning
-        stables_mom = df['Stablecoins'].pct_change(eq_params['smooth']).replace([np.inf, -np.inf], 0).fillna(0)
-        stables_mom = np.where(df.index < '2018-01-01', 0.0, stables_mom)
-        stables_multiplier = 1.0 + np.clip(stables_mom, -0.5, 1.5)
+        # Le Multiplicateur global
+        df['Regime_Phi'] = cs_valve * yc_valve
 
-        raw_accretion = v_nl * dxy_multiplier * stables_multiplier * df['Lorentz_Factor']
-        df['Accretion_Force'] = raw_accretion.rolling(30).mean().fillna(0)
+        # F = ma * Phi (Effective Accretion Force)
+        eq_params = self.optimize_liquidity_space(df)
+        injection_90d = df['Net_Liquidity'].diff(90)
+        acceleration = injection_90d.diff(eq_params['smooth'])
         
-        # CRITICAL FIX: Z-Score scaling to prevent Gradient Vanishing in MCMC
+        # On multiplie par Phi et on décale selon l'optimum
+        raw_accretion = (acceleration * df['Regime_Phi']).shift(eq_params['lag'])
+        
+        # Lissage pour le VECM et Normalisation Z-Score
+        df['Accretion_Force'] = raw_accretion.rolling(30).mean().fillna(0)
         mean_acc = df['Accretion_Force'].rolling(365, min_periods=90).mean().bfill()
         std_acc = df['Accretion_Force'].rolling(365, min_periods=90).std().bfill() + 1e-8
         df['Accretion_Force'] = ((df['Accretion_Force'] - mean_acc) / std_acc).fillna(0)
@@ -246,10 +224,6 @@ class BinaryStarRocheLobeModel:
         tx = self.fetcher.get_blockchain_metric('estimated-transaction-volume-usd', 'Tx_Vol_USD')
         m = self.fetcher.get_fred()
         
-        dxy_raw = self.fetcher.get_yf_close("DX-Y.NYB", "dxy")
-        dxy = pd.DataFrame({'DXY': dxy_raw.iloc[:, 0]}) if not dxy_raw.empty else pd.DataFrame({'DXY': 100.0}, index=price_df.index)
-        stables = self.fetcher.get_stablecoins()
-        
         dates_all = pd.date_range(self.genesis, datetime.today() + timedelta(days=FORECAST_DAYS), freq='D')
         epochs = np.floor((dates_all - self.genesis).days / 1458.33)
         flow = pd.Series(144 * (50.0 / (2.0 ** epochs)), index=dates_all)
@@ -257,8 +231,7 @@ class BinaryStarRocheLobeModel:
 
         h['H_Elastic'] = pd.Series(np.where((h['Hashrate'].rolling(30).mean() < h['Hashrate'].rolling(60).mean()), h['Hashrate'].shift(-60), h['Hashrate'].shift(-HASHRATE_LAG)), index=h.index).ffill()
 
-        self.df = price_df.join([h, m, v, tx, dxy, stables], how='left').ffill()
-        self.df['Stablecoins'] = self.df['Stablecoins'].fillna(1e6) 
+        self.df = price_df.join([h, m, v, tx], how='left').ffill()
         self.df = self.apply_thermodynamics(self.df)
 
         roro_assets = self.fetcher.get_yf_close(["HYG", "IEF", "COPX", "GLD", "SPHB", "SPLV"], "roro_assets")
@@ -270,12 +243,8 @@ class BinaryStarRocheLobeModel:
     def run_audit(self):
         print("\n--- [2/5] MCMC BAYESIAN PHYSICS AUDIT ---")
         trace_file = "mcmc_physics_trace.nc"
-        
-        if os.path.exists(trace_file):
-            print("   🗑️ Supression du cache MCMC (Mise à jour des équations requise)...")
-            os.remove(trace_file)
+        if os.path.exists(trace_file): os.remove(trace_file)
 
-        # CRITICAL FIX: Start the physics simulation strictly in 2014.
         self.df = self.df[self.df.index >= '2014-01-01']
 
         self.df['TAM_B'] = self.df['M2SL'] * TAM_MULTIPLIER
@@ -304,7 +273,8 @@ class BinaryStarRocheLobeModel:
             y_obs = pm.Normal('y_obs', mu=mu, sigma=sigma, observed=y)
             
             print("   ⚛️ Lancement du Sampler (NUTS) sur l'ère Macro Moderne (2014+)...")
-            self.mcmc_trace = pm.sample(1000, tune=1000, chains=2, target_accept=0.95, progressbar=True)
+            # OPTIMISATION: 500 draws au lieu de 1000 pour accélérer x4 le processus
+            self.mcmc_trace = pm.sample(500, tune=500, chains=2, target_accept=0.95, progressbar=True)
             self.mcmc_stats = az.summary(self.mcmc_trace, hdi_prob=0.94)
             az.to_netcdf(self.mcmc_trace, trace_file)
 
