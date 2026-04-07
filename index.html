@@ -274,7 +274,7 @@
                 </div>
             </div>
             <div class="tensor-tooltip">
-                ℹ️ Tensors Math Decoder
+                ℹ️ Vectors Math Decoder
                 <div class="tooltip-content">
                     <div class="tooltip-lang">
                         <h4>🇬🇧 The Thermodynamics of Cointegration</h4>
@@ -391,7 +391,7 @@
                     <div class="text-xl scale-110 origin-left py-2">
                     $$d(\dot{M}_{Acc}) = \underbrace{\mu(M_{ratio}, \gamma_{Lorentz}) dt}_{\text{Newtonian Drift}} + \underbrace{\sigma(\gamma_{Lorentz}) dW_t}_{\text{Wiener Diffusion}}$$
                     </div>
-                    <p class="text-[10px] text-slate-400 mt-2" data-i18n="eq_4_desc">Replaces deterministic Keplerian orbits. The accretion force follows a stochastic differential equation driven by dynamic mass ratios and random market entropy ($dW_t$).</p>
+                    <p class="text-[10px] text-slate-400 mt-2" data-i18n="eq_4_desc">Replaces deterministic Keplerian orbits. The accretion force follows a stochastic differential equation driven by dynamic mass ratios and random market entropy ($$dW_t$$).</p>
                 </div>
 
                 <div class="mb-6">
@@ -1528,11 +1528,11 @@ if __name__ == "__main__":
                 eq_3_title: "III. The Cointegrating Vector (Gravitational Equilibrium)",
                 eq_3_desc: "Defined in the VECM framework, this vector represents the stable, long-run path where Bitcoin’s TAM absorption ($\\rho$) is balanced against the fundamental scarcity, internal heat/energy ($H$), and network power vectors.",
                 eq_4_title: "IV. Langevin SDE (Stochastic Orbital Accretion)",
-                eq_4_desc: "Replaces deterministic Keplerian orbits. The accretion force follows a stochastic differential equation driven by dynamic mass ratios and random market entropy ($dW_t$).",
+                eq_4_desc: "Replaces deterministic Keplerian orbits. The accretion force follows a stochastic differential equation driven by dynamic mass ratios and random market entropy ($$dW_t$$).",
                 eq_5_title: "V. Relativistic Error Correction Term (ECT)",
                 eq_5_desc: "The Mean Reversion Force. The speed at which price is forced back to the Barycenter is amplified by the current Lorentz factor.",
                 eq_6_title: "VI. Phase Space Chaos (Lyapunov Exponent)",
-                eq_6_desc: "If $\\lambda > 0$, the binary orbit is in deterministic chaos. Initial minor divergences in the macro state lead to exponentially divergent price paths.",
+                eq_6_desc: "If $$\\lambda > 0$$, the binary orbit is in deterministic chaos. Initial minor divergences in the macro state lead to exponentially divergent price paths.",
                 glossary_title: "State Tensor Glossary",
                 glossary_lorentz: "Spacetime compression factor driven by VIX; scales gravitational pull during high volatility.",
                 glossary_macc: "Mass Accretion Rate; the velocity of fiat liquidity transferring into the network.",
@@ -1616,7 +1616,10 @@ if __name__ == "__main__":
             
             document.querySelectorAll('[data-i18n]').forEach(el => {
                 const key = el.getAttribute('data-i18n');
-                if (i18n[lang][key]) el.innerText = i18n[lang][key];
+                if (i18n[lang][key]) {
+                    // Use innerHTML instead of innerText so the injected text can contain HTML entities if needed
+                    el.innerHTML = i18n[lang][key];
+                }
             });
 
             if(currentSelDate) updateSelectionText();
@@ -1624,6 +1627,11 @@ if __name__ == "__main__":
             const iframe = document.getElementById('sim-frame');
             if (iframe && iframe.contentWindow) {
                 iframe.contentWindow.postMessage({ type: 'SET_LANG', lang: lang }, '*');
+            }
+
+            // Force MathJax to re-typeset the page after new text is injected
+            if (window.MathJax && window.MathJax.typesetPromise) {
+                window.MathJax.typesetPromise().catch((err) => console.log('MathJax error:', err));
             }
         }
 
