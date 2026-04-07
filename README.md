@@ -25,7 +25,7 @@ This mass transfer is modeled using actual astrophysics and thermodynamics:
 
 ### I. Relativistic Volatility (Lorentz Factor)
 ```math
-\gamma_{Lorentz} = \exp\left(\frac{\min(VIX_t, 80) - 20}{40}\right)$$
+\gamma_{Lorentz} = \exp\left(\frac{\min(VIX_t, 80) - 20}{40}\right)
 ```
 Simulates spacetime compression. High VIX shrinks the 'distance' between assets, forcing tighter cointegration and violently increasing gravitational pull (correlations trending to 1 during market panics).
 
