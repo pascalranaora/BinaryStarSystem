@@ -28,7 +28,7 @@ $$\gamma_{Lorentz} = \exp\left(\frac{\min(VIX_t, 80) - 20}{40}\right)$$
 Simulates spacetime compression. High VIX shrinks the 'distance' between assets, forcing tighter cointegration and violently increasing gravitational pull (correlations trending to 1 during market panics).
 
 ### II. Mass Transfer Velocity (Bernoulli Overflow)
-$$\dot{M}_{Acc} = \left(\frac{\max(CPI_{yoy} - 2.0, 0)\cdot M2_{Vol}}{Rate_{FedFunds}}\right) \cdot \gamma_{Lorentz}$$
+$$\dot{M}_{Acc} = \left(\frac{\max(CPI_{yoy} - 2.0, 0)\cdot M2_{Vol}_{Rate_{FedFunds} \right) \cdot \gamma_{Lorentz}$$
 Calculates the velocity of liquidity escaping the expanding 'Red Giant' (M2), multiplied by the Lorentz Factor during volatile regimes.
 
 ### III. The Cointegrating Vector (Gravitational Equilibrium)
