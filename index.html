@@ -1950,8 +1950,12 @@ if __name__ == "__main__":
         .play-btn { background-color: #00e5ff; }
         .play-btn.paused { background-color: #f59e0b; color: white;}
 
+        /* Tooltip UI */
+        #info-btn { position: absolute; top: 20px; right: 20px; width: 40px; height: 40px; border-radius: 50%; background: rgba(15, 23, 42, 0.85); border: 2px solid #00e5ff; color: #00e5ff; font-size: 20px; font-weight: bold; cursor: pointer; z-index: 20; box-shadow: 0 0 10px rgba(0,229,255,0.3); backdrop-filter: blur(4px); transition: all 0.3s; display: flex; align-items: center; justify-content: center; }
+        #info-btn:hover { background: #00e5ff; color: #000; }
+        
         /* Audio & Info Buttons */
-        .top-btns { position: absolute; top: 20px; right: 20px; display: flex; gap: 10px; z-index: 20; }
+        .top-btns { position: absolute; top: 20px; right: 70px; display: flex; gap: 10px; z-index: 20; }
         .circle-btn { width: 40px; height: 40px; border-radius: 50%; background: rgba(15, 23, 42, 0.85); border: 2px solid #00e5ff; color: #00e5ff; font-size: 18px; font-weight: bold; cursor: pointer; box-shadow: 0 0 10px rgba(0,229,255,0.3); backdrop-filter: blur(4px); transition: all 0.3s; display: flex; align-items: center; justify-content: center; }
         .circle-btn:hover { background: #00e5ff; color: #000; }
         .circle-btn.muted { border-color: #64748b; color: #64748b; }
@@ -1967,14 +1971,13 @@ if __name__ == "__main__":
 </head>
 <body>
     <audio id="bgMusic" loop>
-        <source src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-10.mp3" type="audio/mpeg">
+        <source src="https://raw.githubusercontent.com/pascalranaora/BinaryStarSystem/main/Mashup.mp3" type="audio/mpeg">
     </audio>
 
     <div class="top-btns">
-        <button id="audioBtn" class="circle-btn">🔊</button>
-        <button id="infoBtn" class="circle-btn">?</button>
+        <button id="audioBtn" class="circle-btn">🔇</button>
     </div>
-
+    <button id="info-btn" class="info-btn">?</button>
     <div id="ui">
         <h1 id="i18n-title">Bitcoin-Fiat Binary Star System</h1>
         <p id="i18n-desc">Scroll to zoom. Joint growth simulation.</p>
@@ -2001,32 +2004,56 @@ if __name__ == "__main__":
             <label><span id="i18n-cagr">M2 Expansion (CAGR):</span> <span id="rateLabel">6.4</span>%</label>
             <input type="range" id="inflationRate" min="2" max="15" step="0.1" value="6.4">
         </div>
-        <button id="toggleBtn" class="btn play-btn">PAUSE</button>
+        <button id="toggleBtn" class="btn play-btn" id="i18n-pause">PAUSE</button>
     </div>
 
+    
     <div id="info-panel">
         <h2 id="i18n-tt-title">The Thermodynamic Analogy</h2>
-        <p id="i18n-tt-p1">...</p>
+        <p id="i18n-tt-p1">As central banks expand the money supply (<span class="highlight-red">The Red Giant</span>), fiat currency inflates, losing purchasing power and "density". The flare pulses represent massive liquidity injections (QE) that often align with 4-year cycles.</p>
+        <p id="i18n-tt-p2">Bitcoin (<span class="highlight">The White Dwarf</span>) possesses absolute mathematical scarcity. As capital seeks a store of value to escape fiat inflation, liquidity is pulled from the expanding fiat system into the dense, limited network via the accretion ray.</p>
+        <p id="i18n-tt-p3">This acts precisely like a binary star system: a hyper-dense object strips mass from a dying, expanding star, organically growing Bitcoin's market cap and its accretion disk as a mathematical consequence of fiat expansion.</p>
     </div>
 
     <script>
         const audio = document.getElementById('bgMusic');
         const audioBtn = document.getElementById('audioBtn');
-        const infoBtn = document.getElementById('infoBtn');
-        const infoPanel = document.getElementById('info-panel');
         const toggleBtn = document.getElementById('toggleBtn');
-        let isMuted = true;
+        const infoBtn = document.getElementById('info-btn');
+        const infoPanel = document.getElementById('info-panel');
         let isInfoOpen = false;
+        let isMuted = true; // Intent: Unmuted by default
+        audio.muted = isMuted;
 
-        // Gestion Audio
-        audioBtn.addEventListener('click', () => {
+        // 1. Function to attempt playback
+        const startAudio = () => {
+            if (!isMuted) {
+                audio.play()
+                    .then(() => {
+                        // Success: Remove the listener once music starts
+                        window.removeEventListener('click', startAudio);
+                        window.removeEventListener('touchstart', startAudio);
+                    })
+                    .catch(e => console.log("Waiting for interaction to play..."));
+            }
+        };
+
+        // 2. Add listeners to "Unlock" audio on the first user gesture
+        window.addEventListener('click', startAudio);
+        window.addEventListener('touchstart', startAudio);
+
+        // 3. Manual Toggle Button
+        audioBtn.addEventListener('click', (e) => {
+            e.stopPropagation(); // Prevent startAudio from triggering twice
             isMuted = !isMuted;
             audio.muted = isMuted;
-            if(!isMuted) {
-                audio.play().catch(e => console.log("Interaction required"));
+            
+            if (!isMuted) {
+                audio.play();
                 audioBtn.innerText = '🔊';
                 audioBtn.classList.remove('muted');
             } else {
+                audio.pause(); // Optional: pause instead of just muting to save resources
                 audioBtn.innerText = '🔇';
                 audioBtn.classList.add('muted');
             }
@@ -2048,15 +2075,350 @@ if __name__ == "__main__":
                 infoPanel.style.display = 'block';
                 setTimeout(() => infoPanel.style.opacity = '1', 10);
                 infoBtn.innerText = 'X';
+                infoBtn.style.color = '#ef4444';
+                infoBtn.style.borderColor = '#ef4444';
             } else {
                 infoPanel.style.opacity = '0';
                 setTimeout(() => infoPanel.style.display = 'none', 300);
                 infoBtn.innerText = '?';
+                infoBtn.style.color = '#00e5ff';
+                infoBtn.style.borderColor = '#00e5ff';
+            }
+        });
+        
+        setTimeout(() => infoBtn.click(), 500);
+
+        const dict = {
+            en: { 
+                title: "Bitcoin-Fiat Binary Star System", desc: "Scroll to zoom. Joint growth simulation.", time: "Simulated Time", scrubber: "Time Scrubber", m2: "Red Giant (M2)", btc: "White Dwarf (BTC)", price: "BTC Price ($)", cagr: "M2 Expansion (CAGR):", pause: "PAUSE", play: "PLAY", unit: " B$",
+                tt_title: "The Thermodynamic Analogy",
+                tt_p1: "As central banks expand the money supply (<span class='highlight-red'>The Red Giant</span>), fiat currency inflates, losing purchasing power and 'density'. The flare pulses represent massive liquidity injections (QE) that often align with 4-year cycles.",
+                tt_p2: "Bitcoin (<span class='highlight'>The White Dwarf</span>) possesses absolute mathematical scarcity. As capital seeks a store of value to escape fiat inflation, liquidity is pulled from the expanding fiat system into the dense, limited network via the accretion ray.",
+                tt_p3: "This acts precisely like a binary star system: a hyper-dense object strips mass from a dying, expanding star, organically growing Bitcoin's market cap and its accretion disk as a mathematical consequence of fiat expansion."
+            },
+            fr: { 
+                title: "Système Stellaire Binaire Bitcoin-Fiat", 
+                desc: "Défilez pour zoomer. Simulation de croissance conjointe.", 
+                time: "Temps Simule", 
+                scrubber: "Curseur Temporel", 
+                m2: "Geante Rouge (M2)", 
+                btc: "Naine Blanche (BTC)", 
+                price: "Prix BTC ($)", 
+                cagr: "Expansion M2 (TCAM):", 
+                pause: "PAUSE", 
+                play: "LECTURE", 
+                unit: " Mds $",
+                tt_title: "L'Analogie Thermodynamique",
+                tt_p1 : "À mesure que les banques centrales étendent la masse monétaire (⁣la Géante Rouge</span>), la monnaie fiat s'inflate, perdant son pouvoir d'achat et sa 'densité'. Les éruptions représentent des injections massives de liquidités (QE) alignées sur des cycles de 4 ans.",
+                tt_p2: "Bitcoin (<span class='highlight'>La Naine Blanche</span>) possède une rareté mathématique absolue. Alors que le capital cherche une réserve de valeur pour échapper à l'inflation fiat, la liquidité est aspirée du système fiat vers ce réseau dense et limité via le rayon d'accrétion.",
+                tt_p3: "Ceci agit précisément comme un système d'étoiles binaires : un objet hyperdense arrache la masse d'une étoile mourante en expansion, faisant croître organiquement la capitalisation du Bitcoin et son disque d'accrétion."
+            }
+        };
+        
+        let currLang = 'fr';
+
+        window.addEventListener('message', (event) => {
+            if(event.data && event.data.type === 'SET_LANG') {
+                currLang = event.data.lang;
+                document.getElementById('i18n-title').innerText = dict[currLang].title;
+                document.getElementById('i18n-desc').innerText = dict[currLang].desc;
+                document.getElementById('i18n-time').innerText = dict[currLang].time;
+                document.getElementById('i18n-scrubber').innerText = dict[currLang].scrubber;
+                document.getElementById('i18n-m2').innerText = dict[currLang].m2;
+                document.getElementById('i18n-btc').innerText = dict[currLang].btc;
+                document.getElementById('i18n-price').innerText = dict[currLang].price;
+                document.getElementById('i18n-cagr').innerText = dict[currLang].cagr;
+                
+                document.getElementById('i18n-tt-title').innerHTML = dict[currLang].tt_title;
+                document.getElementById('i18n-tt-p1').innerHTML = dict[currLang].tt_p1;
+                document.getElementById('i18n-tt-p2').innerHTML = dict[currLang].tt_p2;
+                document.getElementById('i18n-tt-p3').innerHTML = dict[currLang].tt_p3;
+
+                toggleBtn.innerText = isPlaying ? dict[currLang].pause : dict[currLang].play;
             }
         });
 
-        // ... [Reste du code Three.js identique au précédent] ...
-        // Note: Assurez-vous d'inclure toute la logique Three.js ici
+        
+        // Data & Logic
+        const historyData = {
+            2010: { m2: 45236.6, btc: 0.001, p: 0.26 },
+            2011: { m2: 46778.5, btc: 0.04, p: 5.74 },
+            2012: { m2: 49662.9, btc: 0.08, p: 8.39 },
+            2013: { m2: 53002.3, btc: 2.3, p: 200 },
+            2014: { m2: 57257.8, btc: 3.99, p: 322.3 },
+            2015: { m2: 61284.8, btc: 5.86, p: 423.55 },
+            2016: { m2: 64422.7, btc: 14.88, p: 979.66 },
+            2017: { m2: 68254.9, btc: 250.11, p: 15399.22 },
+            2018: { m2: 70842.3, btc: 63.59, p: 3809.24 },
+            2019: { m2: 74503.3, btc: 125.49, p: 7193.15 },
+            2020: { m2: 89316.5, btc: 523.53, p: 28889.29 },
+            2021: { m2: 103254.6, btc: 862.3, p: 46471.03 },
+            2022: { m2: 107942.0, btc: 311.71, p: 16538.67 },
+            2023: { m2: 104240.4, btc: 835.62, p: 43473.63 },
+            2024: { m2: 105800.7, btc: 1942.33, p: 99362.77 },
+            2025: { m2: 109999.8, btc: 1731.58, p: 87553.51 },
+            2026: { m2: 115183.1, btc: 1907.72, p: 95586.09 },
+            2027: { m2: 122222.1, btc: 2507.65, p: 124715.67 },
+            2028: { m2: 126934.0, btc: 2731.8, p: 135174.0 },
+        };
+
+        let currentYearFloat = 2010.0; let initialM2 = 44116; let currentM2 = initialM2; let currentBTC_Cap = 0; let currentBTC_Price = 0;
+        let inflationRate = 0.064; let isPlaying = true; 
+        const timeScrubber = document.getElementById('timeScrubber');
+        //const toggleBtn = document.getElementById('toggleBtn');
+        
+        toggleBtn.addEventListener('click', () => { isPlaying = !isPlaying; toggleBtn.innerText = isPlaying ? dict[currLang].pause : dict[currLang].play; toggleBtn.classList.toggle('paused', !isPlaying); });
+        document.getElementById('inflationRate').addEventListener('input', (e) => { inflationRate = parseFloat(e.target.value) / 100; document.getElementById('rateLabel').innerText = e.target.value; });
+        timeScrubber.addEventListener('input', (e) => currentYearFloat = parseFloat(e.target.value));
+
+        function lerp(start, end, amt) { return (1 - amt) * start + amt * end; }
+        
+        // MATH UPDATE: Logarithmic Interpolation for Geometric Assets
+        function logLerp(start, end, amt) { 
+            if (start <= 0) start = 0.0001; // Protect against log(0)
+            return Math.exp(lerp(Math.log(start), Math.log(end), amt)); 
+        }
+        
+        function calculateStateAtYear(y) {
+            let m2, btc, p;
+            if(y <= 2028) {
+                let keys = Object.keys(historyData).map(Number).sort((a,b)=>a-b);
+                let k1 = keys.reverse().find(k => k <= y) || 2010; let k2 = keys.reverse().find(k => k > y) || 2028;
+                let amt = (y - k1) / (k2 - k1 || 1);
+                
+                // M2 expands relatively smoothly, but exponential is more accurate
+                m2 = logLerp(historyData[k1].m2, historyData[k2].m2, amt); 
+                // BTC and Price are strictly power-law/exponential. logLerp is mathematically required.
+                btc = logLerp(historyData[k1].btc, historyData[k2].btc, amt);
+                p = logLerp(historyData[k1].p, historyData[k2].p, amt);
+            } else {
+                let yrs = y - 2028.0;
+                m2 = historyData[2028].m2 * Math.pow(1 + inflationRate, yrs);
+                let baseR = historyData[2028].btc / historyData[2028].m2;
+                
+                // MATH UPDATE: Imposing the 15% Eddington Limit with high-friction curve
+                const EDDINGTON_LIMIT = 0.15; 
+                // Increased decay factor (0.25) to simulate severe radiation pressure as the dwarf approaches TAM cap
+                btc = m2 * (baseR + (EDDINGTON_LIMIT - baseR) * (1 - Math.exp(-0.25 * yrs)));
+                
+                // Assuming ~19.8M active coins beyond 2028
+                p = (btc * 1e9) / 19800000;
+            }
+            return {m2, btc, p};
+        }
+
+        function createCenterIcon(text, color, fontSize = 160) {
+            const canvas = document.createElement('canvas'); const context = canvas.getContext('2d');
+            canvas.width = 512; canvas.height = 512; 
+            context.font = "Bold " + fontSize + "px 'Courier New', monospace"; 
+            context.fillStyle = color; 
+            context.textAlign = "center"; 
+            context.textBaseline = "middle";
+            context.fillText(text, canvas.width / 2, canvas.height / 2 + (fontSize*0.05)); 
+            return new THREE.Sprite(new THREE.SpriteMaterial({ map: new THREE.CanvasTexture(canvas), transparent: true, depthTest: false }));
+        }
+
+        // Three.js Setup
+        const scene = new THREE.Scene(); scene.fog = new THREE.FogExp2(0x030712, 0.002);
+        const camera = new THREE.PerspectiveCamera(60, window.innerWidth/window.innerHeight, 0.1, 5000); camera.position.set(0, 45, 70);
+        const renderer = new THREE.WebGLRenderer({antialias: true}); renderer.setSize(window.innerWidth, window.innerHeight); document.body.appendChild(renderer.domElement);
+        new THREE.OrbitControls(camera, renderer.domElement).enableDamping = true;
+        scene.add(new THREE.AmbientLight(0x222233));
+        const dwarfLight = new THREE.PointLight(0xa78bfa, 2, 150); scene.add(dwarfLight);
+        const giantLight = new THREE.PointLight(0xff3333, 5, 200); scene.add(giantLight);
+
+        // Stars
+        const starGeo = new THREE.BufferGeometry(); const starPos = [];
+        for(let i=0; i<10000; i++) starPos.push((Math.random()-0.5)*2000, (Math.random()-0.5)*2000, (Math.random()-0.5)*2000);
+        starGeo.setAttribute('position', new THREE.Float32BufferAttribute(starPos, 3));
+        scene.add(new THREE.Points(starGeo, new THREE.PointsMaterial({color: 0xffffff, size: 0.2, transparent: true, opacity: 0.5})));
+
+        // --- THE RED GIANT ---
+        const giantUniforms = { time: { value: 0 }, intensity: { value: 0.0 } };
+        const giantMaterial = new THREE.ShaderMaterial({
+            uniforms: giantUniforms,
+            vertexShader: \`
+                varying vec2 vUv;
+                varying vec3 vPosition;
+                void main() { vUv = uv; vPosition = position; gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0); }
+            \`,
+            fragmentShader: \`
+                uniform float time;
+                uniform float intensity;
+                varying vec2 vUv;
+                varying vec3 vPosition;
+
+                float hash(vec3 p) { p = fract(p * 0.3183099 + .1); p *= 17.0; return fract(p.x * p.y * p.z * (p.x + p.y + p.z)); }
+                float noise(vec3 x) {
+                    vec3 i = floor(x); vec3 f = fract(x); f = f * f * (3.0 - 2.0 * f);
+                    return mix(mix(mix(hash(i + vec3(0,0,0)), hash(i + vec3(1,0,0)), f.x), mix(hash(i + vec3(0,1,0)), hash(i + vec3(1,1,0)), f.x), f.y),
+                               mix(mix(hash(i + vec3(0,0,1)), hash(i + vec3(1,0,1)), f.x), mix(hash(i + vec3(0,1,1)), hash(i + vec3(1,1,1)), f.x), f.y), f.z);
+                }
+
+                void main() {
+                    float n = noise(vPosition * 0.5 + time * 0.5);
+                    n += 0.5 * noise(vPosition * 1.5 - time * 0.3);
+                    vec3 color1 = vec3(0.4, 0.0, 0.0); vec3 color2 = vec3(0.9, 0.2, 0.0); vec3 color3 = vec3(1.0, 0.8, 0.1); 
+                    vec3 finalColor = mix(color1, color2, n * 1.5);
+                    float flare = smoothstep(0.6, 1.0, n) * intensity;
+                    finalColor = mix(finalColor, color3, flare);
+                    gl_FragColor = vec4(finalColor, 0.9);
+                }
+            \`,
+            transparent: true
+        });
+
+        const giantSystem = new THREE.Group();
+        const giantMesh = new THREE.Mesh(new THREE.SphereGeometry(15, 64, 64), giantMaterial); giantSystem.add(giantMesh);
+        const m2Icon = createCenterIcon("M2", "rgba(0,0,0,0.8)", 200); m2Icon.scale.set(30, 30, 1); m2Icon.position.z = 15.5; giantSystem.add(m2Icon); 
+        scene.add(giantSystem);
+
+        // --- THE WHITE DWARF ---
+        const dwarfSystem = new THREE.Group();
+        dwarfSystem.add(new THREE.Mesh(new THREE.SphereGeometry(1, 32, 32), new THREE.MeshBasicMaterial({color: 0xffffff})));
+        
+        const diskParticleCount = 12000;
+        const diskGeo = new THREE.BufferGeometry();
+        const diskPos = new Float32Array(diskParticleCount * 3);
+        const diskColors = new Float32Array(diskParticleCount * 3);
+        const colorInner = new THREE.Color(0xffffff); const colorOuter = new THREE.Color(0xf59e0b); 
+
+        for(let i=0; i<diskParticleCount; i++) {
+            const r = 1.2 + Math.pow(Math.random(), 2.0) * 6.0; 
+            const theta = Math.random() * Math.PI * 2;
+            diskPos[i*3] = Math.cos(theta) * r;
+            diskPos[i*3+1] = (Math.random() - 0.5) * 0.1 * (r/6.0); 
+            diskPos[i*3+2] = Math.sin(theta) * r;
+            const mixRatio = (r - 1.2) / 6.0;
+            const mixedColor = colorInner.clone().lerp(colorOuter, mixRatio);
+            diskColors[i*3] = mixedColor.r; diskColors[i*3+1] = mixedColor.g; diskColors[i*3+2] = mixedColor.b;
+        }
+        diskGeo.setAttribute('position', new THREE.BufferAttribute(diskPos, 3));
+        diskGeo.setAttribute('color', new THREE.BufferAttribute(diskColors, 3));
+        const accretionDisk = new THREE.Points(diskGeo, new THREE.PointsMaterial({ size: 0.15, vertexColors: true, blending: THREE.AdditiveBlending, transparent: true, opacity: 0.6 }));
+        dwarfSystem.add(accretionDisk);
+
+        const btcIcon = createCenterIcon("₿", "#f59e0b", 250); btcIcon.scale.set(2, 2, 1); dwarfSystem.add(btcIcon); 
+        scene.add(dwarfSystem);
+
+        // --- VOLUMETRIC TRANSFER RAY ---
+        class CustomSinCurve extends THREE.Curve {
+            constructor(start, end, control) { super(); this.start = start; this.end = end; this.control = control; }
+            getPoint(t, target = new THREE.Vector3()) {
+                const tInv = 1 - t;
+                target.x = tInv * tInv * this.start.x + 2 * tInv * t * this.control.x + t * t * this.end.x;
+                target.y = tInv * tInv * this.start.y + 2 * tInv * t * this.control.y + t * t * this.end.y;
+                target.z = tInv * tInv * this.start.z + 2 * tInv * t * this.control.z + t * t * this.end.z;
+                return target;
+            }
+        }
+
+        const dummyPath = new CustomSinCurve(new THREE.Vector3(0,0,0), new THREE.Vector3(10,0,0), new THREE.Vector3(5,5,0));
+        let tubeGeo = new THREE.TubeGeometry(dummyPath, 20, 1.5, 8, false);
+
+        const rayUniforms = { time: { value: 0 }, opacityMulti: { value: 0.0 }, colorStart: { value: new THREE.Color(0xf59e0b) }, colorEnd: { value: new THREE.Color(0xffffff) } };
+        const rayMaterial = new THREE.ShaderMaterial({
+            uniforms: rayUniforms,
+            vertexShader: \` varying vec2 vUv; void main() { vUv = uv; gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0); }\`,
+            fragmentShader: \`
+                uniform float time; uniform float opacityMulti; uniform vec3 colorStart; uniform vec3 colorEnd; varying vec2 vUv;
+                void main() {
+                    float flow = sin((vUv.x * 20.0) - (time * 10.0)) * 0.5 + 0.5;
+                    float edgeFade = smoothstep(0.0, 0.1, vUv.x) * smoothstep(1.0, 0.9, vUv.x);
+                    vec3 finalColor = mix(colorStart, colorEnd, vUv.x);
+                    gl_FragColor = vec4(finalColor, flow * edgeFade * opacityMulti);
+                }
+            \`,
+            transparent: true, blending: THREE.AdditiveBlending, depthWrite: false, side: THREE.DoubleSide
+        });
+
+        let transferRay = new THREE.Mesh(tubeGeo, rayMaterial);
+        scene.add(transferRay);
+
+        let angle = 0; let clock = new THREE.Clock();
+
+        function animate() {
+            requestAnimationFrame(animate);
+            let dt = clock.getDelta();
+            
+            if(isPlaying) {
+                // PHYSICS UPDATE: Multiply by delta time (dt) for hardware independence
+                // Advances exactly 0.5 simulated years per real-world second, regardless of monitor Hz
+                currentYearFloat += 0.2 * dt; 
+                if(currentYearFloat > 2050) currentYearFloat = 2010;
+                timeScrubber.value = currentYearFloat;
+                
+                let st = calculateStateAtYear(currentYearFloat);
+                currentM2 = st.m2; currentBTC_Cap = st.btc; currentBTC_Price = st.p;
+
+                let date = new Date(2010, 0, 1); date.setFullYear(Math.floor(currentYearFloat)); date.setMonth(Math.floor((currentYearFloat%1)*12));
+                document.getElementById('dateDisplay').innerText = date.toLocaleDateString(currLang === 'fr' ? 'fr-FR' : 'en-US', {year: 'numeric', month: 'short'});
+                
+                // M2 is always large, so floor and format is fine
+                document.getElementById('m2Display').innerText = Math.floor(currentM2).toLocaleString() + dict[currLang].unit;
+                
+                // BTC Cap formatting logic based on the 1 Billion threshold
+                let btcFormatted;
+                if (currentBTC_Cap < 1) {
+                    // Less than 1 Billion: show 3 decimal places (e.g., "0.001 B$")
+                    btcFormatted = currentBTC_Cap.toFixed(3);
+                } else {
+                    // 1 Billion or more: floor to whole number and add commas
+                    btcFormatted = Math.floor(currentBTC_Cap).toLocaleString();
+                }
+                document.getElementById('btcDisplay').innerText = btcFormatted + dict[currLang].unit;
+                
+                // Price formatting (kept the same)
+                document.getElementById('priceDisplay').innerText = "$" + Math.floor(currentBTC_Price).toLocaleString();
+
+                let marketShare = currentBTC_Cap / currentM2;
+                document.getElementById('ratioDisplay').innerText = (marketShare * 100).toFixed(2) + "%";
+
+                giantUniforms.time.value += dt; rayUniforms.time.value += dt;
+                
+                let cycleProgress = (currentYearFloat % 4) / 4; 
+                let flareIntensity = 0;
+                if(cycleProgress > 0.8) { flareIntensity = (cycleProgress - 0.8) * 6; } else if (cycleProgress < 0.2) { flareIntensity = 1.0 - (cycleProgress * 5); }
+                giantUniforms.intensity.value = (inflationRate * 5) + flareIntensity;
+
+                let scaleM2 = Math.cbrt(currentM2 / initialM2); 
+                giantSystem.scale.setScalar(scaleM2);
+                
+                let targetScaleDwarf = (15 * scaleM2) * Math.cbrt(marketShare);
+                let actualDwarfScale = Math.max(0.01, targetScaleDwarf);
+                dwarfSystem.scale.setScalar(actualDwarfScale);
+
+                accretionDisk.rotation.y -= 0.05;
+                angle -= 0.005;
+                giantSystem.position.set(Math.cos(angle)*-15, 0, Math.sin(angle)*-15);
+                dwarfSystem.position.set(Math.cos(angle)*45, 0, Math.sin(angle)*45);
+                
+                m2Icon.position.set(0,0,0); m2Icon.quaternion.copy(camera.quaternion);
+                btcIcon.position.set(0,0,0); btcIcon.quaternion.copy(camera.quaternion);
+
+                giantLight.position.copy(giantSystem.position); dwarfLight.position.copy(dwarfSystem.position);
+
+                if (currentYearFloat > 2011) {
+                    const dirToDwarf = new THREE.Vector3().subVectors(dwarfSystem.position, giantSystem.position).normalize();
+                    const start = new THREE.Vector3().copy(giantSystem.position).add(dirToDwarf.clone().multiplyScalar(15 * scaleM2)); 
+                    const end = new THREE.Vector3().copy(dwarfSystem.position).sub(dirToDwarf.clone().multiplyScalar(4 * actualDwarfScale));
+                    const curveOffset = new THREE.Vector3(dirToDwarf.z, 0, -dirToDwarf.x).multiplyScalar(20); 
+                    const control = new THREE.Vector3().addVectors(start, end).multiplyScalar(0.5).add(curveOffset);
+                    
+                    const newPath = new CustomSinCurve(start, end, control);
+                    let dynamicThickness = 0.5 + (flareIntensity * 1.5) + (marketShare * 10);
+                    
+                    transferRay.geometry.dispose(); 
+                    transferRay.geometry = new THREE.TubeGeometry(newPath, 30, dynamicThickness, 8, false);
+                    rayUniforms.opacityMulti.value = Math.min(0.8, (marketShare * 5) + 0.3);
+                } else { rayUniforms.opacityMulti.value = 0.0; }
+
+            } else {
+                giantUniforms.time.value += dt * 0.2; rayUniforms.time.value += dt * 0.2; accretionDisk.rotation.y -= 0.01; 
+            }
+            renderer.render(scene, camera);
+        }
+        animate();
     <\/script>
 </body>
 </html>`;
