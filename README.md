@@ -98,17 +98,3 @@ This will output `Nakamoto_RocheLobe_VECM.pdf` (a high-resolution quant report) 
 
 Past performance is not indicative of future results. The Nakamoto/Fiat Binary Star System model is a theoretical and scientific experiment designed to study macroeconomic thermodynamics and network effects. It is **strictly not financial or investment advice**. Cryptocurrencies and financial markets are highly volatile. Always conduct your own independent research.
 
-
----
-
-### **How to Make It Even Better (The Final 1%)**
-
-If you want to continue pushing this project, here are the exact features to build next:
-
-1. **Implement Jump-Diffusion (Merton Model) in the Python SDE:**
-   Currently, your Monte Carlo loop uses `np.random.normal()` (Wiener process/Brownian motion). This creates a smooth "bell curve" of futures. However, crypto has "fat tails" (sudden violent crashes or spikes).
-   * *Update:* Add a Poisson Jump process to your Monte Carlo loop. `if np.random.rand() < 0.05:` trigger a massive +/- 20% jump in the price path. This will make your probability density graph (Figure 2) much more realistic.
-2. **Re-activate the DCA Backtester in the HTML:**
-   You have commented out `<div id="backtester-module">` in your HTML. You should reactivate it. Let users input a starting capital amount, and write a JS function that automatically "buys" when your Thermodynamic Z-Score drops below -2, and "sells" when it goes above +2. Compare that ROI to a standard Buy & Hold strategy to prove the model generates Alpha.
-3. **Bayesian Parameter Optimization (Python):**
-   Instead of hardcoding `TAM_MULTIPLIER = 5.0` and `STRUCTURAL_M2_GROWTH = 0.06`, import `optuna` in Python and write a function that simulates 1,000 different values for these constants to find the exact combination that minimizes the VECM's Residual Standard Error. Let the machine discover the physics constants!
