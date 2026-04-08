@@ -4,6 +4,7 @@ import numpy as np
 import statsmodels.api as sm
 from statsmodels.tsa.stattools import adfuller
 from sklearn.preprocessing import StandardScaler
+from sklearn.decomposition import PCA
 import matplotlib.pyplot as plt
 from matplotlib.backends.backend_pdf import PdfPages
 import yfinance as yf
@@ -24,8 +25,8 @@ HASHRATE_LAG = 245
 FORECAST_DAYS = 730 
 STRUCTURAL_M2_GROWTH = 0.06  
 TAM_MULTIPLIER = 5.0 
-HOWELL_CYCLE_DAYS = 1975 
 MC_PATHS = 2000
+HOWELL_CRISIS_THRESHOLD = 1.65 # Ratio Dette/Liquidité critique
 
 HALVING_DATES = [
     pd.to_datetime('2012-11-28'), pd.to_datetime('2016-07-09'),
@@ -84,7 +85,7 @@ class DataFetcher:
         fpath = os.path.join(self.cache_dir, fname)
         if self._is_valid(fname): return pd.read_csv(fpath, index_col=0, parse_dates=True)
         try:
-            df = yf.download(tickers, start="2010-01-01", progress=False)
+            df = yf.download(tickers, start="2009-01-01", progress=False)
             if isinstance(df.columns, pd.MultiIndex):
                 if 'Close' in df.columns.levels[0]: df = df['Close']
             elif 'Close' in df.columns:
@@ -97,18 +98,18 @@ class DataFetcher:
             return pd.DataFrame()
             
     def get_fred(self):
-        fname = "fred_macro_v4.csv"
+        fname = "fred_macro_v7.csv"
         fpath = os.path.join(self.cache_dir, fname)
         if self._is_valid(fname): return pd.read_csv(fpath, index_col=0, parse_dates=True)
         
-        # Ajout de BAMLH0A0HYM2 (Credit Spreads) et T10Y2Y (Yield Curve) pour le Régime Macro
-        series_list = ['WALCL', 'WTREGEN', 'RRPONTSYD', 'M2SL', 'VIXCLS', 'CPIAUCSL', 'FEDFUNDS', 'BAMLH0A0HYM2', 'T10Y2Y']
+        # Updated Tickers: Replaced DPSACBW with QUSPBMUSDA for Private Banking Credit
+        series_list = ['WALCL', 'WTREGEN', 'RRPONTSYD', 'M2SL', 'VIXCLS', 'CPIAUCSL', 
+                       'FEDFUNDS', 'BAMLH0A0HYM2', 'T10Y2Y', 'GFDEBTN', 'WSHOSHO', 'QUSPBMUSDA']
         df_list = []
         session = requests.Session()
         adapter = HTTPAdapter(max_retries=Retry(connect=5, backoff_factor=0.5))
         session.mount('https://', adapter)
         dates = pd.date_range(start='2009-01-03', end=datetime.today(), freq='D')
-        
         for s in series_list:
             try:
                 url = f"https://api.stlouisfed.org/fred/series/observations?series_id={s}&api_key={FRED_API_KEY}&file_type=json&observation_start=2009-01-03"
@@ -145,80 +146,83 @@ class BinaryStarRocheLobeModel:
             dt = np.abs(series_arr[i+lag] - series_arr[nn_idx+lag]) + 1e-8
             divergences.append(np.log(dt / d0))
         return np.mean(divergences) / lag
-
-    def optimize_liquidity_space(self, df):
-        print("   🔍 Optimizing Regime-Switching Accretion Force (Pal + Hayes + Newton)...")
-        df['Net_Liquidity'] = df['WALCL'].fillna(0) - df['WTREGEN'].fillna(0) - df['RRPONTSYD'].fillna(0)
-        df['Net_Liquidity'] = np.where(df['Net_Liquidity'] > 1e6, df['Net_Liquidity'], df['M2SL'] * 1000)
-
-        injection_90d = df['Net_Liquidity'].diff(90)
-        btc_momentum = np.log(df['Price']).diff(30).shift(-30)
-
-        best_corr, best_params = 0, {'lag': 15, 'smooth': 30}
+    
+    def create_global_liquidity_index(self, df):
+        """
+        Implémente la thèse de Howell (Volume) et TBL (Plumbing).
+        Utilise PCA pour trouver l'indice de corrélation maximale.
+        """
+        print("   🔍 Building Howell-TBL Global Liquidity Index (PCA Optimization)...")
         
-        for smooth in [15, 30, 60, 90]:
-            acceleration = injection_90d.diff(smooth)
-            # APPLICATION DU FILTRE DE RÉGIME : Force Effective = Accélération * Phi
-            effective_force = acceleration * df['Regime_Phi']
+        # 1. US Net Liquidity (The Bitcoin Layer)
+        df['US_Net_Liq'] = df['WALCL'].fillna(0) - df['WTREGEN'].fillna(0) - df['RRPONTSYD'].fillna(0)
+        df['US_Net_Liq'] = np.where(df['US_Net_Liq'] > 1e6, df['US_Net_Liq'], df['M2SL'] * 1000)
+        
+        # 2. Shadow Banking / Private Credit (Howell component)
+        df['Private_Credit'] = df['QUSPBMUSDA'].rolling(90, min_periods=1).mean().ffill().bfill()
+        
+        # 3. Global CB Proxy (Howell component)
+        df['Global_CB_Flow'] = df['WSHOSHO'].diff(90).fillna(0)
+        
+        # Normalisation pour PCA. Fix: Use .ffill() instead of fillna(method='ffill')
+        liq_vars = ['US_Net_Liq', 'Private_Credit', 'Global_CB_Flow', 'M2SL']
+        scaler = StandardScaler()
+        standardized_data = scaler.fit_transform(df[liq_vars].ffill().bfill())
+        
+        # PCA : On extrait la 1ère composante (l'Onde de Liquidité Mondiale)
+        pca = PCA(n_components=1)
+        gli_wave_raw = pca.fit_transform(standardized_data).flatten() # Aplatit le array numpy ici
+        df['GLI_Wave'] = gli_wave_raw
+        
+        # Inverser l'onde si le PCA l'a lue à l'envers (le PCA ne connaît pas le signe de corrélation)
+        # On s'assure que l'onde de liquidité est positivement corrélée au M2 historique
+        if np.corrcoef(gli_wave_raw, df['M2SL'].ffill().bfill())[0, 1] < 0:
+            df['GLI_Wave'] = df['GLI_Wave'] * -1
             
-            for lag in np.arange(15, 200, 15):
-                f_lagged = effective_force.shift(lag)
-                valid = f_lagged.notna() & btc_momentum.notna()
-                if valid.sum() > 100:
-                    corr = np.corrcoef(f_lagged[valid], btc_momentum[valid])[0, 1]
-                    if corr > best_corr:
-                        best_corr, best_params = corr, {'lag': lag, 'smooth': smooth}
-
-        print(f"   ✅ Regime-Switching Lag Found (Max Corr: {best_corr:.4f}): {best_params['lag']} days")
-        return best_params
+        print(f"   ✅ Liquidity PCA complete. Explained Variance: {pca.explained_variance_ratio_[0]*100:.1f}%")
+        return df
 
     def apply_thermodynamics(self, df):
-        hoarding_rate = np.where(df['Price'] < df['MA200'], 2500, 500)
-        corp_h = pd.Series(hoarding_rate, index=df.index).cumsum()
-        corp_h[df.index < '2020-08-11'] = 0 
-        
-        hodl_raw = (self.all_supply[df.index] - (df['Tx_Vol_USD'] / df['Price']).rolling(30).mean() - corp_h).dropna()
-        df['WD_Density'] = hodl_raw / self.all_supply[df.index] 
+        hodl_raw = (self.all_supply[df.index] - (df['Tx_Vol_USD'] / df['Price']).rolling(30).mean()).dropna()
+        df['WD_Density'] = (hodl_raw / self.all_supply[df.index]).bfill()
         
         res_a = sm.OLS(np.log(hodl_raw), sm.add_constant(np.log((hodl_raw.index - self.genesis).days))).fit()
         self.pl_const, self.alpha = res_a.params
-        df['SF'] = (np.exp(self.pl_const + self.alpha * np.log((df.index - self.genesis).days)) + corp_h) / self.all_ann_flow[df.index]
+        df['SF'] = np.exp(self.pl_const + self.alpha * np.log((df.index - self.genesis).days)) / self.all_ann_flow[df.index]
 
-        df['M1_Asset'] = df['Price'] * self.all_supply[df.index]
         df['M2_TAM'] = df['M2SL'] * 1e9 * TAM_MULTIPLIER
-        df['Mass_Ratio'] = df['M1_Asset'] / df['M2_TAM']
+        df['Mass_Ratio'] = (df['Price'] * self.all_supply[df.index]) / df['M2_TAM']
         df['Lorentz_Factor'] = np.exp((df['VIXCLS'].clip(upper=80) - 20) / 40)
 
-        # --- CALCUL DU MULTIPLICATEUR DE RÉGIME (PHI) ---
-        # 1. Spreads de Crédit (Stress). Moyenne historique ~ 4%. Si > 4%, on ferme la valve exponentiellement.
+        # Intégration du nouvel indice Global
+        df = self.create_global_liquidity_index(df)
+        
+        # Valve de Régime (Raoul Pal Business Cycle)
         cs = df['BAMLH0A0HYM2'].fillna(4.0)
         cs_valve = np.exp(-(cs - 4.0) / 3.0).clip(upper=1.2)
-        
-        # 2. Courbe des Taux (Récession). Inversée (<0) = danger. Normale (>0) = saine.
         yc = df['T10Y2Y'].fillna(1.0)
-        yc_valve = 1 / (1 + np.exp(-yc * 2)) # Fonction logistique douce (0 à 1)
-        
-        # Le Multiplicateur global
+        yc_valve = 1 / (1 + np.exp(-yc * 2))
         df['Regime_Phi'] = cs_valve * yc_valve
 
-        # F = ma * Phi (Effective Accretion Force)
-        eq_params = self.optimize_liquidity_space(df)
-        injection_90d = df['Net_Liquidity'].diff(90)
-        acceleration = injection_90d.diff(eq_params['smooth'])
+        # NEW DEBT WALL ACCRETION PHYSICS
+        df['Debt_to_M2'] = (df['GFDEBTN'] / 1000.0) / df['M2SL']
         
-        # On multiplie par Phi et on décale selon l'optimum
-        raw_accretion = (acceleration * df['Regime_Phi']).shift(eq_params['lag'])
+        # On utilise l'accélération du GLI (Howell/TBL) adoucie
+        gli_acceleration = df['GLI_Wave'].diff(30).diff(30).fillna(0)
+        debt_momentum = df['GFDEBTN'].diff(90).fillna(0)
         
-        # Lissage pour le VECM et Normalisation Z-Score
-        df['Accretion_Force'] = raw_accretion.rolling(30).mean().fillna(0)
-        mean_acc = df['Accretion_Force'].rolling(365, min_periods=90).mean().bfill()
+        # Valve de Pal + Pression de la Dette + Onde Howell
+        base_force = (gli_acceleration * df['Regime_Phi']) + (debt_momentum * df['Debt_to_M2'])
+        df['Accretion_Force'] = base_force.shift(30).rolling(30).mean().fillna(0)
+        
+        # Robust Z-Score Scaling
         std_acc = df['Accretion_Force'].rolling(365, min_periods=90).std().bfill() + 1e-8
-        df['Accretion_Force'] = ((df['Accretion_Force'] - mean_acc) / std_acc).fillna(0)
+        df['Accretion_Force'] = ((df['Accretion_Force'] - df['Accretion_Force'].rolling(365, min_periods=90).mean().bfill()) / std_acc).fillna(0)
         return df
 
     def assemble_tensors(self):
         print("\n--- [1/5] ASSEMBLING TENSORS (Astrophysics & Cointegration) ---")
-        price_df = self.fetcher.get_price(); price_df['MA200'] = price_df['Price'].rolling(200).mean()
+        price_df = self.fetcher.get_price()
         h = self.fetcher.get_blockchain_metric('hash-rate', 'Hashrate')
         v = self.fetcher.get_blockchain_metric('n-unique-addresses', 'Velocity')
         tx = self.fetcher.get_blockchain_metric('estimated-transaction-volume-usd', 'Tx_Vol_USD')
@@ -241,133 +245,190 @@ class BinaryStarRocheLobeModel:
         self.df = self.df.dropna()
 
     def run_audit(self):
-        print("\n--- [2/5] MCMC BAYESIAN PHYSICS AUDIT ---")
+        print("\n--- [2/5] MCMC BAYESIAN PHYSICS AUDIT (V37: Global Liquidity Wave) ---")
         trace_file = "mcmc_physics_trace.nc"
-        if os.path.exists(trace_file): os.remove(trace_file)
-
-        self.df = self.df[self.df.index >= '2014-01-01']
-
-        self.df['TAM_B'] = self.df['M2SL'] * TAM_MULTIPLIER
-        self.df['Rho'] = (((self.df['Price'] * self.all_supply[self.df.index]) / 1e9) / self.df['TAM_B']).clip(upper=0.999)
-        self.df['Logit_Rho'] = np.log(self.df['Rho'] / (1 - self.df['Rho']))
         
+        # We MUST remove the cache to force the model to learn the new GLI_Wave Beta
+        # if os.path.exists(trace_file): 
+        #     os.remove(trace_file)
+
+        self.df = self.df[self.df.index >= '2009-01-03']
+        self.df['Logit_Rho'] = np.log((((self.df['Price'] * self.all_supply[self.df.index]) / 1e9) / (self.df['M2SL'] * TAM_MULTIPLIER)).clip(1e-5, 0.999))
+        self.df['Logit_Rho'] = self.df['Logit_Rho'].replace([np.inf, -np.inf], np.nan).ffill()
+
         self.X_cols = ['WD_Density', 'log_V', 'log_SF', 'log_H', 'Accretion_Force', 'Global_RORO_State']
         self.d_log = pd.DataFrame({
             'Logit_Rho': self.df['Logit_Rho'], 'WD_Density': self.df['WD_Density'],
             'log_V': np.log(self.df['Velocity']), 'log_SF': np.log(self.df['SF']),
             'log_H': np.log(self.df['H_Elastic']), 'Accretion_Force': self.df['Accretion_Force'],
             'Global_RORO_State': self.df['Global_RORO_State'], 'Price': self.df['Price'],
-            'TAM_B': self.df['TAM_B'], 'Lorentz_Factor': self.df['Lorentz_Factor'],
+            'M2_TAM': self.df['M2_TAM'], 'Lorentz_Factor': self.df['Lorentz_Factor'],
             'Mass_Ratio': self.df['Mass_Ratio']
         }).dropna()
 
         X_scaled = self.x_scaler.fit_transform(self.d_log[self.X_cols])
         y = self.d_log['Logit_Rho'].values
 
-        with pm.Model() as model:
-            intercept = pm.Normal('intercept', mu=0, sigma=10)
-            beta = pm.Normal('beta', mu=0, sigma=5, shape=X_scaled.shape[1])
-            sigma = pm.HalfNormal('sigma', sigma=2)
-            mu = intercept + pm.math.dot(X_scaled, beta)
-            
-            y_obs = pm.Normal('y_obs', mu=mu, sigma=sigma, observed=y)
-            
-            print("   ⚛️ Lancement du Sampler (NUTS) sur l'ère Macro Moderne (2014+)...")
-            # OPTIMISATION: 500 draws au lieu de 1000 pour accélérer x4 le processus
-            self.mcmc_trace = pm.sample(500, tune=500, chains=2, target_accept=0.95, progressbar=True)
+        if os.path.exists(trace_file):
+            print(f"   📦 Loading existing MCMC trace from {trace_file}...")
+            self.mcmc_trace = az.from_netcdf(trace_file)
             self.mcmc_stats = az.summary(self.mcmc_trace, hdi_prob=0.94)
-            az.to_netcdf(self.mcmc_trace, trace_file)
+        else:
+            with pm.Model() as model:
+                intercept = pm.Normal('intercept', mu=0, sigma=10)
+                beta_other = pm.Normal('beta_other', mu=0, sigma=5, shape=4) 
+                beta_positive = pm.HalfNormal('beta_positive', sigma=5, shape=2) 
+                
+                beta = pm.Deterministic('beta', pm.math.stack([beta_other[0], beta_other[1], beta_positive[0], beta_positive[1], beta_other[2], beta_other[3]]))
+                
+                sigma = pm.HalfNormal('sigma', sigma=2)
+                mu = intercept + pm.math.dot(X_scaled, beta)
+                pm.Normal('y_obs', mu=mu, sigma=sigma, observed=y)
+                
+                print("   ⚛️ Launching NUTS Sampler (Learning GLI wave mechanics)...")
+                self.mcmc_trace = pm.sample(500, tune=500, chains=2, target_accept=0.95, progressbar=True)
+                self.mcmc_stats = az.summary(self.mcmc_trace, hdi_prob=0.94)
+                az.to_netcdf(self.mcmc_trace, trace_file)
 
-        print("\n--- [RÉSULTATS MCMC] ---")
-        print(self.mcmc_stats)
+        print("\n--- MCMC POSTERIOR SUMMARY ---")
+        print(self.mcmc_stats.loc[['intercept', 'beta[0]', 'beta[1]', 'beta[2]', 'beta[3]', 'beta[4]', 'beta[5]']])
 
-        self.mcmc_intercept = self.mcmc_stats.loc['intercept', 'mean']
-        self.mcmc_betas = self.mcmc_stats.loc[[f'beta[{i}]' for i in range(len(self.X_cols))], 'mean'].values
-        
+        self.mcmc_intercept = float(self.mcmc_stats.loc['intercept', 'mean'])
+        self.mcmc_betas = np.array([
+            float(self.mcmc_stats.loc['beta[0]', 'mean']),
+            float(self.mcmc_stats.loc['beta[1]', 'mean']),
+            float(self.mcmc_stats.loc['beta[2]', 'mean']),
+            float(self.mcmc_stats.loc['beta[3]', 'mean']),
+            float(self.mcmc_stats.loc['beta[4]', 'mean']),
+            float(self.mcmc_stats.loc['beta[5]', 'mean'])
+        ])
+
         mu_fitted = self.mcmc_intercept + np.dot(X_scaled, self.mcmc_betas)
         self.ECT = y - mu_fitted
+        
+        ss_res = np.sum(self.ECT ** 2)
+        ss_tot = np.sum((y - np.mean(y)) ** 2)
+        self.r_squared = 1 - (ss_res / ss_tot)
+        print(f"   VECM R-Squared: {self.r_squared:.4f}")
+
         self.adjusted_ECT = self.ECT * self.d_log['Lorentz_Factor']
         self.ect_p_value = adfuller(self.adjusted_ECT)[1]
-        
-        self.modeled_price_history = (((1 / (1 + np.exp(-mu_fitted))) * self.d_log['TAM_B']) * 1e9) / self.all_supply[self.d_log.index].values
-        log_diff = np.log(self.d_log['Price']) - np.log(self.modeled_price_history)
-        self.val_z_score_series = (log_diff - log_diff.rolling(365).mean()) / log_diff.rolling(365).std()
+
+        self.modeled_price_history = (np.exp(mu_fitted) / (1 + np.exp(mu_fitted)) * self.d_log['M2_TAM']) / self.all_supply[self.d_log.index].values
+        self.val_z_score_series = (np.log(self.d_log['Price']/self.modeled_price_history)).rolling(30).mean() / (np.log(self.d_log['Price']/self.modeled_price_history)).rolling(365).std()
         self.lyapunov_exponent = self.calculate_lle(self.val_z_score_series.dropna())
+        print(f"   Largest Lyapunov Exponent (LLE): {self.lyapunov_exponent:.5f}")
 
     def execute_mc(self):
-        print("\n--- [3/5] MC LANGEVIN SDE PROJECTION ---")
+        print("\n--- [3/5] MC LANGEVIN SDE PROJECTION (Hybrid: Santostasi Power Law + Macro SDE) ---")
         f_dates = pd.date_range(self.d_log.index[-1] + timedelta(1), periods=FORECAST_DAYS, freq='D')
-        steps = np.arange(1, FORECAST_DAYS + 1); dt = 1.0/365.0
+        dt = 1.0 / 365.0
         
-        lookback = min(1460, len(self.d_log) - 1)
-        v_drift = (self.d_log['log_V'].iloc[-1] - self.d_log['log_V'].iloc[-lookback]) / lookback 
-        d_drift = (self.d_log['WD_Density'].iloc[-1] - self.d_log['WD_Density'].iloc[-lookback]) / lookback
-        h_drift = (self.d_log['log_H'].iloc[-1] - self.d_log['log_H'].iloc[-lookback]) / lookback
-
+        # 1. THE THERMODYNAMIC CORE: Extraction de la Loi de Puissance de Santostasi
+        # P = c * t^alpha  <=>  ln(P) = ln(c) + alpha * ln(t)
+        days_history = np.log((self.d_log.index - self.genesis).days.values)
+        days_future = np.log((f_dates - self.genesis).days.values)
+        
+        p_model = sm.OLS(np.log(self.d_log['Price'].values), sm.add_constant(days_history)).fit()
+        p_const, p_slope = p_model.params
+        
+        print(f"   📐 Loi de Puissance (Santostasi) détectée - Exposant: {p_slope:.2f}")
+        
+        # Trajectoire déterministe pure (La ligne droite ascendante sur un graphique Log-Log)
+        power_law_orbit = np.exp(p_const + p_slope * days_future)
+        
+        # 2. MACRO SDE INITIALIZATION
+        base_vix = self.df['VIXCLS'].iloc[-1]
         mc_paths = []
+        
         for _ in tqdm(range(MC_PATHS)):
-            p_m2 = self.df['M2SL'].iloc[-1] * np.exp(steps * (STRUCTURAL_M2_GROWTH/365) + np.random.normal(0, 0.001, FORECAST_DAYS).cumsum())
-            p_acc = np.zeros(FORECAST_DAYS); p_acc[0] = self.d_log['Accretion_Force'].iloc[-1]
-            sim_vix = np.zeros(FORECAST_DAYS); sim_vix[0] = self.df['VIXCLS'].iloc[-1]
+            sim_p = np.zeros(FORECAST_DAYS)
+            sim_p[0] = self.d_log['Price'].iloc[-1]
             
+            p_acc = self.d_log['Accretion_Force'].iloc[-1]
+            sim_vix = base_vix
+            
+            # Génération du bruit brownien
+            dW_acc = np.random.normal(0, np.sqrt(dt), FORECAST_DAYS)
+            dW_vix = np.random.normal(0, np.sqrt(dt), FORECAST_DAYS)
+            dW_price = np.random.normal(0, np.sqrt(dt), FORECAST_DAYS)
+
             for t in range(1, FORECAST_DAYS):
-                sim_vix[t] = sim_vix[t-1] + 5.0 * (20.0 - sim_vix[t-1]) * dt + 8.0 * np.random.normal(0, np.sqrt(dt))
-                loc_l = np.exp((min(sim_vix[t], 80)-20)/40)
-                p_acc[t] = p_acc[t-1] + 1.0 * (0.0 - p_acc[t-1]) * dt + 1.5 * loc_l * np.random.normal(0, np.sqrt(dt))
-            
-            sim_v = self.d_log['log_V'].iloc[-1] + steps * v_drift + np.random.normal(0, 0.005, FORECAST_DAYS).cumsum()
-            sim_d = np.clip(self.d_log['WD_Density'].iloc[-1] + steps * d_drift, 0.4, 0.95)
-            sim_h = self.d_log['log_H'].iloc[-1] + steps * h_drift + np.random.normal(0, 0.01, FORECAST_DAYS).cumsum()
-            f_sf = np.log((np.exp(self.pl_const + self.alpha * np.log((f_dates - self.genesis).days)) + (steps * 1000)) / self.all_ann_flow[f_dates])
-            
-            X_future = pd.DataFrame({'WD_Density': sim_d, 'log_V': sim_v, 'log_SF': f_sf, 'log_H': sim_h, 'Accretion_Force': p_acc, 'Global_RORO_State': self.d_log['Global_RORO_State'].iloc[-1] + np.random.normal(0, 0.02, FORECAST_DAYS).cumsum()})[self.X_cols]
-            X_sim = self.x_scaler.transform(X_future)
-            
-            logit_p = self.mcmc_intercept + np.dot(X_sim, self.mcmc_betas) + np.random.normal(0, self.ECT.std(), FORECAST_DAYS)
-            terminal_price = (((1 / (1 + np.exp(-logit_p))) * (p_m2 * TAM_MULTIPLIER)) * 1e9) / self.all_supply[f_dates].values
-            mc_paths.append(terminal_price)
+                # Volatilité (VIX) - Mean Reversion
+                sim_vix = sim_vix + 5.0 * (20.0 - sim_vix) * dt + 8.0 * dW_vix[t]
+                loc_lorentz = np.exp((min(sim_vix, 80) - 20) / 40)
+                
+                # Onde de Liquidité Globale (Accretion Force)
+                # Retour à la moyenne vers +0.5 (Tendance structurelle à l'impression monétaire / Howell)
+                p_acc = p_acc + 1.5 * (0.5 - p_acc) * dt + 2.0 * loc_lorentz * dW_acc[t]
+                
+                # --- THE HYBRID SDE EQUATION ---
+                # La Cible n'est plus fixe, elle monte chaque jour avec la Loi de Puissance.
+                # L'Onde de Liquidité modifie cette cible : +1 Z-Score de liquidité = +15% de prime de prix (Bulle)
+                macro_multiplier = np.exp(p_acc * 0.15) 
+                dynamic_target = power_law_orbit[t] * macro_multiplier
+                
+                # Processus d'Ornstein-Uhlenbeck (Élastique gravitationnel vers la cible)
+                kappa = 2.5 * loc_lorentz # Vitesse de rappel dépend de la volatilité macro
+                drift = kappa * (np.log(dynamic_target) - np.log(sim_p[t-1])) * dt
+                
+                # Diffusion Stochastique (Random Market Walk ~ 60% vol annuelle)
+                diffusion = 0.60 * loc_lorentz * dW_price[t] 
+                
+                # Mise à jour géométrique du Prix
+                sim_p[t] = sim_p[t-1] * np.exp(drift + diffusion)
+                
+            mc_paths.append(sim_p)
             
         mc = np.array(mc_paths)
-        initial_delta = np.log(self.d_log['Price'].iloc[-1]) - np.log(mc[:, 0])
-        final_projection = np.exp(np.log(mc) + (initial_delta[:, np.newaxis] * np.exp(-np.linspace(0, 15, FORECAST_DAYS))))
-        return f_dates, final_projection, mc
+
+        print(f"   -> Simulation complete. Target Range [5th-95th]: ${np.percentile(mc[:,-1], 5):,.0f} - ${np.percentile(mc[:,-1], 95):,.0f}")
+        return f_dates, mc
 
 if __name__ == "__main__":
     engine = BinaryStarRocheLobeModel()
     engine.assemble_tensors()
     engine.run_audit()
-    f_dates, final_projection, mc = engine.execute_mc()
+    f_dates, mc_final_prices = engine.execute_mc()
 
     print("\n--- [4/5] RENDERING PDF REPORT ---")
-    median, u95, l05 = np.percentile(final_projection, [50, 95, 5], axis=0)
+    median, u95, l05 = np.percentile(mc_final_prices, [50, 95, 5], axis=0)
     
     log_diff = np.log(engine.d_log['Price']) - np.log(engine.modeled_price_history)
     rolling_std = log_diff.rolling(365, min_periods=90).std().fillna(0.5)
     upper_band = engine.modeled_price_history * np.exp(2 * rolling_std)
     lower_band = engine.modeled_price_history * np.exp(-2 * rolling_std)
     
-    with PdfPages('Nakamoto_RocheLobe_VECM_MCMC.pdf') as pdf:
+    with PdfPages('Nakamoto_RocheLobe_V37_GlobalLiq.pdf') as pdf:
+        # Page 1: Equilibrium & Forecast
         fig1, (ax1, ax2) = plt.subplots(2, 1, figsize=(14, 12))
         ax1.plot(engine.d_log.index, engine.d_log['Price'], color='silver', label='Actual Price')
         ax1.plot(engine.d_log.index, engine.modeled_price_history, color='blue', label='VECM MCMC Equilibrium')
-        ax1.plot(f_dates, median, color='red', ls='--', label='Median Forecast')
-        ax1.set_yscale('log'); ax1.set_title("Stochastic Relativistic Equilibrium"); ax1.legend()
-        ax2.hist(final_projection[:, -1], bins=100, color='navy', alpha=0.5, density=True); ax2.set_title("Terminal Price Density")
+        ax1.fill_between(engine.d_log.index, lower_band, upper_band, color='blue', alpha=0.1)
+        ax1.plot(f_dates, median, color='red', ls='--', label=f'Median Forecast: ${median[-1]:,.0f}')
+        ax1.fill_between(f_dates, l05, u95, color='red', alpha=0.1)
+        ax1.set_yscale('log'); ax1.set_title("Stochastic Relativistic Equilibrium (V37: Global Liquidity PCA)"); ax1.legend(loc='upper left')
+        ax2.hist(mc_final_prices[:, -1], bins=100, color='navy', alpha=0.5, density=True); ax2.set_title("Terminal Price Density")
         pdf.savefig(fig1); plt.close()
 
+        # Page 2: Phase Space & Lyapunov
         fig2, (ax3, ax4) = plt.subplots(2, 1, figsize=(14, 12))
         ax3.plot(engine.d_log.index, engine.val_z_score_series, color='purple', label='ECT Z-Score')
         ax3.axhline(2, color='red', ls='--'); ax3.axhline(-2, color='green', ls='--'); ax3.set_ylim(-4,4)
+        ax3.set_title("Thermodynamic Z-Score (Mean Reversion Tension)")
         z = engine.val_z_score_series.dropna().values
-        ax4.scatter(z[:-1], np.diff(z), c=np.arange(len(z)-1), cmap='magma', s=5, alpha=0.5)
-        ax4.set_title(f"Orbital Phase Space (LLE: {engine.lyapunov_exponent:.4f})")
+        sc = ax4.scatter(z[:-1], np.diff(z), c=np.arange(len(z)-1), cmap='magma', s=5, alpha=0.5)
+        plt.colorbar(sc, ax=ax4, label="Time Progression")
+        ax4.set_title(f"Orbital Phase Space Chaos (LLE: {engine.lyapunov_exponent:.4f})")
         pdf.savefig(fig2); plt.close()
 
+        # Page 3: MCMC Forest Plot
         fig3, ax5 = plt.subplots(figsize=(10, 6))
-        az.plot_forest(engine.mcmc_trace, var_names=["beta"], combined=True, ax=ax5)
-        ax5.set_title("MCMC Learned Physics: Cointegrating Vector Distribution")
-        ax5.set_yticklabels(list(reversed(engine.X_cols)))
+        az.plot_forest(engine.mcmc_trace, var_names=["beta_other", "beta_positive"], combined=True, ax=ax5)
+        ax5.set_title("MCMC Learned Physics: Posterior Distributions (Informed Priors)")
         pdf.savefig(fig3); plt.close()
+        
+        
 
     print("\n--- [5/5] GENERATING WEB DASHBOARD JSON ---")
     def clean_val(val, decimals=2):
@@ -395,23 +456,32 @@ if __name__ == "__main__":
             "date": date.strftime('%Y-%m-%d'),
             "median_projection": clean_val(median[real_idx], 2),
             "upper_projection": clean_val(u95[real_idx], 2), 
-            "lower_projection": clean_val(l05[real_idx], 2)  
+            "lower_projection": clean_val(l05[real_idx], 2)
         })
 
-    counts, bin_edges = np.histogram(final_projection[:, -1], bins=100, density=False)
+    counts, bin_edges = np.histogram(mc_final_prices[:, -1], bins=100, density=False)
     bin_centers = (bin_edges[:-1] + bin_edges[1:]) / 2
+
+    mcmc_params = {
+        "beta[0]": engine.mcmc_stats.loc['beta[0]'].to_dict(),
+        "beta[1]": engine.mcmc_stats.loc['beta[1]'].to_dict(),
+        "beta[2]": engine.mcmc_stats.loc['beta[2]'].to_dict(), 
+        "beta[3]": engine.mcmc_stats.loc['beta[3]'].to_dict(), 
+        "beta[4]": engine.mcmc_stats.loc['beta[4]'].to_dict(),
+        "beta[5]": engine.mcmc_stats.loc['beta[5]'].to_dict()
+    }
 
     dashboard_payload = {
         "metadata": {
             "generated_at": datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
-            "r_squared_vecm": 0.975,
+            "r_squared_vecm": clean_val(getattr(engine, 'r_squared', 0.0), 4),
             "target_median": clean_val(median[-1], 0),
             "physics_metrics": {
                 "largest_lyapunov_exponent": clean_val(engine.lyapunov_exponent, 5),
                 "terminal_mass_ratio": clean_val(engine.d_log['Mass_Ratio'].iloc[-1], 5),
                 "terminal_lorentz_factor": clean_val(engine.d_log['Lorentz_Factor'].iloc[-1], 4),
-                "ect_p_value": clean_val(engine.ect_p_value, 4),
-                "mcmc_learned_params": engine.mcmc_stats.to_dict(orient='index')
+                "ect_p_value": clean_val(getattr(engine, 'ect_p_value', 0.0), 4),
+                "mcmc_learned_params": mcmc_params
             }
         },
         "historical": historical_data,
