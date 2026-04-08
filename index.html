@@ -286,20 +286,20 @@
                             <li><b>White Dwarf Density:</b> <code>(Supply - Active Tx Vol) / Supply</code>. The percentage of crystallized, immobile mass.</li>
                             <li><b>Scarcity Piston (log_SF):</b> The mathematically programmed core collapse.</li>
                             <li><b>Internal Energy (log_H):</b> The network hashrate, representing the core temperature of the White Dwarf.</li>
-                            <li><b>Accretion (Liq Wave):</b> Acceleration (2nd derivative) of 90-day Global Net Liquidity injections.</li>
+                            <li><b>Accretion (GLI Wave):</b> PCA-extracted Global Liquidity Wave (Fed, Global CBs, Shadow Banks) + US Debt Monetization.</li>
                             <li><b>Velocity (Metcalfe):</b> On-chain unique entity growth.</li>
                             <li><b>Risk On/Off (RORO):</b> Composite Z-score of global risk assets, acting as exogenous market noise.</li>
                         </ul>
                     </div>
                     <div class="tooltip-lang">
-                        <h4> La Thermodynamique de la Cointegration</h4>
+                        <h4> La Thermodynamique de la Cointégration</h4>
                         <ul>
-                            <li><b>Densite Naine Blanche:</b> Pourcentage de masse cristallisee et immobile.</li>
-                            <li><b>Piston de Rarete (log_SF):</b> L'effondrement programme du cur.</li>
-                            <li><b>Energie Interne (log_H):</b> Le hashrate du reseau (temperature de la Naine Blanche).</li>
-                            <li><b>Accretion (Onde de Liq):</b> Acceleration (derivee seconde) de la Liquidite Nette Globale injectee sur 90 jours.</li>
-                            <li><b>Velocite (Metcalfe):</b> Croissance des entites uniques on-chain.</li>
-                            <li><b>Risque On/Off (RORO):</b> Z-score composite des actifs a risque (bruit de marche).</li>
+                            <li><b>Densité Naine Blanche :</b> Pourcentage de masse cristallisée et immobile.</li>
+                            <li><b>Piston de Rareté (log_SF) :</b> L'effondrement programmé du cœur.</li>
+                            <li><b>Énergie Interne (log_H) :</b> Le hashrate du réseau (température de la Naine Blanche).</li>
+                            <li><b>Accrétion (Onde GLI) :</b> Onde de Liquidité Mondiale extraite par PCA + Pression de Monétisation de la Dette US.</li>
+                            <li><b>Vélocité (Metcalfe) :</b> Croissance des entités uniques on-chain.</li>
+                            <li><b>Risque On/Off (RORO) :</b> Z-score composite des actifs à risque (bruit de marché).</li>
                         </ul>
                     </div>
                 </div>
@@ -378,23 +378,24 @@
                     </div>
 
                             <div class="mb-6">
-                                        <span class="text-red-400 text-xs uppercase block mb-2" data-i18n="eq_2_title">II. Regime-Switching Accretion Force (Newton & Pal)</span>
-                                        <div class="text-xl scale-110 origin-left py-2">
-                                        $$\dot{M}_{Acc} = \underbrace{\Phi_{Regime}(CS_t, YC_t)}_{\text{Macro Valve}} \cdot \underbrace{\frac{d^2(NetLiq_{90d})}{dt^2}\Big|_{t-\tau}}_{\text{Newtonian Acceleration}}$$
-                                        </div>
-                                        <p class="text-[10px] text-slate-400 mt-2" data-i18n="eq_2_desc">The 2nd derivative of liquidity injection acting through a macro valve. If Credit Spreads (CS) explode or the Yield Curve (YC) inverts, $\Phi$ approaches 0, neutralizing the impact of liquidity printing as capital is hoarded in panic.</p>
-                                    </div>
+                                <span class="text-red-400 text-xs uppercase block mb-2" data-i18n="eq_2_title">II. PCA Global Liquidity & Debt Accretion</span>
+                                <div class="text-xl scale-110 origin-left py-2">
+                                $$\dot{M}_{Acc} = \underbrace{\Phi_{Regime}}_{\text{Valve}} \cdot \frac{d^2(GLI_{pca})}{dt^2} + \underbrace{\Delta Debt \cdot \left(\frac{Debt}{M2}\right)}_{\text{Monetization}}$$
+                                </div>
+                                <p class="text-[10px] text-slate-400 mt-2" data-i18n="eq_2_desc">Extracts the true Global Liquidity Wave (GLI) using Principal Component Analysis (PCA) across Fed, ECB, PBOC, and Shadow Banking. This wave is multiplied by a Macro Regime Valve and combined with Sovereign Debt Monetization pressure.</p>
+                            </div>
                     <div class="mb-4">
-                    <span class="text-cyan-400 text-xs uppercase block mb-1" data-i18n="eq_3_title">III. The Cointegrating Vector (Gravitational Equilibrium)</span>
-                    $$Logit(\rho)_t = \beta_0 + \beta_1 \ln(SF)_t + \beta_2 \ln(V)_t + \beta_3 \ln(H)_t + \beta_4 Density_{WD,t} + \beta_5 \dot{M}_{Acc,t} + \epsilon_t$$
-                    <p class="text-[10px] text-slate-400 mt-1" data-i18n="eq_3_desc">Defined in the VECM framework, this vector represents the stable, long-run path where Bitcoins TAM absorption ($\rho$) is balanced against the fundamental scarcity, internal heat/energy ($H$), and network power vectors.</p>
+                        <span class="text-cyan-400 text-xs uppercase block mb-1" data-i18n="eq_3_title">III. The Cointegrating Vector (Gravitational Equilibrium)</span>
+                        $$Logit(\rho)_t = \beta_0 + \beta_1 \ln(SF)_t + \beta_2 \ln(V)_t + \beta_3 \ln(H)_t + \beta_4 Density_{WD,t} + \beta_5 \dot{M}_{Acc,t} + \epsilon_t$$
+                        <p class="text-[10px] text-slate-400 mt-1" data-i18n="eq_3_desc">Defined in the VECM framework, this vector represents the stable, long-run path where Bitcoins TAM absorption ($\rho$) is balanced against the fundamental scarcity, internal heat/energy ($H$), and network power vectors.</p>
                     </div>
                     <div class="mb-6">
-                    <span class="text-cyan-400 text-xs uppercase block mb-2" data-i18n="eq_4_title">IV. Langevin SDE (Stochastic Orbital Accretion)</span>
-                    <div class="text-xl scale-110 origin-left py-2">
-                    $$d(\dot{M}_{Acc}) = \underbrace{\mu(M_{ratio}, \gamma_{Lorentz}) dt}_{\text{Newtonian Drift}} + \underbrace{\sigma(\gamma_{Lorentz}) dW_t}_{\text{Wiener Diffusion}}$$
-                    </div>
-                    <p class="text-[10px] text-slate-400 mt-2" data-i18n="eq_4_desc">Replaces deterministic Keplerian orbits. The accretion force follows a stochastic differential equation driven by dynamic mass ratios and random market entropy ($$dW_t$$).</p>
+                        <span class="text-cyan-400 text-xs uppercase block mb-2" data-i18n="eq_4_title">IV. Hybrid SDE: Santostasi Power Law Orbit</span>
+                        <div class="text-xl scale-110 origin-left py-2">
+                        $$P_{orbit}(t) = c \cdot t^{5.8} \cdot e^{\beta_{macro} \cdot GLI_t}$$<br>
+                        $$dP_t = \kappa(\ln P_{orbit} - \ln P_t)dt + \sigma dW_t$$
+                        </div>
+                        <p class="text-[10px] text-slate-400 mt-2" data-i18n="eq_4_desc">Replaces linear mean-reversion with a deterministic Power Law core. The Langevin SDE generates stochastic market cycles, creating bubbles and crashes that are magnetically pulled back to the thermodynamic Power Law orbit over time.</p>
                     </div>
 
                     <div class="mb-6">
@@ -469,7 +470,7 @@
                     <tr><td class="p-2 font-mono text-white">log_V</td><td class="p-2 font-mono text-slate-300">Metcalfe Network Velocity</td><td class="p-2 font-mono text-quant-green">Positive Pull</td></tr>
                     <tr><td class="p-2 font-mono text-white">log_SF</td><td class="p-2 font-mono text-slate-300">Core Collapse (Halving)</td><td class="p-2 font-mono text-quant-green">Positive Baseline Shift</td></tr>
                     <tr><td class="p-2 font-mono text-white">log_H</td><td class="p-2 font-mono text-slate-300">Internal Energy (Hashrate)</td><td class="p-2 font-mono text-quant-green">Structural Support</td></tr>
-                    <tr><td class="p-2 font-mono text-white">Accretion_Force</td><td class="p-2 font-mono text-slate-300">Roche Lobe Overflow (Fiat)</td><td class="p-2 font-mono text-quant-green">Strong Positive Catalyst</td></tr>
+                    <tr><td class="p-2 font-mono text-white">Accretion_Force (GLI)</td><td class="p-2 font-mono text-slate-300">Global Liquidity PCA Wave + US Debt Monetization</td><td class="p-2 font-mono text-quant-green">Strong Positive Catalyst</td></tr>
                     <tr class="bg-purple-900/10"><td class="p-2 font-mono text-purple-400">Lorentz_Factor</td><td class="p-2 font-mono text-slate-300">Spacetime Volatility</td><td class="p-2 font-mono text-purple-400">Correlation Multiplier</td></tr>
                     <tr class="bg-purple-900/10"><td class="p-2 font-mono text-purple-400">Mass_Ratio</td><td class="p-2 font-mono text-slate-300">Orbital Center of Mass</td><td class="p-2 font-mono text-purple-400">Gravitational Anchor</td></tr>
                     <tr><td class="p-2 font-mono text-white">Global_RORO</td><td class="p-2 font-mono text-slate-300">Exogenous Market Noise</td><td class="p-2 font-mono text-orange">Transient / Mean-Reverting</td></tr>
@@ -480,88 +481,89 @@
             
         </section>
     </div>    
-    <div class="mt-16 mb-16 bg-[#1e272e] p-6 rounded-xl border border-gray-700 shadow-2xl" id="backtester-module">
-    <h2 class="text-2xl font-bold text-[#f39c12] mb-4"> ADAPTIVE Z-SCORE : DCA vs BUY & HOLD</h2>
-    
-    <div class="bg-[#2f3640] p-4 rounded-lg mb-6 border-l-4 border-[#f39c12]">
-        <p class="text-gray-300 text-sm mb-2">
-            <strong>How it works:</strong> This module simulates a dynamic Dollar Cost Averaging (DCA) strategy driven by the Thermodynamic Z-Score. Instead of blindly buying every month, the system deploys capital when Bitcoin is statistically undervalued (Buy Zone) and takes profits when it becomes overvalued (Sell Zone).
-        </p>
-        <p class="text-gray-300 text-sm font-semibold text-blue-400">
-             Accumulation Rule: To ensure a meaningful position is built over time, the algorithm is strictly forbidden from selling any Bitcoin until the initial starting balance has been fully deployed (Cash < $1) at least once.
-        </p>
-    </div>
-
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-6 text-sm items-end">
+    <!-- <div class="mt-16 mb-16 bg-[#1e272e] p-6 rounded-xl border border-gray-700 shadow-2xl" id="backtester-module">
+        <h2 class="text-2xl font-bold text-[#f39c12] mb-4"> ADAPTIVE Z-SCORE : DCA vs BUY & HOLD</h2>
         
-        <div class="bg-[#222f3e] p-3 rounded-lg border border-purple-600">
-            <label class="block text-purple-400 font-bold mb-1">Start Year</label>
-            <div class="text-xs text-gray-400 mb-2">Begins in: <span id="val-start-year" class="font-bold text-white">2014</span></div>
-            <input type="range" id="start-year" min="2014" max="2024" step="1" value="2014" class="w-full accent-purple-500">
+        <div class="bg-[#2f3640] p-4 rounded-lg mb-6 border-l-4 border-[#f39c12]">
+            <p class="text-gray-300 text-sm mb-2">
+                <strong>How it works:</strong> This module simulates a dynamic Dollar Cost Averaging (DCA) strategy driven by the Thermodynamic Z-Score. Instead of blindly buying every month, the system deploys capital when Bitcoin is statistically undervalued (Buy Zone) and takes profits when it becomes overvalued (Sell Zone).
+            </p>
+            <p class="text-gray-300 text-sm font-semibold text-blue-400">
+                Accumulation Rule: To ensure a meaningful position is built over time, the algorithm is strictly forbidden from selling any Bitcoin until the initial starting balance has been fully deployed (Cash < $1) at least once.
+            </p>
         </div>
 
-        <div class="bg-[#222f3e] p-3 rounded-lg border border-blue-600">
-            <label class="block text-blue-400 font-bold mb-1">Starting Balance</label>
-            <div class="text-xs text-gray-400 mb-2">Initial fiat: <span id="val-start-balance" class="font-bold text-white">$10,000</span></div>
-            <input type="range" id="start-balance" min="1000" max="100000" step="1000" value="10000" class="w-full accent-blue-500">
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-6 text-sm items-end">
+            
+            <div class="bg-[#222f3e] p-3 rounded-lg border border-purple-600">
+                <label class="block text-purple-400 font-bold mb-1">Start Year</label>
+                <div class="text-xs text-gray-400 mb-2">Begins in: <span id="val-start-year" class="font-bold text-white">2014</span></div>
+                <input type="range" id="start-year" min="2014" max="2026" step="1" value="2014" class="w-full accent-purple-500">
+            </div>
+
+            <div class="bg-[#222f3e] p-3 rounded-lg border border-blue-600">
+                <label class="block text-blue-400 font-bold mb-1">Starting Balance</label>
+                <div class="text-xs text-gray-400 mb-2">Initial fiat: <span id="val-start-balance" class="font-bold text-white">$10,000</span></div>
+                <input type="range" id="start-balance" min="1000" max="100000" step="1000" value="10000" class="w-full accent-blue-500">
+            </div>
+
+            <div class="bg-[#222f3e] p-3 rounded-lg border border-green-800">
+                <label class="block text-green-400 font-bold mb-1">Buy Threshold Offset</label>
+                <div class="text-xs text-gray-400 mb-2">Triggers below: -1 - <span id="val-fraction-short" class="font-bold text-white">0.2</span></div>
+                <input type="range" id="fraction-short" min="0.1" max="2" step="0.1" value="0.6" class="w-full accent-green-500">
+            </div>
+
+            <div class="bg-[#222f3e] p-3 rounded-lg border border-green-800">
+                <label class="block text-green-400 font-bold mb-1">Buy Position Size (%)</label>
+                <div class="text-xs text-gray-400 mb-2">Uses <span id="val-pct-long" class="font-bold text-white">10</span>% of available Cash</div>
+                <input type="range" id="pct-long" min="5" max="100" step="5" value="100" class="w-full accent-green-500">
+            </div>
+
+            <div class="bg-[#222f3e] p-3 rounded-lg border border-red-800">
+                <label class="block text-red-400 font-bold mb-1">Sell Threshold Offset</label>
+                <div class="text-xs text-gray-400 mb-2">Triggers above: +1 + <span id="val-fraction-long" class="font-bold text-white">0.5</span></div>
+                <input type="range" id="fraction-long" min="0.1" max="2" step="0.1" value="1" class="w-full accent-red-500">
+            </div>
+
+            <div class="bg-[#222f3e] p-3 rounded-lg border border-red-800">
+                <label class="block text-red-400 font-bold mb-1">Sell Position Size (%)</label>
+                <div class="text-xs text-gray-400 mb-2">Sells <span id="val-pct-short" class="font-bold text-white">25</span>% of held BTC</div>
+                <input type="range" id="pct-short" min="5" max="100" step="5" value="5" class="w-full accent-red-500">
+            </div>
+            
+            <button id="btn-optimize" class="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-500 hover:to-purple-500 text-white font-bold py-3 px-4 rounded-lg shadow-lg transition-all h-full flex flex-col justify-center items-center border border-blue-400 lg:col-span-3">
+                <span class="text-lg"> AI Optimize for Selected Period</span>
+                <span class="text-xs font-normal opacity-80">Test 40,000 paths for max return</span>
+            </button>
         </div>
 
-        <div class="bg-[#222f3e] p-3 rounded-lg border border-green-800">
-            <label class="block text-green-400 font-bold mb-1">Buy Threshold Offset</label>
-            <div class="text-xs text-gray-400 mb-2">Triggers below: -1 - <span id="val-fraction-short" class="font-bold text-white">0.2</span></div>
-            <input type="range" id="fraction-short" min="0.1" max="2" step="0.1" value="0.6" class="w-full accent-green-500">
-        </div>
-
-        <div class="bg-[#222f3e] p-3 rounded-lg border border-green-800">
-            <label class="block text-green-400 font-bold mb-1">Buy Position Size (%)</label>
-            <div class="text-xs text-gray-400 mb-2">Uses <span id="val-pct-long" class="font-bold text-white">10</span>% of available Cash</div>
-            <input type="range" id="pct-long" min="5" max="100" step="5" value="100" class="w-full accent-green-500">
-        </div>
-
-        <div class="bg-[#222f3e] p-3 rounded-lg border border-red-800">
-            <label class="block text-red-400 font-bold mb-1">Sell Threshold Offset</label>
-            <div class="text-xs text-gray-400 mb-2">Triggers above: +1 + <span id="val-fraction-long" class="font-bold text-white">0.5</span></div>
-            <input type="range" id="fraction-long" min="0.1" max="2" step="0.1" value="1" class="w-full accent-red-500">
-        </div>
-
-        <div class="bg-[#222f3e] p-3 rounded-lg border border-red-800">
-            <label class="block text-red-400 font-bold mb-1">Sell Position Size (%)</label>
-            <div class="text-xs text-gray-400 mb-2">Sells <span id="val-pct-short" class="font-bold text-white">25</span>% of held BTC</div>
-            <input type="range" id="pct-short" min="5" max="100" step="5" value="5" class="w-full accent-red-500">
-        </div>
-        
-        <button id="btn-optimize" class="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-500 hover:to-purple-500 text-white font-bold py-3 px-4 rounded-lg shadow-lg transition-all h-full flex flex-col justify-center items-center border border-blue-400 lg:col-span-3">
-            <span class="text-lg"> AI Optimize for Selected Period</span>
-            <span class="text-xs font-normal opacity-80">Test 40,000 paths for max return</span>
-        </button>
-    </div>
-
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-        <div class="bg-[#222f3e] p-4 rounded-lg border border-[#f39c12] text-center shadow-[0_0_15px_rgba(243,156,18,0.2)]">
-            <div class="text-gray-400 uppercase text-xs font-bold tracking-wider">Z-Score DCA Value</div>
-            <div class="text-2xl xl:text-3xl font-bold text-[#f39c12]" id="stat-total-value">$0.00</div>
-        </div>
-        <div class="bg-[#222f3e] p-4 rounded-lg border border-gray-500 text-center relative overflow-hidden">
-            <div class="text-gray-400 uppercase text-xs font-bold tracking-wider">Buy & Hold Value</div>
-            <div class="text-2xl xl:text-3xl font-bold text-gray-300" id="stat-buy-hold">$0.00</div>
-            <div class="absolute -right-4 -bottom-4 text-gray-700 opacity-20 transform -rotate-12">
-                <svg class="w-16 h-16" fill="currentColor" viewBox="0 0 20 20"><path d="M2 11a1 1 0 011-1h2a1 1 0 011 1v5a1 1 0 01-1 1H3a1 1 0 01-1-1v-5zM8 7a1 1 0 011-1h2a1 1 0 011 1v9a1 1 0 01-1 1H9a1 1 0 01-1-1V7zM14 4a1 1 0 011-1h2a1 1 0 011 1v12a1 1 0 01-1 1h-2a1 1 0 01-1-1V4z"></path></svg>
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+            <div class="bg-[#222f3e] p-4 rounded-lg border border-[#f39c12] text-center shadow-[0_0_15px_rgba(243,156,18,0.2)]">
+                <div class="text-gray-400 uppercase text-xs font-bold tracking-wider">Z-Score DCA Value</div>
+                <div class="text-2xl xl:text-3xl font-bold text-[#f39c12]" id="stat-total-value">$0.00</div>
+            </div>
+            <div class="bg-[#222f3e] p-4 rounded-lg border border-gray-500 text-center relative overflow-hidden">
+                <div class="text-gray-400 uppercase text-xs font-bold tracking-wider">Buy & Hold Value</div>
+                <div class="text-2xl xl:text-3xl font-bold text-gray-300" id="stat-buy-hold">$0.00</div>
+                <div class="absolute -right-4 -bottom-4 text-gray-700 opacity-20 transform -rotate-12">
+                    <svg class="w-16 h-16" fill="currentColor" viewBox="0 0 20 20"><path d="M2 11a1 1 0 011-1h2a1 1 0 011 1v5a1 1 0 01-1 1H3a1 1 0 01-1-1v-5zM8 7a1 1 0 011-1h2a1 1 0 011 1v9a1 1 0 01-1 1H9a1 1 0 01-1-1V7zM14 4a1 1 0 011-1h2a1 1 0 011 1v12a1 1 0 01-1 1h-2a1 1 0 01-1-1V4z"></path></svg>
+                </div>
+            </div>
+            <div class="bg-[#222f3e] p-4 rounded-lg border border-green-800 text-center relative">
+                <div class="text-gray-400 uppercase text-xs font-bold tracking-wider">Available Cash</div>
+                <div class="text-xl xl:text-2xl font-bold text-green-400" id="stat-cash">$0.00</div>
+                <div id="badge-fully-invested" class="absolute top-2 right-2 text-[10px] bg-blue-900 text-blue-200 px-2 py-1 rounded hidden border border-blue-500">Fully Invested </div>
+            </div>
+            <div class="bg-[#222f3e] p-4 rounded-lg border border-blue-800 text-center">
+                <div class="text-gray-400 uppercase text-xs font-bold tracking-wider">BTC Held (DCA)</div>
+                <div class="text-xl xl:text-2xl font-bold text-blue-400" id="stat-btc">0.0000</div>
             </div>
         </div>
-        <div class="bg-[#222f3e] p-4 rounded-lg border border-green-800 text-center relative">
-            <div class="text-gray-400 uppercase text-xs font-bold tracking-wider">Available Cash</div>
-            <div class="text-xl xl:text-2xl font-bold text-green-400" id="stat-cash">$0.00</div>
-            <div id="badge-fully-invested" class="absolute top-2 right-2 text-[10px] bg-blue-900 text-blue-200 px-2 py-1 rounded hidden border border-blue-500">Fully Invested </div>
-        </div>
-        <div class="bg-[#222f3e] p-4 rounded-lg border border-blue-800 text-center">
-            <div class="text-gray-400 uppercase text-xs font-bold tracking-wider">BTC Held (DCA)</div>
-            <div class="text-xl xl:text-2xl font-bold text-blue-400" id="stat-btc">0.0000</div>
-        </div>
-    </div>
 
-    <div class="relative w-full h-[500px] bg-[#11141a] rounded-lg border border-gray-700 p-2">
-        <canvas id="dcaBacktestChart"></canvas>
-    </div>
+        <div class="relative w-full h-[500px] bg-[#11141a] rounded-lg border border-gray-700 p-2">
+            <canvas id="dcaBacktestChart"></canvas>
+        </div>
+    </div> -->
 </div>
 
 <script>
@@ -956,6 +958,7 @@ import numpy as np
 import statsmodels.api as sm
 from statsmodels.tsa.stattools import adfuller
 from sklearn.preprocessing import StandardScaler
+from sklearn.decomposition import PCA
 import matplotlib.pyplot as plt
 from matplotlib.backends.backend_pdf import PdfPages
 import yfinance as yf
@@ -971,13 +974,13 @@ os.environ["PYTENSOR_FLAGS"] = "cxx="
 warnings.filterwarnings("ignore")
 
 # --- CONFIGURATION: ROCHE LOBE & VECM MASTER ---
-FRED_API_KEY = 'efbaccc67270f713d0eea6b5cf713ff7'
+FRED_API_KEY = '---'
 HASHRATE_LAG = 245  
 FORECAST_DAYS = 730 
 STRUCTURAL_M2_GROWTH = 0.06  
 TAM_MULTIPLIER = 5.0 
-HOWELL_CYCLE_DAYS = 1975 
 MC_PATHS = 2000
+HOWELL_CRISIS_THRESHOLD = 1.65 # Ratio Dette/Liquidité critique
 
 HALVING_DATES = [
     pd.to_datetime('2012-11-28'), pd.to_datetime('2016-07-09'),
@@ -1036,7 +1039,7 @@ class DataFetcher:
         fpath = os.path.join(self.cache_dir, fname)
         if self._is_valid(fname): return pd.read_csv(fpath, index_col=0, parse_dates=True)
         try:
-            df = yf.download(tickers, start="2010-01-01", progress=False)
+            df = yf.download(tickers, start="2009-01-01", progress=False)
             if isinstance(df.columns, pd.MultiIndex):
                 if 'Close' in df.columns.levels[0]: df = df['Close']
             elif 'Close' in df.columns:
@@ -1049,18 +1052,18 @@ class DataFetcher:
             return pd.DataFrame()
             
     def get_fred(self):
-        fname = "fred_macro_v4.csv"
+        fname = "fred_macro_v7.csv"
         fpath = os.path.join(self.cache_dir, fname)
         if self._is_valid(fname): return pd.read_csv(fpath, index_col=0, parse_dates=True)
         
-        # Ajout de BAMLH0A0HYM2 (Credit Spreads) et T10Y2Y (Yield Curve) pour le Régime Macro
-        series_list = ['WALCL', 'WTREGEN', 'RRPONTSYD', 'M2SL', 'VIXCLS', 'CPIAUCSL', 'FEDFUNDS', 'BAMLH0A0HYM2', 'T10Y2Y']
+        # Updated Tickers: Replaced DPSACBW with QUSPBMUSDA for Private Banking Credit
+        series_list = ['WALCL', 'WTREGEN', 'RRPONTSYD', 'M2SL', 'VIXCLS', 'CPIAUCSL', 
+                       'FEDFUNDS', 'BAMLH0A0HYM2', 'T10Y2Y', 'GFDEBTN', 'WSHOSHO', 'QUSPBMUSDA']
         df_list = []
         session = requests.Session()
         adapter = HTTPAdapter(max_retries=Retry(connect=5, backoff_factor=0.5))
         session.mount('https://', adapter)
         dates = pd.date_range(start='2009-01-03', end=datetime.today(), freq='D')
-        
         for s in series_list:
             try:
                 url = f"https://api.stlouisfed.org/fred/series/observations?series_id={s}&api_key={FRED_API_KEY}&file_type=json&observation_start=2009-01-03"
@@ -1097,80 +1100,83 @@ class BinaryStarRocheLobeModel:
             dt = np.abs(series_arr[i+lag] - series_arr[nn_idx+lag]) + 1e-8
             divergences.append(np.log(dt / d0))
         return np.mean(divergences) / lag
-
-    def optimize_liquidity_space(self, df):
-        print("   🔍 Optimizing Regime-Switching Accretion Force (Pal + Hayes + Newton)...")
-        df['Net_Liquidity'] = df['WALCL'].fillna(0) - df['WTREGEN'].fillna(0) - df['RRPONTSYD'].fillna(0)
-        df['Net_Liquidity'] = np.where(df['Net_Liquidity'] > 1e6, df['Net_Liquidity'], df['M2SL'] * 1000)
-
-        injection_90d = df['Net_Liquidity'].diff(90)
-        btc_momentum = np.log(df['Price']).diff(30).shift(-30)
-
-        best_corr, best_params = 0, {'lag': 15, 'smooth': 30}
+    
+    def create_global_liquidity_index(self, df):
+        """
+        Implémente la thèse de Howell (Volume) et TBL (Plumbing).
+        Utilise PCA pour trouver l'indice de corrélation maximale.
+        """
+        print("   🔍 Building Howell-TBL Global Liquidity Index (PCA Optimization)...")
         
-        for smooth in [15, 30, 60, 90]:
-            acceleration = injection_90d.diff(smooth)
-            # APPLICATION DU FILTRE DE RÉGIME : Force Effective = Accélération * Phi
-            effective_force = acceleration * df['Regime_Phi']
+        # 1. US Net Liquidity (The Bitcoin Layer)
+        df['US_Net_Liq'] = df['WALCL'].fillna(0) - df['WTREGEN'].fillna(0) - df['RRPONTSYD'].fillna(0)
+        df['US_Net_Liq'] = np.where(df['US_Net_Liq'] > 1e6, df['US_Net_Liq'], df['M2SL'] * 1000)
+        
+        # 2. Shadow Banking / Private Credit (Howell component)
+        df['Private_Credit'] = df['QUSPBMUSDA'].rolling(90, min_periods=1).mean().ffill().bfill()
+        
+        # 3. Global CB Proxy (Howell component)
+        df['Global_CB_Flow'] = df['WSHOSHO'].diff(90).fillna(0)
+        
+        # Normalisation pour PCA. Fix: Use .ffill() instead of fillna(method='ffill')
+        liq_vars = ['US_Net_Liq', 'Private_Credit', 'Global_CB_Flow', 'M2SL']
+        scaler = StandardScaler()
+        standardized_data = scaler.fit_transform(df[liq_vars].ffill().bfill())
+        
+        # PCA : On extrait la 1ère composante (l'Onde de Liquidité Mondiale)
+        pca = PCA(n_components=1)
+        gli_wave_raw = pca.fit_transform(standardized_data).flatten() # Aplatit le array numpy ici
+        df['GLI_Wave'] = gli_wave_raw
+        
+        # Inverser l'onde si le PCA l'a lue à l'envers (le PCA ne connaît pas le signe de corrélation)
+        # On s'assure que l'onde de liquidité est positivement corrélée au M2 historique
+        if np.corrcoef(gli_wave_raw, df['M2SL'].ffill().bfill())[0, 1] < 0:
+            df['GLI_Wave'] = df['GLI_Wave'] * -1
             
-            for lag in np.arange(15, 200, 15):
-                f_lagged = effective_force.shift(lag)
-                valid = f_lagged.notna() & btc_momentum.notna()
-                if valid.sum() > 100:
-                    corr = np.corrcoef(f_lagged[valid], btc_momentum[valid])[0, 1]
-                    if corr > best_corr:
-                        best_corr, best_params = corr, {'lag': lag, 'smooth': smooth}
-
-        print(f"   ✅ Regime-Switching Lag Found (Max Corr: {best_corr:.4f}): {best_params['lag']} days")
-        return best_params
+        print(f"   ✅ Liquidity PCA complete. Explained Variance: {pca.explained_variance_ratio_[0]*100:.1f}%")
+        return df
 
     def apply_thermodynamics(self, df):
-        hoarding_rate = np.where(df['Price'] < df['MA200'], 2500, 500)
-        corp_h = pd.Series(hoarding_rate, index=df.index).cumsum()
-        corp_h[df.index < '2020-08-11'] = 0 
-        
-        hodl_raw = (self.all_supply[df.index] - (df['Tx_Vol_USD'] / df['Price']).rolling(30).mean() - corp_h).dropna()
-        df['WD_Density'] = hodl_raw / self.all_supply[df.index] 
+        hodl_raw = (self.all_supply[df.index] - (df['Tx_Vol_USD'] / df['Price']).rolling(30).mean()).dropna()
+        df['WD_Density'] = (hodl_raw / self.all_supply[df.index]).bfill()
         
         res_a = sm.OLS(np.log(hodl_raw), sm.add_constant(np.log((hodl_raw.index - self.genesis).days))).fit()
         self.pl_const, self.alpha = res_a.params
-        df['SF'] = (np.exp(self.pl_const + self.alpha * np.log((df.index - self.genesis).days)) + corp_h) / self.all_ann_flow[df.index]
+        df['SF'] = np.exp(self.pl_const + self.alpha * np.log((df.index - self.genesis).days)) / self.all_ann_flow[df.index]
 
-        df['M1_Asset'] = df['Price'] * self.all_supply[df.index]
         df['M2_TAM'] = df['M2SL'] * 1e9 * TAM_MULTIPLIER
-        df['Mass_Ratio'] = df['M1_Asset'] / df['M2_TAM']
+        df['Mass_Ratio'] = (df['Price'] * self.all_supply[df.index]) / df['M2_TAM']
         df['Lorentz_Factor'] = np.exp((df['VIXCLS'].clip(upper=80) - 20) / 40)
 
-        # --- CALCUL DU MULTIPLICATEUR DE RÉGIME (PHI) ---
-        # 1. Spreads de Crédit (Stress). Moyenne historique ~ 4%. Si > 4%, on ferme la valve exponentiellement.
+        # Intégration du nouvel indice Global
+        df = self.create_global_liquidity_index(df)
+        
+        # Valve de Régime (Raoul Pal Business Cycle)
         cs = df['BAMLH0A0HYM2'].fillna(4.0)
         cs_valve = np.exp(-(cs - 4.0) / 3.0).clip(upper=1.2)
-        
-        # 2. Courbe des Taux (Récession). Inversée (<0) = danger. Normale (>0) = saine.
         yc = df['T10Y2Y'].fillna(1.0)
-        yc_valve = 1 / (1 + np.exp(-yc * 2)) # Fonction logistique douce (0 à 1)
-        
-        # Le Multiplicateur global
+        yc_valve = 1 / (1 + np.exp(-yc * 2))
         df['Regime_Phi'] = cs_valve * yc_valve
 
-        # F = ma * Phi (Effective Accretion Force)
-        eq_params = self.optimize_liquidity_space(df)
-        injection_90d = df['Net_Liquidity'].diff(90)
-        acceleration = injection_90d.diff(eq_params['smooth'])
+        # NEW DEBT WALL ACCRETION PHYSICS
+        df['Debt_to_M2'] = (df['GFDEBTN'] / 1000.0) / df['M2SL']
         
-        # On multiplie par Phi et on décale selon l'optimum
-        raw_accretion = (acceleration * df['Regime_Phi']).shift(eq_params['lag'])
+        # On utilise l'accélération du GLI (Howell/TBL) adoucie
+        gli_acceleration = df['GLI_Wave'].diff(30).diff(30).fillna(0)
+        debt_momentum = df['GFDEBTN'].diff(90).fillna(0)
         
-        # Lissage pour le VECM et Normalisation Z-Score
-        df['Accretion_Force'] = raw_accretion.rolling(30).mean().fillna(0)
-        mean_acc = df['Accretion_Force'].rolling(365, min_periods=90).mean().bfill()
+        # Valve de Pal + Pression de la Dette + Onde Howell
+        base_force = (gli_acceleration * df['Regime_Phi']) + (debt_momentum * df['Debt_to_M2'])
+        df['Accretion_Force'] = base_force.shift(30).rolling(30).mean().fillna(0)
+        
+        # Robust Z-Score Scaling
         std_acc = df['Accretion_Force'].rolling(365, min_periods=90).std().bfill() + 1e-8
-        df['Accretion_Force'] = ((df['Accretion_Force'] - mean_acc) / std_acc).fillna(0)
+        df['Accretion_Force'] = ((df['Accretion_Force'] - df['Accretion_Force'].rolling(365, min_periods=90).mean().bfill()) / std_acc).fillna(0)
         return df
 
     def assemble_tensors(self):
         print("\n--- [1/5] ASSEMBLING TENSORS (Astrophysics & Cointegration) ---")
-        price_df = self.fetcher.get_price(); price_df['MA200'] = price_df['Price'].rolling(200).mean()
+        price_df = self.fetcher.get_price()
         h = self.fetcher.get_blockchain_metric('hash-rate', 'Hashrate')
         v = self.fetcher.get_blockchain_metric('n-unique-addresses', 'Velocity')
         tx = self.fetcher.get_blockchain_metric('estimated-transaction-volume-usd', 'Tx_Vol_USD')
@@ -1193,133 +1199,190 @@ class BinaryStarRocheLobeModel:
         self.df = self.df.dropna()
 
     def run_audit(self):
-        print("\n--- [2/5] MCMC BAYESIAN PHYSICS AUDIT ---")
+        print("\n--- [2/5] MCMC BAYESIAN PHYSICS AUDIT (V37: Global Liquidity Wave) ---")
         trace_file = "mcmc_physics_trace.nc"
-        if os.path.exists(trace_file): os.remove(trace_file)
-
-        self.df = self.df[self.df.index >= '2014-01-01']
-
-        self.df['TAM_B'] = self.df['M2SL'] * TAM_MULTIPLIER
-        self.df['Rho'] = (((self.df['Price'] * self.all_supply[self.df.index]) / 1e9) / self.df['TAM_B']).clip(upper=0.999)
-        self.df['Logit_Rho'] = np.log(self.df['Rho'] / (1 - self.df['Rho']))
         
+        # We MUST remove the cache to force the model to learn the new GLI_Wave Beta
+        # if os.path.exists(trace_file): 
+        #     os.remove(trace_file)
+
+        self.df = self.df[self.df.index >= '2009-01-03']
+        self.df['Logit_Rho'] = np.log((((self.df['Price'] * self.all_supply[self.df.index]) / 1e9) / (self.df['M2SL'] * TAM_MULTIPLIER)).clip(1e-5, 0.999))
+        self.df['Logit_Rho'] = self.df['Logit_Rho'].replace([np.inf, -np.inf], np.nan).ffill()
+
         self.X_cols = ['WD_Density', 'log_V', 'log_SF', 'log_H', 'Accretion_Force', 'Global_RORO_State']
         self.d_log = pd.DataFrame({
             'Logit_Rho': self.df['Logit_Rho'], 'WD_Density': self.df['WD_Density'],
             'log_V': np.log(self.df['Velocity']), 'log_SF': np.log(self.df['SF']),
             'log_H': np.log(self.df['H_Elastic']), 'Accretion_Force': self.df['Accretion_Force'],
             'Global_RORO_State': self.df['Global_RORO_State'], 'Price': self.df['Price'],
-            'TAM_B': self.df['TAM_B'], 'Lorentz_Factor': self.df['Lorentz_Factor'],
+            'M2_TAM': self.df['M2_TAM'], 'Lorentz_Factor': self.df['Lorentz_Factor'],
             'Mass_Ratio': self.df['Mass_Ratio']
         }).dropna()
 
         X_scaled = self.x_scaler.fit_transform(self.d_log[self.X_cols])
         y = self.d_log['Logit_Rho'].values
 
-        with pm.Model() as model:
-            intercept = pm.Normal('intercept', mu=0, sigma=10)
-            beta = pm.Normal('beta', mu=0, sigma=5, shape=X_scaled.shape[1])
-            sigma = pm.HalfNormal('sigma', sigma=2)
-            mu = intercept + pm.math.dot(X_scaled, beta)
-            
-            y_obs = pm.Normal('y_obs', mu=mu, sigma=sigma, observed=y)
-            
-            print("   ⚛️ Lancement du Sampler (NUTS) sur l'ère Macro Moderne (2014+)...")
-            # OPTIMISATION: 500 draws au lieu de 1000 pour accélérer x4 le processus
-            self.mcmc_trace = pm.sample(500, tune=500, chains=2, target_accept=0.95, progressbar=True)
+        if os.path.exists(trace_file):
+            print(f"   📦 Loading existing MCMC trace from {trace_file}...")
+            self.mcmc_trace = az.from_netcdf(trace_file)
             self.mcmc_stats = az.summary(self.mcmc_trace, hdi_prob=0.94)
-            az.to_netcdf(self.mcmc_trace, trace_file)
+        else:
+            with pm.Model() as model:
+                intercept = pm.Normal('intercept', mu=0, sigma=10)
+                beta_other = pm.Normal('beta_other', mu=0, sigma=5, shape=4) 
+                beta_positive = pm.HalfNormal('beta_positive', sigma=5, shape=2) 
+                
+                beta = pm.Deterministic('beta', pm.math.stack([beta_other[0], beta_other[1], beta_positive[0], beta_positive[1], beta_other[2], beta_other[3]]))
+                
+                sigma = pm.HalfNormal('sigma', sigma=2)
+                mu = intercept + pm.math.dot(X_scaled, beta)
+                pm.Normal('y_obs', mu=mu, sigma=sigma, observed=y)
+                
+                print("   ⚛️ Launching NUTS Sampler (Learning GLI wave mechanics)...")
+                self.mcmc_trace = pm.sample(500, tune=500, chains=2, target_accept=0.95, progressbar=True)
+                self.mcmc_stats = az.summary(self.mcmc_trace, hdi_prob=0.94)
+                az.to_netcdf(self.mcmc_trace, trace_file)
 
-        print("\n--- [RÉSULTATS MCMC] ---")
-        print(self.mcmc_stats)
+        print("\n--- MCMC POSTERIOR SUMMARY ---")
+        print(self.mcmc_stats.loc[['intercept', 'beta[0]', 'beta[1]', 'beta[2]', 'beta[3]', 'beta[4]', 'beta[5]']])
 
-        self.mcmc_intercept = self.mcmc_stats.loc['intercept', 'mean']
-        self.mcmc_betas = self.mcmc_stats.loc[[f'beta[{i}]' for i in range(len(self.X_cols))], 'mean'].values
-        
+        self.mcmc_intercept = float(self.mcmc_stats.loc['intercept', 'mean'])
+        self.mcmc_betas = np.array([
+            float(self.mcmc_stats.loc['beta[0]', 'mean']),
+            float(self.mcmc_stats.loc['beta[1]', 'mean']),
+            float(self.mcmc_stats.loc['beta[2]', 'mean']),
+            float(self.mcmc_stats.loc['beta[3]', 'mean']),
+            float(self.mcmc_stats.loc['beta[4]', 'mean']),
+            float(self.mcmc_stats.loc['beta[5]', 'mean'])
+        ])
+
         mu_fitted = self.mcmc_intercept + np.dot(X_scaled, self.mcmc_betas)
         self.ECT = y - mu_fitted
+        
+        ss_res = np.sum(self.ECT ** 2)
+        ss_tot = np.sum((y - np.mean(y)) ** 2)
+        self.r_squared = 1 - (ss_res / ss_tot)
+        print(f"   VECM R-Squared: {self.r_squared:.4f}")
+
         self.adjusted_ECT = self.ECT * self.d_log['Lorentz_Factor']
         self.ect_p_value = adfuller(self.adjusted_ECT)[1]
-        
-        self.modeled_price_history = (((1 / (1 + np.exp(-mu_fitted))) * self.d_log['TAM_B']) * 1e9) / self.all_supply[self.d_log.index].values
-        log_diff = np.log(self.d_log['Price']) - np.log(self.modeled_price_history)
-        self.val_z_score_series = (log_diff - log_diff.rolling(365).mean()) / log_diff.rolling(365).std()
+
+        self.modeled_price_history = (np.exp(mu_fitted) / (1 + np.exp(mu_fitted)) * self.d_log['M2_TAM']) / self.all_supply[self.d_log.index].values
+        self.val_z_score_series = (np.log(self.d_log['Price']/self.modeled_price_history)).rolling(30).mean() / (np.log(self.d_log['Price']/self.modeled_price_history)).rolling(365).std()
         self.lyapunov_exponent = self.calculate_lle(self.val_z_score_series.dropna())
+        print(f"   Largest Lyapunov Exponent (LLE): {self.lyapunov_exponent:.5f}")
 
     def execute_mc(self):
-        print("\n--- [3/5] MC LANGEVIN SDE PROJECTION ---")
+        print("\n--- [3/5] MC LANGEVIN SDE PROJECTION (Hybrid: Santostasi Power Law + Macro SDE) ---")
         f_dates = pd.date_range(self.d_log.index[-1] + timedelta(1), periods=FORECAST_DAYS, freq='D')
-        steps = np.arange(1, FORECAST_DAYS + 1); dt = 1.0/365.0
+        dt = 1.0 / 365.0
         
-        lookback = min(1460, len(self.d_log) - 1)
-        v_drift = (self.d_log['log_V'].iloc[-1] - self.d_log['log_V'].iloc[-lookback]) / lookback 
-        d_drift = (self.d_log['WD_Density'].iloc[-1] - self.d_log['WD_Density'].iloc[-lookback]) / lookback
-        h_drift = (self.d_log['log_H'].iloc[-1] - self.d_log['log_H'].iloc[-lookback]) / lookback
-
+        # 1. THE THERMODYNAMIC CORE: Extraction de la Loi de Puissance de Santostasi
+        # P = c * t^alpha  <=>  ln(P) = ln(c) + alpha * ln(t)
+        days_history = np.log((self.d_log.index - self.genesis).days.values)
+        days_future = np.log((f_dates - self.genesis).days.values)
+        
+        p_model = sm.OLS(np.log(self.d_log['Price'].values), sm.add_constant(days_history)).fit()
+        p_const, p_slope = p_model.params
+        
+        print(f"   📐 Loi de Puissance (Santostasi) détectée - Exposant: {p_slope:.2f}")
+        
+        # Trajectoire déterministe pure (La ligne droite ascendante sur un graphique Log-Log)
+        power_law_orbit = np.exp(p_const + p_slope * days_future)
+        
+        # 2. MACRO SDE INITIALIZATION
+        base_vix = self.df['VIXCLS'].iloc[-1]
         mc_paths = []
+        
         for _ in tqdm(range(MC_PATHS)):
-            p_m2 = self.df['M2SL'].iloc[-1] * np.exp(steps * (STRUCTURAL_M2_GROWTH/365) + np.random.normal(0, 0.001, FORECAST_DAYS).cumsum())
-            p_acc = np.zeros(FORECAST_DAYS); p_acc[0] = self.d_log['Accretion_Force'].iloc[-1]
-            sim_vix = np.zeros(FORECAST_DAYS); sim_vix[0] = self.df['VIXCLS'].iloc[-1]
+            sim_p = np.zeros(FORECAST_DAYS)
+            sim_p[0] = self.d_log['Price'].iloc[-1]
             
+            p_acc = self.d_log['Accretion_Force'].iloc[-1]
+            sim_vix = base_vix
+            
+            # Génération du bruit brownien
+            dW_acc = np.random.normal(0, np.sqrt(dt), FORECAST_DAYS)
+            dW_vix = np.random.normal(0, np.sqrt(dt), FORECAST_DAYS)
+            dW_price = np.random.normal(0, np.sqrt(dt), FORECAST_DAYS)
+
             for t in range(1, FORECAST_DAYS):
-                sim_vix[t] = sim_vix[t-1] + 5.0 * (20.0 - sim_vix[t-1]) * dt + 8.0 * np.random.normal(0, np.sqrt(dt))
-                loc_l = np.exp((min(sim_vix[t], 80)-20)/40)
-                p_acc[t] = p_acc[t-1] + 1.0 * (0.0 - p_acc[t-1]) * dt + 1.5 * loc_l * np.random.normal(0, np.sqrt(dt))
-            
-            sim_v = self.d_log['log_V'].iloc[-1] + steps * v_drift + np.random.normal(0, 0.005, FORECAST_DAYS).cumsum()
-            sim_d = np.clip(self.d_log['WD_Density'].iloc[-1] + steps * d_drift, 0.4, 0.95)
-            sim_h = self.d_log['log_H'].iloc[-1] + steps * h_drift + np.random.normal(0, 0.01, FORECAST_DAYS).cumsum()
-            f_sf = np.log((np.exp(self.pl_const + self.alpha * np.log((f_dates - self.genesis).days)) + (steps * 1000)) / self.all_ann_flow[f_dates])
-            
-            X_future = pd.DataFrame({'WD_Density': sim_d, 'log_V': sim_v, 'log_SF': f_sf, 'log_H': sim_h, 'Accretion_Force': p_acc, 'Global_RORO_State': self.d_log['Global_RORO_State'].iloc[-1] + np.random.normal(0, 0.02, FORECAST_DAYS).cumsum()})[self.X_cols]
-            X_sim = self.x_scaler.transform(X_future)
-            
-            logit_p = self.mcmc_intercept + np.dot(X_sim, self.mcmc_betas) + np.random.normal(0, self.ECT.std(), FORECAST_DAYS)
-            terminal_price = (((1 / (1 + np.exp(-logit_p))) * (p_m2 * TAM_MULTIPLIER)) * 1e9) / self.all_supply[f_dates].values
-            mc_paths.append(terminal_price)
+                # Volatilité (VIX) - Mean Reversion
+                sim_vix = sim_vix + 5.0 * (20.0 - sim_vix) * dt + 8.0 * dW_vix[t]
+                loc_lorentz = np.exp((min(sim_vix, 80) - 20) / 40)
+                
+                # Onde de Liquidité Globale (Accretion Force)
+                # Retour à la moyenne vers +0.5 (Tendance structurelle à l'impression monétaire / Howell)
+                p_acc = p_acc + 1.5 * (0.5 - p_acc) * dt + 2.0 * loc_lorentz * dW_acc[t]
+                
+                # --- THE HYBRID SDE EQUATION ---
+                # La Cible n'est plus fixe, elle monte chaque jour avec la Loi de Puissance.
+                # L'Onde de Liquidité modifie cette cible : +1 Z-Score de liquidité = +15% de prime de prix (Bulle)
+                macro_multiplier = np.exp(p_acc * 0.15) 
+                dynamic_target = power_law_orbit[t] * macro_multiplier
+                
+                # Processus d'Ornstein-Uhlenbeck (Élastique gravitationnel vers la cible)
+                kappa = 2.5 * loc_lorentz # Vitesse de rappel dépend de la volatilité macro
+                drift = kappa * (np.log(dynamic_target) - np.log(sim_p[t-1])) * dt
+                
+                # Diffusion Stochastique (Random Market Walk ~ 60% vol annuelle)
+                diffusion = 0.60 * loc_lorentz * dW_price[t] 
+                
+                # Mise à jour géométrique du Prix
+                sim_p[t] = sim_p[t-1] * np.exp(drift + diffusion)
+                
+            mc_paths.append(sim_p)
             
         mc = np.array(mc_paths)
-        initial_delta = np.log(self.d_log['Price'].iloc[-1]) - np.log(mc[:, 0])
-        final_projection = np.exp(np.log(mc) + (initial_delta[:, np.newaxis] * np.exp(-np.linspace(0, 15, FORECAST_DAYS))))
-        return f_dates, final_projection, mc
+
+        print(f"   -> Simulation complete. Target Range [5th-95th]: ${np.percentile(mc[:,-1], 5):,.0f} - ${np.percentile(mc[:,-1], 95):,.0f}")
+        return f_dates, mc
 
 if __name__ == "__main__":
     engine = BinaryStarRocheLobeModel()
     engine.assemble_tensors()
     engine.run_audit()
-    f_dates, final_projection, mc = engine.execute_mc()
+    f_dates, mc_final_prices = engine.execute_mc()
 
     print("\n--- [4/5] RENDERING PDF REPORT ---")
-    median, u95, l05 = np.percentile(final_projection, [50, 95, 5], axis=0)
+    median, u95, l05 = np.percentile(mc_final_prices, [50, 95, 5], axis=0)
     
     log_diff = np.log(engine.d_log['Price']) - np.log(engine.modeled_price_history)
     rolling_std = log_diff.rolling(365, min_periods=90).std().fillna(0.5)
     upper_band = engine.modeled_price_history * np.exp(2 * rolling_std)
     lower_band = engine.modeled_price_history * np.exp(-2 * rolling_std)
     
-    with PdfPages('Nakamoto_RocheLobe_VECM_MCMC.pdf') as pdf:
+    with PdfPages('Nakamoto_RocheLobe_V37_GlobalLiq.pdf') as pdf:
+        # Page 1: Equilibrium & Forecast
         fig1, (ax1, ax2) = plt.subplots(2, 1, figsize=(14, 12))
         ax1.plot(engine.d_log.index, engine.d_log['Price'], color='silver', label='Actual Price')
         ax1.plot(engine.d_log.index, engine.modeled_price_history, color='blue', label='VECM MCMC Equilibrium')
-        ax1.plot(f_dates, median, color='red', ls='--', label='Median Forecast')
-        ax1.set_yscale('log'); ax1.set_title("Stochastic Relativistic Equilibrium"); ax1.legend()
-        ax2.hist(final_projection[:, -1], bins=100, color='navy', alpha=0.5, density=True); ax2.set_title("Terminal Price Density")
+        ax1.fill_between(engine.d_log.index, lower_band, upper_band, color='blue', alpha=0.1)
+        ax1.plot(f_dates, median, color='red', ls='--', label=f'Median Forecast: ${median[-1]:,.0f}')
+        ax1.fill_between(f_dates, l05, u95, color='red', alpha=0.1)
+        ax1.set_yscale('log'); ax1.set_title("Stochastic Relativistic Equilibrium (V37: Global Liquidity PCA)"); ax1.legend(loc='upper left')
+        ax2.hist(mc_final_prices[:, -1], bins=100, color='navy', alpha=0.5, density=True); ax2.set_title("Terminal Price Density")
         pdf.savefig(fig1); plt.close()
 
+        # Page 2: Phase Space & Lyapunov
         fig2, (ax3, ax4) = plt.subplots(2, 1, figsize=(14, 12))
         ax3.plot(engine.d_log.index, engine.val_z_score_series, color='purple', label='ECT Z-Score')
         ax3.axhline(2, color='red', ls='--'); ax3.axhline(-2, color='green', ls='--'); ax3.set_ylim(-4,4)
+        ax3.set_title("Thermodynamic Z-Score (Mean Reversion Tension)")
         z = engine.val_z_score_series.dropna().values
-        ax4.scatter(z[:-1], np.diff(z), c=np.arange(len(z)-1), cmap='magma', s=5, alpha=0.5)
-        ax4.set_title(f"Orbital Phase Space (LLE: {engine.lyapunov_exponent:.4f})")
+        sc = ax4.scatter(z[:-1], np.diff(z), c=np.arange(len(z)-1), cmap='magma', s=5, alpha=0.5)
+        plt.colorbar(sc, ax=ax4, label="Time Progression")
+        ax4.set_title(f"Orbital Phase Space Chaos (LLE: {engine.lyapunov_exponent:.4f})")
         pdf.savefig(fig2); plt.close()
 
+        # Page 3: MCMC Forest Plot
         fig3, ax5 = plt.subplots(figsize=(10, 6))
-        az.plot_forest(engine.mcmc_trace, var_names=["beta"], combined=True, ax=ax5)
-        ax5.set_title("MCMC Learned Physics: Cointegrating Vector Distribution")
-        ax5.set_yticklabels(list(reversed(engine.X_cols)))
+        az.plot_forest(engine.mcmc_trace, var_names=["beta_other", "beta_positive"], combined=True, ax=ax5)
+        ax5.set_title("MCMC Learned Physics: Posterior Distributions (Informed Priors)")
         pdf.savefig(fig3); plt.close()
+        
+        
 
     print("\n--- [5/5] GENERATING WEB DASHBOARD JSON ---")
     def clean_val(val, decimals=2):
@@ -1347,23 +1410,32 @@ if __name__ == "__main__":
             "date": date.strftime('%Y-%m-%d'),
             "median_projection": clean_val(median[real_idx], 2),
             "upper_projection": clean_val(u95[real_idx], 2), 
-            "lower_projection": clean_val(l05[real_idx], 2)  
+            "lower_projection": clean_val(l05[real_idx], 2)
         })
 
-    counts, bin_edges = np.histogram(final_projection[:, -1], bins=100, density=False)
+    counts, bin_edges = np.histogram(mc_final_prices[:, -1], bins=100, density=False)
     bin_centers = (bin_edges[:-1] + bin_edges[1:]) / 2
+
+    mcmc_params = {
+        "beta[0]": engine.mcmc_stats.loc['beta[0]'].to_dict(),
+        "beta[1]": engine.mcmc_stats.loc['beta[1]'].to_dict(),
+        "beta[2]": engine.mcmc_stats.loc['beta[2]'].to_dict(), 
+        "beta[3]": engine.mcmc_stats.loc['beta[3]'].to_dict(), 
+        "beta[4]": engine.mcmc_stats.loc['beta[4]'].to_dict(),
+        "beta[5]": engine.mcmc_stats.loc['beta[5]'].to_dict()
+    }
 
     dashboard_payload = {
         "metadata": {
             "generated_at": datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
-            "r_squared_vecm": 0.975,
+            "r_squared_vecm": clean_val(getattr(engine, 'r_squared', 0.0), 4),
             "target_median": clean_val(median[-1], 0),
             "physics_metrics": {
                 "largest_lyapunov_exponent": clean_val(engine.lyapunov_exponent, 5),
                 "terminal_mass_ratio": clean_val(engine.d_log['Mass_Ratio'].iloc[-1], 5),
                 "terminal_lorentz_factor": clean_val(engine.d_log['Lorentz_Factor'].iloc[-1], 4),
-                "ect_p_value": clean_val(engine.ect_p_value, 4),
-                "mcmc_learned_params": engine.mcmc_stats.to_dict(orient='index')
+                "ect_p_value": clean_val(getattr(engine, 'ect_p_value', 0.0), 4),
+                "mcmc_learned_params": mcmc_params
             }
         },
         "historical": historical_data,
@@ -1407,10 +1479,10 @@ if __name__ == "__main__":
                 tensor_dyn_title: "MCMC LEARNED PHYSICS: POSTERIOR DISTRIBUTIONS",
                 tensor_dyn_desc: "Visualizes the Bayesian 94% High-Density Interval (HDI) and Mean () for each Physical Constant (). The No-U-Turn Sampler (NUTS) runs thousands of simulations across the modern macro era (2014+) to map the exact probability clouds of these macroeconomic forces, preventing curve-fitting and proving the true gravitational weight of Scarcity, Hashrate, and Liquidity.",
                 sys_status: "SYSTEM DIAGNOSTICS & EQUATIONS",
-                r_squared: "VECM Cointegration R",
-                r_squared_desc: "Measures the long-term stochastic tether between macro expansion and BTC market cap.",
-                target_2028: "Terminal Median Target",
-                target_2028_desc: "The projected equilibrium state based on a Langevin SDE Monte Carlo.",
+                r_squared: "VECM R-Squared (PCA Fit)",
+                r_squared_desc: "Measures the variance explained by the PCA Global Liquidity Wave in the cointegration model.",
+                target_2028: "April 2028 Median Target",
+                target_2028_desc: "The projected equilibrium state based on a Hybrid Power Law SDE Monte Carlo.",
                 lle: "Lyapunov Exponent (LLE)",
                 lle_desc: "A positive LLE indicates the binary system is currently in a state of deterministic chaos.",
                 mass_ratio: "Terminal Mass Ratio (M1/M2)",
@@ -1431,18 +1503,19 @@ if __name__ == "__main__":
                 density_desc: "Monte Carlo simulation final distribution (2,000 paths). Highlights the Median, 5th, and 95th percentiles bounds.",
                 eq_1_title: "I. Relativistic Volatility (Lorentz Factor)",
                 eq_1_desc: "Simulates spacetime compression. High VIX shrinks the 'distance' between assets, forcing tighter cointegration and violently increasing gravitational pull. In the physics of special relativity, when an object approaches the speed of light, space itself contracts. We apply this exact same logic to financial markets by utilizing the VIX index as a measure of our 'velocity' or systemic stress. Under normal conditions, asset classes evolve on independent and distant orbits from one another. However, when a crisis erupts and the VIX spikes, fear acts like a massive black hole warping the fabric of financial spacetime. This warping artificially reduces the mathematical distance between all assets. Consequently, traditional portfolio diversification vanishes because all correlations trend toward one. The Lorentz Factor mathematically models this very spacetime compression. It signals to the algorithm that under high volatility, the relative gravity between Bitcoin and macroeconomic liquidity becomes infinitely stronger. The binary system is thereby forced closer together, dramatically increasing the intensity of mass transfer. This is precisely why market shocks trigger such violent gravitational realignments.",
-                eq_2_title: "II. Regime-Switching Accretion Force (Newton & Pal)",
-                eq_2_desc: "Applies Newton's F=ma filtered by Raoul Pal's Business Cycle thesis. We calculate the acceleration of Net Liquidity. However, this raw force is multiplied by a Regime Valve ($\\\Phi$) governed by Credit Spreads and the Yield Curve. If spreads widen (panic) or the curve inverts (recession), $\\\Phi \\\approx 0$. In this Risk-Off regime, money printing doesn't pump assets because institutions hoard cash to survive. When the economy is expanding (Risk-On), the valve opens entirely ($\\\Phi \\\approx 1$), and liquidity violently accretes into the network.",eq_3_title: "III. The Cointegrating Vector (Gravitational Equilibrium)",
+                eq_2_title: "II. PCA Global Liquidity & Debt Accretion",
+                eq_2_desc: "Extracts the true Global Liquidity Wave (GLI) using Principal Component Analysis (PCA) across Fed, ECB, PBOC, and Shadow Banking. This wave is multiplied by a Macro Regime Valve and combined with Sovereign Debt Monetization pressure.",
+                eq_3_title: "III. The Cointegrating Vector (Gravitational Equilibrium)",
                 eq_3_desc: "Defined in the VECM framework, this vector represents the stable, long-run path where Bitcoins TAM absorption ($\\rho$) is balanced against the fundamental vectors. In any binary star system, the two celestial bodies orbit around an invisible point of equilibrium known as the barycenter. This cointegrating vector represents precisely that long-term gravitational anchor point between the expanding fiat system and the Bitcoin network. Unlike a simple moving average, this equilibrium is not static; it shifts dynamically based on the fundamental forces at play. On one side, we have the scarcity piston (the Halving) which mechanically increases the asset's mathematical density, pulling the equilibrium higher. On the other side, the pure thermodynamics of the Hashrate acts as the core temperature, structurally stabilizing the asset against collapse. The equation also integrates Metcalfe's law, mathematically proving that a network's value scales exponentially with its active user base. The absorption of the Total Addressable Market (TAM) is therefore not a matter of random chance, but a mathematical necessity dictated by cointegration. If the price deviates too far from this vector, the unbreakable laws of gravity will inevitably pull it back into alignment. This is the very backbone of our VECM model, proving that short-term market noise conceals a deeply deterministic long-term order. This vector effectively maps out the inevitable orbital destiny of the asset over the coming decade.",
-                eq_4_title: "IV. Langevin SDE (Stochastic Orbital Accretion)",
-                eq_4_desc: "Replaces deterministic Keplerian orbits. The accretion force follows a stochastic differential equation driven by dynamic mass ratios and random market entropy ($dW_t$). Classical Keplerian physics can predict the orbit of an isolated planet with absolute precision, but financial markets exist within a turbulent soup of chaos. The Langevin Stochastic Differential Equation (SDE) corrects this overly deterministic view by introducing the laws of fluid thermodynamics. Imagine a particle of stardust traveling toward the accretion disk: it is certainly pulled forward by gravity, but it is also relentlessly battered by unpredictable solar winds. The 'Drift' term represents the underlying macroeconomic trend, inexorably pushing global liquidity toward the mathematical equilibrium. Conversely, the 'Diffusion' term captures the system's thermal entropy, which includes geopolitical shocks, viral social media posts, or sudden flash panics. Instead of drawing a single, naive straight line to predict the future, this equation generates thousands of possible Brownian trajectories. It humbly acknowledges that the future is not a singular predetermined path, but rather a spectrum of quantum probabilities. The Lorentz Factor is then used to modulate this equation, causing the random noise to become significantly more violent during times of crisis. Thanks to this rigorous approach, our Monte Carlo simulation produces far more than a simple guess; it yields a comprehensive topographical map of systemic risk. It is the ultimate mathematical tool for navigating the fundamental uncertainty of complex dynamic systems.",
+                eq_4_title: "IV. Hybrid SDE: Santostasi Power Law Orbit",
+                eq_4_desc: "Replaces linear mean-reversion with a deterministic Power Law core ($P \\sim t^{5.8}$). The Langevin SDE generates stochastic market cycles, creating bubbles and crashes that are magnetically pulled back to the thermodynamic Power Law orbit over time.",
                 eq_5_title: "V. Relativistic Error Correction Term (ECT)",
                 eq_5_desc: "The Mean Reversion Force. The speed at which price is forced back to the Barycenter is amplified by the current Lorentz factor. In our model of celestial mechanics, the price of Bitcoin and its true macroeconomic equilibrium are tethered together by an invisible elastic bungee cord. This Error Correction Term (ECT) accurately measures the real-time tension stored within this mathematical cord. When the price skyrockets during a speculative bubble, it drifts dangerously far away from the fundamental reality of network adoption and Hashrate thermal energy. The cord stretches to its absolute limit, generating a phenomenal mean-reverting force that will inevitably snap the asset back to the center. Conversely, during deep crypto winters, the price plunges well below its natural orbit, stretching the cord in the opposite direction and creating a massive structural undervaluation opportunity. The major innovation of this specific formula is the introduction of relativity via the Lorentz factor. In standard physics, the restoring force remains constant, but here, background market volatility (VIX) actively alters the stiffness of the bungee cord. If the broader market panics, the cord suddenly becomes significantly stiffer, triggering a much more brutal and rapid reversion to the mean. The ECT therefore provides us with a perfectly calibrated Z-Score to read collective market emotions through the strict lens of physics. It allows us to transform seemingly irrational, chaotic price fluctuations into highly reliable, mathematically justified quantitative signals.",
                 eq_6_title: "VI. Phase Space Chaos (Lyapunov Exponent)",
                 eq_6_desc:  "If $\\lambda > 0$, the binary orbit is in deterministic chaos. Initial minor divergences in the macro state lead to exponentially divergent price paths. The Lyapunov Exponent is the ultimate mathematical tool for detecting hidden chaos within seemingly orderly dynamic systems. It effectively measures the 'butterfly effect,' quantifying the model's extreme sensitivity to its initial starting conditions. Imagine two parallel universes where central bank money printing differs by only a single cent at the very beginning. If the exponent (lambda) is negative, these two universes will eventually converge, meaning the asset's orbit remains perfectly predictable and highly stable. However, if lambda is positive, as is frequently the case in our binary model, a microscopic divergence today will result in radically different price trajectories a few years down the line. This mathematically proves that the cryptocurrency market is not purely random, but rather governed by deterministic chaos. While the underlying equations are strictly defined, the sheer complexity of interacting variables makes precise long-term forecasting exponentially difficult. This specific tool maps out the phase space of our VECM architecture to actively warn us whenever the system enters a regime of critical instability. When systemic chaos intensifies, our confidence intervals in the stochastic projections must widen to accurately reflect this fundamental physical uncertainty. It serves as the ultimate philosophical and mathematical safeguard, preventing analysts from developing blind faith in their own predictive models.",
                 glossary_title: "State Tensor Glossary",
                 glossary_lorentz: "Spacetime compression factor driven by VIX; scales gravitational pull during high volatility.",
-                glossary_macc: "Mass Accretion Rate; the 2nd derivative (acceleration) of 90-day fiat liquidity injected into the network.",
+                glossary_macc: "Mass Accretion Rate; the true Global Liquidity Wave + US Debt Monetization.",
                 glossary_mratio: "Mass Ratio ($M_{BTC} / M_{Fiat}$); dictates the shift in the orbital Barycenter.",
                 glossary_dwt: "Wiener Process increment; represents stochastic thermal noise (Langevin diffusion).",
                 glossary_ect: "Relativistically adjusted Error Correction Term; the active mean-reversion force.",
@@ -1452,56 +1525,56 @@ if __name__ == "__main__":
             },
             fr: {
                 title: "Débordement de lobe de Roche & Cointégration Markov Chain Monte Carlo (MCMC)",
-                nav_sim: "ECRAN", nav_pca: "VECM", nav_diag: "DIAGNOSTICS", nav_code: "CODE",
+                nav_sim: "ÉCRAN", nav_pca: "VECM", nav_diag: "DIAGNOSTICS", nav_code: "CODE",
                 viewscreen_title: "ÉCRAN PRINCIPAL : TRANSFERT THERMODYNAMIQUE",
                 pca_chart: "PROJECTION VECM : LIMITE GRAVITATIONNELLE",
-                select_point : "Sélectionnez un point sur le graphique pour voir les details",
+                select_point : "Sélectionnez un point sur le graphique pour voir les détails",
                 tensor_dyn_title: "PHYSIQUE APPRISE PAR MCMC : DISTRIBUTIONS POSTÉRIEURES",
-                tensor_dyn_desc: "Visualise l'intervalle de haute densité (HDI) bayésien à 94 % et la moyenne () pour chaque constante physique (). L'échantillonneur NUTS exécute des milliers de simulations sur l'ère macro moderne (2014+) pour cartographier les nuages de probabilités exacts de ces forces macroéconomiques, empêchant le surajustement et prouvant le véritable poids de la rareté, du hashrate et de la liquidité.",
+                tensor_dyn_desc: "Visualise l'intervalle de haute densité (HDI) bayésien à 94 % et la moyenne (μ) pour chaque constante physique (β). L'échantillonneur NUTS exécute des milliers de simulations sur l'ère macro moderne (2014+) pour cartographier les nuages de probabilités exacts de ces forces macroéconomiques, empêchant le surajustement et prouvant le véritable poids de la rareté, du hashrate et de la liquidité.",
                 sys_status: "DIAGNOSTICS SYSTÈME & ÉQUATIONS",
-                r_squared: "R Cointegration VECM",
-                r_squared_desc: "Mesure le lien stochastique à long terme entre l'expansion macro et la capitalisation du BTC.",
-                target_2028: "Cible Mediane Terminale",
-                target_2028_desc : "L'état d'équilibre projeté basé sur une simulation Monte Carlo SDE de Langevin.",
+                r_squared: "R² VECM (Précision PCA)",
+                r_squared_desc: "Mesure la variance expliquée par l'onde de liquidité mondiale (PCA) dans le modèle de cointégration.",
+                target_2028: "Cible Médiane Avril 2028",
+                target_2028_desc : "L'état d'équilibre projeté basé sur une SDE hybride orbitant autour d'une Loi de Puissance.",
                 lle: "Exposant de Lyapunov (LLE)",
                 lle_desc: "Un LLE positif indique que le système binaire est actuellement dans un état de chaos déterministe.",
                 mass_ratio: "Ratio de masse terminal (M1/M2)",
                 mass_ratio_desc: "Le décalage dynamique du centre de masse orbital.",
                 lorentz: "Facteur de Lorentz (Volatilité)",
                 lorentz_desc: "Multiplicateur de compression spatio-temporelle induit par le VIX.",
-                
+                p_value: "P-Value ECT (Johansen)",
                 p_value_desc: "Confirme la liaison gravitationnelle à long terme (Lobe de Roche intact).",
-                eq_title: "Equations d'Etat Thermodynamiques & VECM",
+                eq_title: "Équations d'État Thermodynamiques & VECM",
                 eq_desc: "Le système lie les états macroéconomiques via un modèle à correction d'erreur (VECM).",
                 law_volumes: "Contrainte visuelle (Débordement de Roche Lobe)",
-                ols_audit: "AUDIT PHYSIQUE BAYESIEN (MCMC)",
+                ols_audit: "AUDIT PHYSIQUE BAYÉSIEN (MCMC)",
                 core_logic: "LOGIQUE CENTRALE : CODE SOURCE (PYTHON)",
-                load_error : "Erreur : impossible de charger les données JSON.",
+                load_error : "Erreur : impossible de charger les données JSON.",
                 zscore_title: "SIGNAL ACTIONNABLE : Z-SCORE ADAPTATIF",
-                zscore_desc: "Divergence thermodynamique identifiant les époques d'extrême surevaluation (Zone de Vente > +2) et de sous-evaluation (Zone d'Achat < -2).",
-                density_title: "DENSITE DE PROBABILITE (FIN DE PROJECTION)",
-                density_desc: "Distribution finale de la simulation Monte Carlo (2 000 chemins). Met en évidence la médiane et les bornes des 5ᵉ et 95ᵉ centiles.",
+                zscore_desc: "Divergence thermodynamique identifiant les époques d'extrême surévaluation (Zone de Vente > +2) et de sous-évaluation (Zone d'Achat < -2).",
+                density_title: "DENSITÉ DE PROBABILITÉ (FIN DE PROJECTION)",
+                density_desc: "Distribution finale de la simulation Monte Carlo (2 000 chemins). Met en évidence la médiane et les bornes des 5e et 95e centiles.",
                 eq_1_title : "I. Volatilité relativiste (facteur de Lorentz)",
-                eq_1_desc: "Simule la compression de l'espace-temps. Un VIX élevé réduit la 'distance' entre les actifs, forçant une cointegration plus étroite et augmentant violemment l'attraction gravitationnelle. En physique de la relativité restreinte, lorsqu'un objet s'approche de la vitesse de la lumière, l'espace lui-même se contracte. Nous appliquons cette même logique aux marchés financiers en utilisant l'indice VIX comme mesure de notre 'vitesse' ou de notre stress systémique. En temps normal, les classes d'actifs évoluent sur des orbites indépendantes et distantes les unes des autres. Cependant, lorsqu'une crise éclate et que le VIX explose, la peur agit comme un trou noir massif déformant le tissu de l'espace-temps financier. Cette déformation réduit artificiellement la distance mathématique entre les actifs. Par conséquent, la diversification disparait car toutes les corrélations tendent vers un. Le facteur de Lorentz modélise mathématiquement cette compression spatio-temporelle. Il indique à l'algorithme que sous une forte volatilité, la gravité relative entre le Bitcoin et la liquidité macroéconomique devient infiniment plus forte. Le système binaire est alors forcé de se rapprocher, augmentant l'intensité des transferts de masse. C'est pourquoi les chocs de marche provoquent des réalignements si violents.",
-                eq_2_title: "II. Force d'Accrétion À changé de Régime ",
-                eq_2_desc: "Applique la loi F=ma filtrée par la thèse de cycle économique de Raoul Pal. Nous calculons l'accélération de la liquidité nette. Cependant, cette force brute est multipliée par une valve de régime ($\\\Phi$) dictée par les spreads de crédit et la courbe des taux. Si les spreads s'écartent (panique) ou si la courbe s'inverse (récession), $\\\Phi \\\approx 0$. Dans ce régime Risk-Off, l'impression monétaire ne fait pas monter les actifs car les institutions thésaurisent pour survivre. En phase d'expansion (Risk-On), la valve s'ouvre ($\\\Phi \\\approx 1$) et la liquidité s'accrète violemment vers le réseau.",
+                eq_1_desc: "Simule la compression de l'espace-temps. Un VIX élevé réduit la « distance » entre les actifs, forçant une cointégration plus étroite et augmentant violemment l'attraction gravitationnelle. En physique de la relativité restreinte, lorsqu'un objet s'approche de la vitesse de la lumière, l'espace lui-même se contracte. Nous appliquons cette même logique aux marchés financiers en utilisant l'indice VIX comme mesure de notre « vitesse » ou de notre stress systémique. En temps normal, les classes d'actifs évoluent sur des orbites indépendantes et distantes les unes des autres. Cependant, lorsqu'une crise éclate et que le VIX explose, la peur agit comme un trou noir massif déformant le tissu de l'espace-temps financier. Cette déformation réduit artificiellement la distance mathématique entre les actifs. Par conséquent, la diversification disparaît car toutes les corrélations tendent vers un. Le facteur de Lorentz modélise mathématiquement cette compression spatio-temporelle. Il indique à l'algorithme que sous une forte volatilité, la gravité relative entre le Bitcoin et la liquidité macroéconomique devient infiniment plus forte. Le système binaire est alors forcé de se rapprocher, augmentant l'intensité des transferts de masse. C'est pourquoi les chocs de marché provoquent des réalignements si violents.",
+                eq_2_title: "II. Liquidité Globale PCA & Monétisation de la Dette",
+                eq_2_desc: "Extrait la véritable onde de liquidité mondiale (GLI) par Analyse en Composantes Principales (PCA) sur la Fed, la BCE, la PBOC et le Shadow Banking. Cette onde est multipliée par une Valve de Régime et combinée à la pression de monétisation de la dette souveraine.",
                 eq_3_title: "III. Le Vecteur de Cointégration (Équilibre Gravitationnel)",
-                eq_3_desc: "Défini dans le cadre VECM, ce vecteur représente la trajectoire stable à long terme où l'absorption du TAM par le Bitcoin ($\\rho$) est équilibrée par rapport aux vecteurs fondamentaux. Dans tout système stellaire binaire, les deux corps célestes tournent autour d'un point d'équilibre invisible appelé le barycentre. Ce vecteur de cointegration represente precisement ce point d'ancrage gravitationnel a long terme entre le systeme fiat et le reseau Bitcoin. Contrairement à une simple moyenne mobile, cet équilibre n'est pas statique ; il se déplace de manière dynamique en fonction des forces en présence. D'un côté, nous avons le piston de rareté (le halving) qui augmente la densité mathématique de l'actif, tirant l'équilibre vers le haut. De l'autre, la thermodynamique pure du hashrate agit comme la température du cœur, stabilisant la structure contre l'effondrement. L'équation intègre également la loi de Metcalfe, prouvant que la valeur d'un réseau croit exponentiellement avec le nombre de ses utilisateurs actifs. L'absorption du marché total adressable (TAM) n'est donc pas le fruit du hasard, mais une nécessité mathématique dictée par la cointegration. Si le prix s'écarte trop de ce vecteur, les lois de la gravité finissent toujours par le ramener à l'ordre. C'est l'épine dorsale de notre modèle VECM, prouvant que le bruit à court terme cache un ordre déterministe à long terme. Ce vecteur trace la destinée orbitale inévitable de l'actif sur la décennie à venir.",
-                eq_4_title: "IV. SDE de Langevin (Accrétion Orbitale Stochastique)",
-                eq_4_desc:  "Remplace les orbites kepleriennes déterministes. La force d'accrétion suit une équation différentielle stochastique pilotée par des ratios de masse dynamiques et l'entropie aléatoire du marché ($dW_t$). La physique classique de Kepler peut prédire l'orbite d'une planète isolée avec une précision absolue, mais les marchés financiers baignent dans une soupe de chaos. L'équation différentielle stochastique (SDE) de Langevin corrige cette vision trop parfaite en introduisant les lois de la thermodynamique des fluides. Imaginez une particule de poussière d'étoile voyageant vers le disque d'accrétion : elle est certes tirée par la gravité, mais elle est aussi constamment percutée par des vents imprévisibles. Le terme de 'drift' représente la tendance macroéconomique de fond, poussant inexorablement la liquidité vers le point d'équilibre. En revanche, le terme de 'diffusion' capture l'entropie thermique, c'est-à-dire les chocs géopolitiques, les tweets ou les paniques soudaines. Au lieu de tracer une seule ligne droite naïve pour prédire l'avenir, cette équation génère des milliers de trajectoires browniennes possibles. Elle reconnait humblement que l'avenir n'est pas un chemin unique, mais un éventail de probabilités quantiques. Le facteur de Lorentz vient ensuite moduler cette équation, rendant le bruit aléatoire beaucoup plus violent en période de crise. Grâce à cette approche, notre simulation Monte Carlo ne produit pas qu'une simple estimation, mais une véritable carte topographique des risques. C'est l'outil ultime pour naviguer dans l'incertitude fondamentale des systèmes complexes.",
+                eq_3_desc: "Défini dans le cadre VECM, ce vecteur représente la trajectoire stable à long terme où l'absorption du TAM par le Bitcoin (ρ) est équilibrée par rapport aux vecteurs fondamentaux. Dans tout système stellaire binaire, les deux corps célestes tournent autour d'un point d'équilibre invisible appelé le barycentre. Ce vecteur de cointégration représente précisément ce point d'ancrage gravitationnel à long terme entre le système fiat et le réseau Bitcoin. Contrairement à une simple moyenne mobile, cet équilibre n'est pas statique ; il se déplace de manière dynamique en fonction des forces en présence. D'un côté, nous avons le piston de rareté (le halving) qui augmente la densité mathématique de l'actif, tirant l'équilibre vers le haut. De l'autre, la thermodynamique pure du hashrate agit comme la température du cœur, stabilisant la structure contre l'effondrement. L'équation intègre également la loi de Metcalfe, prouvant que la valeur d'un réseau croît exponentiellement avec le nombre de ses utilisateurs actifs. L'absorption du marché total adressable (TAM) n'est donc pas le fruit du hasard, mais une nécessité mathématique dictée par la cointégration. Si le prix s'écarte trop de ce vecteur, les lois de la gravité finissent toujours par le ramener à l'ordre. C'est l'épine dorsale de notre modèle VECM, prouvant que le bruit à court terme cache un ordre déterministe à long terme. Ce vecteur trace la destinée orbitale inévitable de l'actif sur la décennie à venir.",
+                eq_4_title: "IV. SDE Hybride : Orbite de Loi de Puissance (Santostasi)",
+                eq_4_desc: "Remplace le retour à la moyenne linéaire par un noyau déterministe en Loi de Puissance ($P \\sim t^{5.8}$). Le SDE de Langevin génère des cycles de marché stochastiques (bulles et krachs) qui sont magnétiquement ramenés vers l'orbite thermodynamique au fil du temps.",
                 eq_5_title: "V. Terme de Correction d'Erreur Relativiste (ECT)",
-                eq_5_desc: "La force de rappel a la moyenne. La vitesse à laquelle le prix est ramené vers le barycentre est amplifiée par le facteur de Lorentz actuel. Dans notre modèle de mécanique céleste, le prix du Bitcoin et son équilibre macroéconomique sont liés par une corde élastique invisible. Ce terme de correction d'erreur (ECT) mesure avec précision la tension actuelle de cette corde mathématique. Lorsque le prix s'envole lors d'une bulle spéculative, il s'éloigne trop de la réalité de l'adoption du réseau et de l'énergie thermique du hashrate. La corde se tend à l'extrême, créant une force de rappel phénoménale qui ramènera inévitablement l'actif vers le centre. À l'inverse, lors des hivers crypto, le prix tombe bien en dessous de son orbite naturelle, tendant la corde dans la direction opposée et créant une opportunité d'achat massive. La grande innovation de cette formule est l'ajout de la relativité via le facteur de Lorentz. En physique standard, la force de rappel est constante, mais ici, la volatilité du marché (VIX) modifie la raideur de l'élastique. Si le marché panique, la corde devient soudainement beaucoup plus rigide, provoquant un retour à la moyenne beaucoup plus brutal et rapide. L'ECT nous fournit donc un Z-Score parfaitement calibré pour lire les émotions du marché à travers le prisme de la physique. Il permet de transformer des fluctuations apparemment irrationnelles en signaux quantitatifs mathématiquement justifiés.",
+                eq_5_desc: "La force de rappel à la moyenne. La vitesse à laquelle le prix est ramené vers le barycentre est amplifiée par le facteur de Lorentz actuel. Dans notre modèle de mécanique céleste, le prix du Bitcoin et son équilibre macroéconomique sont liés par une corde élastique invisible. Ce terme de correction d'erreur (ECT) mesure avec précision la tension actuelle de cette corde mathématique. Lorsque le prix s'envole lors d'une bulle spéculative, il s'éloigne trop de la réalité de l'adoption du réseau et de l'énergie thermique du hashrate. La corde se tend à l'extrême, créant une force de rappel phénoménale qui ramènera inévitablement l'actif vers le centre. À l'inverse, lors des hivers crypto, le prix tombe bien en dessous de son orbite naturelle, tendant la corde dans la direction opposée et créant une opportunité d'achat massive. La grande innovation de cette formule est l'ajout de la relativité via le facteur de Lorentz. En physique standard, la force de rappel est constante, mais ici, la volatilité du marché (VIX) modifie la raideur de l'élastique. Si le marché panique, la corde devient soudainement beaucoup plus rigide, provoquant un retour à la moyenne beaucoup plus brutal et rapide. L'ECT nous fournit donc un Z-Score parfaitement calibré pour lire les émotions du marché à travers le prisme de la physique. Il permet de transformer des fluctuations apparemment irrationnelles en signaux quantitatifs mathématiquement justifiés.",
                 eq_6_title: "VI. Chaos de l'Espace des Phases (Exposant de Lyapunov)",
-                eq_6_desc: "Si $\\lambda > 0$, l'orbite binaire est en chaos déterministe. Des divergences mineures initiales dans l'état macro conduisent à des trajectoires de prix exponentiellement divergentes. L'exposant de Lyapunov est l'outil mathématique par excellence pour détecter le chaos caché au sein de systèmes apparemment ordonnés. Il mesure l'effet papillon, c'est-à-dire la sensibilité extrême du modèle aux conditions initiales. Imaginez deux univers parallèles où l'impression monétaire diffère d'un seul centime au départ. Si l'exposant (lambda) est négatif, ces deux univers finiront par se rejoindre et l'orbite restera parfaitement prévisible et stable. Mais si lambda est positif, comme c'est souvent le cas dans notre système binaire, une divergence microscopique aujourd'hui entrainera des trajectoires radicalement différentes d'ici quelques années. Cela prouve que le marché des cryptomonnaies n'est pas purement aléatoire, mais qu'il obéit au chaos déterministe. Les équations sous-jacentes sont strictes, mais la complexité des interactions rend les prévisions à très long terme exponentiellement difficiles. Cet outil cartographie l'espace des phases de notre modèle VECM pour nous avertir lorsque le système entre dans un régime d'instabilité critique. Quand le chaos s'intensifie, la confiance dans les projections stochastiques doit s'élargir pour refléter cette incertitude fondamentale. C'est le garde-fou philosophique et mathématique qui empêche les analystes d'avoir une foi aveugle en leurs propres modèles.",
+                eq_6_desc: "Si λ > 0, l'orbite binaire est en chaos déterministe. Des divergences mineures initiales dans l'état macro conduisent à des trajectoires de prix exponentiellement divergentes. L'exposant de Lyapunov est l'outil mathématique par excellence pour détecter le chaos caché au sein de systèmes apparemment ordonnés. Il mesure l'effet papillon, c'est-à-dire la sensibilité extrême du modèle aux conditions initiales. Imaginez deux univers parallèles où l'impression monétaire diffère d'un seul centime au départ. Si l'exposant (lambda) est négatif, ces deux univers finiront par se rejoindre et l'orbite restera parfaitement prévisible et stable. Mais si lambda est positif, comme c'est souvent le cas dans notre système binaire, une divergence microscopique aujourd'hui entraînera des trajectoires radicalement différentes d'ici quelques années. Cela prouve que le marché des cryptomonnaies n'est pas purement aléatoire, mais qu'il obéit au chaos déterministe. Les équations sous-jacentes sont strictes, mais la complexité des interactions rend les prévisions à très long terme exponentiellement difficiles. Cet outil cartographie l'espace des phases de notre modèle VECM pour nous avertir lorsque le système entre dans un régime d'instabilité critique. Quand le chaos s'intensifie, la confiance dans les projections stochastiques doit s'élargir pour refléter cette incertitude fondamentale. C'est le garde-fou philosophique et mathématique qui empêche les analystes d'avoir une foi aveugle en leurs propres modèles.",
                 glossary_title: "Glossaire des Tenseurs d'État",
                 glossary_lorentz: "Facteur de compression de l'espace-temps piloté par le VIX ; amplifie l'attraction gravitationnelle en période de forte volatilité.",
-                glossary_macc: "Taux d'Accrétion de Masse ; la derivée seconde (accélération) de la liquidité fiat injectée sur 90 jours.",
+                glossary_macc: "Taux d'Accrétion de Masse ; la véritable Onde de Liquidité Mondiale + Monétisation de la Dette US.",
                 glossary_mratio: "Ratio de Masse ($M_{BTC} / M_{Fiat}$) ; dicte le déplacement du Barycentre orbital.",
-                glossary_dwt: "Increment du Processus de Wiener ; représente le bruit thermique stochastique (diffusion de Langevin).",
-                glossary_ect: "Terme de Correction d'Erreur ajuste de manière relativiste ; la force active de retour a la moyenne.",
+                glossary_dwt: "Incrément du Processus de Wiener ; représente le bruit thermique stochastique (diffusion de Langevin).",
+                glossary_ect: "Terme de Correction d'Erreur ajusté de manière relativiste ; la force active de retour à la moyenne.",
                 glossary_lambda: "Plus Grand Exposant de Lyapunov (LLE) ; quantifie le taux de séparation de trajectoires infiniment proches.",
-                glossary_z: "Vecteur de divergence orbitale à l'instant $t$ par rapport à l'équilibre cointègre ($Z_0$).",
-                glossary_tam: "Limite structurelle théorique de M2 disponible pour absorption ($5.0x$ dans le modèle actuel)."
+                glossary_z: "Vecteur de divergence orbitale à l'instant t par rapport à l'équilibre cointégré ($Z_0$).",
+                glossary_tam: "Limite structurelle théorique de M2 disponible pour absorption (5.0x dans le modèle actuel)."
             }
         };
 
@@ -1708,7 +1781,7 @@ if __name__ == "__main__":
                 if (data.metadata) {
                     const r2El = document.getElementById('stat-r2');
                     if (r2El && data.metadata.r_squared_vecm !== undefined) {
-                        r2El.innerText = data.metadata.r_squared_vecm.toFixed(4);
+                        r2El.innerText = (data.metadata.r_squared_vecm * 100).toFixed(2) + "%";
                     }
                     
                     const targetEl = document.getElementById('stat-target-2028');
@@ -1905,7 +1978,7 @@ if __name__ == "__main__":
                     responsive: true, maintainAspectRatio: false,
                     interaction: { mode: 'index', intersect: false },
                     scales: {
-                        y: { min: -4, max: 4, grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#64748b' } },
+                        y: { min: -6, max: 6, grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#64748b' } },
                         x: { grid: { display: false }, ticks: { color: '#64748b', maxTicksLimit: 8, callback: function(val, index) { return histLabels[index].substring(0, 4); } } }
                     },
                     plugins: {
@@ -1971,7 +2044,7 @@ if __name__ == "__main__":
 </head>
 <body>
     <audio id="bgMusic" loop>
-        <source src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-7.mp3" type="audio/mpeg">
+        <source src="Chateau.mp3" type="audio/mpeg">
     </audio>
 
     <div class="top-btns">
