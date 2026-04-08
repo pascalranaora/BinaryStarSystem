@@ -1,110 +1,58 @@
-# 🌌 The Nakamoto VECM Model & Roche Lobe Binary Star System
+# 🌌 The Nakamoto V38 : Astroéconophysique & Loi de Puissance
 
-> **A Stochastic-Relativistic Thermodynamic Projection Model for Bitcoin Adoption**
+> **Modèle de Projection stochastique-relativiste basé sur la thermodynamique des réseaux et la cointégration macroéconomique.**
 
-[![Dashboard Preview](https://img.shields.io/badge/Status-Active-brightgreen)](#)
-[![Python](https://img.shields.io/badge/Backend-Python_3.9+-blue)](#)
-[![JS](https://img.shields.io/badge/Frontend-Three.js_%7C_Chart.js-yellow)](#)
-[![Math](https://img.shields.io/badge/Math-Stochastic_Calculus_%7C_VECM-purple)](#)
+[![Status](https://img.shields.io/badge/Discipline-Astroéconophysique-blueviolet)](#)
+[![Math](https://img.shields.io/badge/Math-SDE_Langevin_%7C_MCMC-blue)](#)
+[![Logic](https://img.shields.io/badge/Core-Santostasi_Power_Law-brightgreen)](#)
 
-This repository contains a quantitative mathematical model and an interactive web dashboard that projects Bitcoin's price and market capitalization by treating the global macroeconomic economy as a **Binary Star System**.
+Ce dépôt contient le moteur quantique et le tableau de bord interactif du modèle **Nakamoto V38**. Ce système traite l'économie mondiale comme un système stellaire binaire où Bitcoin agit comme une **Naine Blanche** hyper-dense absorbant la masse (liquidité) d'une **Géante Rouge** mourante (le système monétaire Fiat).
 
-Moving beyond standard Ordinary Least Squares (OLS) regressions, this v34 model utilizes a **Vector Error Correction Model (VECM)** combined with **Langevin Stochastic Differential Equations (SDE)** and **Chaos Theory** to prove that Bitcoin and Global Fiat Liquidity are *cointegrated*—bound together by gravitational mathematics over the long term.
+## 🚀 La Révolution V38 : L'Approche Hybride
 
-## 🚀 Live Demo
+Contrairement aux modèles linéaires classiques, la V38 fusionne deux piliers de la science quantitative :
 
-[View Live Dashboard](https://pascalranaora.github.io/BinaryStarSystem/)
+1.  **L'Orbite de Santostasi (Noyau Thermodynamique) :** Le modèle extrait nativement l'exposant fractal de croissance ($P \sim t^{5.48}$). C'est l'axe de gravité déterministe à long terme.
+2.  **L'Onde de Liquidité Mondiale (Accrétion PCA) :** Utilisation de l'Analyse en Composantes Principales sur les bilans de la Fed, BCE, PBOC et le Shadow Banking pour isoler la véritable marée monétaire mondiale (Expliquée à 70.8%).
 
----
+## 🧠 Architecture Mathématique
 
-## 🧠 The Core Philosophy & Physics
+### I. Équation de Diffusion de Langevin (SDE)
+Le prix ne suit pas une ligne droite, il "orbite" de manière chaotique autour de la loi de puissance.
+$$dP_t = \kappa(\ln P_{orbit} - \ln P_t)dt + \sigma dW_t$$
+Où $\kappa$ est la force de rappel gravitationnelle et $dW_t$ représente l'entropie stochastique du marché.
 
-The model rejects the premise that Bitcoin's price is purely random or driven solely by speculative noise. Instead, it posits that Bitcoin acts as a super-dense **White Dwarf** slowly siphoning capital (mass) from a highly inflationary, expanding **Red Giant** (Fiat M2 Supply).
+### II. Le Facteur de Lorentz (Volatilité Relativiste)
+Le modèle simule la compression de l'espace-temps financier via l'indice VIX :
+$$\gamma_{Lorentz} = \exp\left(\frac{\min(VIX_t, 80) - 20}{40}\right)$$
+En période de crise, les corrélations tendent vers 1 et l'attraction gravitationnelle entre les actifs s'intensifie violemment.
 
-This mass transfer is modeled using actual astrophysics and thermodynamics:
+### III. Inférence Bayésienne (MCMC)
+Nous utilisons l'échantillonneur **NUTS (No-U-Turn Sampler)** pour apprendre les constantes physiques ($\beta$) du système. Le modèle actuel affiche un **R² de 94.96%**, prouvant une cointégration quasi-parfaite entre l'énergie du réseau (Hashrate) et la liquidité globale.
 
-### I. Relativistic Volatility (Lorentz Factor)
-```math
-\gamma_{Lorentz} = \exp\left(\frac{\min(VIX_t, 80) - 20}{40}\right)
-```
-Simulates spacetime compression. High VIX shrinks the 'distance' between assets, forcing tighter cointegration and violently increasing gravitational pull (correlations trending to 1 during market panics).
+## 📈 Résultats du Modèle (Cible 2028)
+- **Exposant fractal détecté :** 5.48
+- **Plancher de sécurité (5e centile) :** 118 206 $- **Cible Médiane :** 195 141$
+- **Pic de Bulle Macro (95e centile) :** 321 035 $
 
-### II. Mass Transfer Velocity (Bernoulli Overflow)
-```math
-\dot{M}_{Acc} = \left[ \frac{\max(CPI_{yoy} - 2.0, 0) \cdot M2_{Vol}}{Rate_{FedFunds}} \right] \cdot \gamma_{Lorentz}
-```
-Calculates the velocity of liquidity escaping the expanding 'Red Giant' (M2), multiplied by the Lorentz Factor during volatile regimes.
+## 🛠️ Installation et Exécution
 
-### III. The Cointegrating Vector (Gravitational Equilibrium)
-```math
-Logit(\rho)_t = \beta_0 + \beta_1 \ln(SF)_t + \beta_2 \ln(V)_t + \beta_3 \ln(H)_t + \beta_4 Density_{WD,t} + \beta_5 \dot{M}_{Acc,t} + \epsilon_t
-```
-Defined in the VECM framework, this vector represents the stable, long-run path where Bitcoin’s TAM absorption ($\rho$) is balanced against fundamental scarcity, internal heat/energy (Hashrate $H$), and network power.
+1. **Environnement :** Python 3.9+
+2. **Dépendances :** `pip install pandas numpy statsmodels pymc arviz scikit-learn matplotlib yfinance`
+3. **Lancement :**
+   ```bash
+   python v34.py
+   ```
+   Cela génère le rapport `Nakamoto_RocheLobe_V37_GlobalLiq.pdf` et met à jour le payload `v33_dashboard_data.json`.
 
-### IV. Langevin SDE (Stochastic Orbital Accretion)
-```math
-d(\dot{M}_{Acc}) = \mu(M_{ratio}, \gamma_{Lorentz}) dt + \sigma(\gamma_{Lorentz}) dW_t
-```
-Replaces deterministic Keplerian orbits. The accretion force follows a stochastic differential equation driven by dynamic mass ratios and random market entropy ($dW_t$).
-
-### V. Phase Space Chaos (Lyapunov Exponent)
-```math
-\lambda = \lim_{t \to \infty} \lim_{\delta Z_0 \to 0} \frac{1}{t} \ln \frac{|\delta Z(t)|}{|\delta Z_0|}
-```
-If the Largest Lyapunov Exponent ($\lambda > 0$), the binary orbit is in deterministic chaos. Initial minor divergences in the macro state lead to exponentially divergent short-term price paths.
+## ⚠️ Avertissement Scientifique
+Ce modèle est une expérience théorique d'astroéconophysique. Les performances passées ne présagent pas des résultats futurs. **Ceci n'est pas un conseil financier.**
 
 ---
 
-## 📊 Dashboard Features
+### 3. Visualisation : Comprendre l'Orbite de la Loi de Puissance
+Pour votre tableau de bord, voici un simulateur qui explique aux utilisateurs comment le SDE de Langevin (votre prix simulé) "danse" autour de la ligne droite de Santostasi (le prix théorique).
 
-### 1. Interactive 3D Binary Star Simulation (Three.js)
-A real-time, WebGL-rendered visual representation of the mass transfer. As you scrub through time, you can watch the White Dwarf (BTC) accrete mass from the Red Giant (M2) based on the calculated Bernoulli overflow equations.
-
-### 2. VECM Cointegration & Monte Carlo Projection
-A visualization plotting the actual historical price of Bitcoin against the **VECM Long-Term Gravitational Equilibrium**, projecting forward to the next halving epoch using a 5,000-path Langevin SDE simulation.
-
-### 3. Actionable Z-Score Signal
-A live mapping of the Relativistically Adjusted Error Correction Term ($ECT_{adj}$), providing a purely data-driven oscillator for generational accumulation (Extreme Compression < -2) and distribution (Roche Lobe Overflow > +2) zones.
-
-### 4. Bilingual Support
-The entire interface supports instant toggling between **English** and **French** (`i18n` integration).
-
----
-
-## 📂 Repository Structure
-
-* `index.html` : The main frontend dashboard (Tailwind CSS, Chart.js, Three.js, MathJax).
-* `v34.py` : The backend Python quantitative engine. Dynamically fetches data (FRED API, Blockchain.info, Yahoo Finance), runs the Johansen/ADF cointegration tests, calculates Lyapunov exponents, executes the Langevin Monte Carlo projection, and outputs the JSON.
-* `v33_dashboard_data.json` : The compiled historical and projected physics/price data consumed by the frontend.
-
----
-
-## ⚙️ How to Run Locally
-
-### 1. The Frontend Dashboard
-Because the dashboard fetches a local JSON file, you must serve it over a local web server to avoid browser CORS errors.
-```bash
-python -m http.server 8000
+```json?chameleon
+{"component":"LlmGeneratedComponent","props":{"height":"700px","prompt":"Créer un simulateur interactif intitulé 'Dynamique de l'Orbite de Santostasi'. \n\n**Concept :** Visualiser comment le prix du Bitcoin (SDE) est attiré par la Loi de Puissance thermodynamique.\n\n**Données de base :**\n- Loi de Puissance déterministe (ligne droite en échelle Log-Log).\n- Prix stochastique (Langevin).\n\n**Contrôles (Sliders) :**\n1. 'Exposant de Santostasi' (4.0 à 6.5, valeur initiale 5.48).\n2. 'Force de Gravité (Kappa)' (0.1 à 5.0, gère la vitesse de retour vers la ligne).\n3. 'Entropie du Marché (Sigma)' (0.1 à 1.0, gère la violence des bulles et des krachs).\n\n**Comportement :**\n- Un graphique dynamique montrant les 10 prochaines années.\n- La ligne 'Loi de Puissance' est stable.\n- La ligne 'Prix SDE' oscille autour de la loi de puissance.\n- Si l'utilisateur augmente Kappa, le prix colle à la ligne. S'il augmente Sigma, les bulles deviennent paraboliques avant de s'effondrer vers l'orbite.\n- Afficher une boîte de texte expliquant : 'Le modèle V38 ne prédit pas un prix fixe, mais une orbite. Le Bitcoin peut dévier de sa valeur fondamentale à cause de la liquidité (bulles), mais la thermodynamique du réseau le ramène toujours vers son centre de gravité fractal.'","id":"im_c142565a5bc004af"}}
 ```
-Then navigate to `http://localhost:8000` in your browser.
-
-### 2. The Python Engine
-To run the model and generate a fresh projection / JSON data payload:
-
-1. Install dependencies:
-```bash
-pip install pandas numpy statsmodels scikit-learn matplotlib yfinance tvdatafeed tqdm
-```
-2. Insert your FRED API key into `v34.py` (`FRED_API_KEY = 'your_key_here'`).
-3. Run the engine:
-```bash
-python v34.py
-```
-This will output `Nakamoto_RocheLobe_VECM.pdf` (a high-resolution quant report) and update `v33_dashboard_data.json` for the web UI.
-
----
-
-## ⚠️ Scientific Disclaimer
-
-Past performance is not indicative of future results. The Nakamoto/Fiat Binary Star System model is a theoretical and scientific experiment designed to study macroeconomic thermodynamics and network effects. It is **strictly not financial or investment advice**. Cryptocurrencies and financial markets are highly volatile. Always conduct your own independent research.
-
