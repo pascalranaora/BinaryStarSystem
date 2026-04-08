@@ -1,4 +1,4 @@
-# 🌌 The Nakamoto V38 : Astroéconophysique & Loi de Puissance
+# 🌌 Nakamoto Astroéconophysique & Loi de Puissance
 
 > **Modèle de Projection stochastique-relativiste basé sur la thermodynamique des réseaux et la cointégration macroéconomique.**
 
