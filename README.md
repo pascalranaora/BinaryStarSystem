@@ -8,6 +8,9 @@
 
 Ce dépôt contient le moteur quantique et le tableau de bord interactif du modèle **Nakamoto v33**. Ce système traite l'économie mondiale comme un système stellaire binaire où Bitcoin agit comme une **Naine Blanche** hyper-dense absorbant la masse (liquidité) d'une **Géante Rouge** mourante (le système monétaire Fiat).
 
+## Démo
+[View Live Dashboard](https://pascalranaora.github.io/BinaryStarSystem/)
+
 ## 🚀 La Révolution v33 : L'Approche Hybride
 
 Contrairement aux modèles linéaires classiques, la v33 fusionne deux piliers de la science quantitative :
